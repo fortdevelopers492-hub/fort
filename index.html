@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="fort logo.png" type="image/png">
+    <title>Fort Developers</title>
+    <link rel="stylesheet" href="fort dev styles.css">
+</head>
+<body>
+
+    <div class="app-container scrollable-container">
+        
+        <section id="intro-section" class="view-page bg-white-pure">
+            <div class="intro-header-block">
+                <div class="intro-logo-frame">
+                    <img src="fort logo.png" alt="Fort Logo" id="main-fort-logo">
+                </div>
+                <div class="intro-text-pane">
+                    <h1 class="bold-text">Fort Developers</h1>
+                    <p class="margin-top-sm">
+                        Made to give you the best on the web. We wish you best of luck as you explore and hopefully enjoy our services. 
+                        We have different websites which are shown in the <a href="#more-from-fort" class="redirect-link font-accent-weight">More from Fort</a> section.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="table-of-contents" class="view-page bg-blue-section">
+            <div class="section-content-wrapper">
+                <h2>Table of Contents</h2>
+                <ul class="drawer-links margin-top-md" id="toc-list">
+                    <li><a href="#intro-section">Intro Section</a></li>
+                    <li><a href="#table-of-contents">Table of Contents</a></li>
+                    <li><a href="#customer-care">Customer Care Info</a></li>
+                    <li><a href="#more-from-fort">More from Fort</a></li>
+                    <li><a href="#fort-mart-section">Fort Mart – Marketplace and Chat</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="customer-care" class="view-page bg-white-pure">
+            <div class="section-content-wrapper">
+                <div class="header-inline-edit-row">
+                    <h2>Customer Care Info</h2>
+                </div>
+                <p class="margin-top-xs text-muted">For complaints, ratings, reviews, feedback, simple website creation and account verification process and much more contact us through the portals below</p>
+                
+                <div class="suite-extensions-vertical-stack margin-top-md">
+                    <div class="editable-field-row" id="whatsapp-row">
+                        <div class="detail-row-item">
+                            <label>WhatsApp</label>
+                            <span id="cc-whatsapp-val" class="bold-text">+2348028241162</span>
+                        </div>
+                        <button class="btn-sm-pencil hidden" id="edit-whatsapp-btn" onclick="openCcEditModal('WhatsApp', '+2348028241162', 'cc-whatsapp-val')">✏️ Edit</button>
+                    </div>
+
+                    <div class="editable-field-row" id="email-row">
+                        <div class="detail-row-item">
+                            <label>Email</label>
+                            <span id="cc-email-val" class="bold-text">fortdevelopers492@gmail.com</span>
+                        </div>
+                        <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
+                    </div>
+
+                    <div class="editable-field-row" id="email-row">
+                        <div class="detail-row-item">
+                            <label>About Us</label>
+                            <span id="cc-email-val" class="bold-text">Read our <a href="about us.html" target="_blank">About Us</a> legal document</span>
+                        </div>
+                        <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="customer-care" class="view-page bg-white-pure">
+            <div class="section-content-wrapper">
+                <div class="header-inline-edit-row">
+                    <h2>Custom Website Creation</h2>
+                </div>
+                <div>
+                    <p class="margin-top-xs text-muted"></p>
+                </div>
+                <div class="editable-field-row" id="email-row">
+                    <div class="detail-row-item">
+                        <label>Need a Simple Business Website?</label>
+                        <span id="cc-email-val" class="bold-text">Contact us through our customer care lines. Just proper explanation and the rest is taken care of by us.</span>
+                    </div>
+                    <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="more-from-fort" class="view-page bg-blue-section">
+            <div class="section-content-wrapper">
+                <h2>More from Fort</h2>
+                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
+                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-mart-section'">
+                        <div class="product-card-image-box">
+                            <img src="fort mart logo.png" alt="Fort Mart">
+                        </div>
+                        <div class="product-card-details-block text-center">
+                            <span class="product-card-title">Fort Mart</span>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+        </section>
+
+        <div id="dynamic-websites-container">
+            <section id="fort-mart-section" class="view-page bg-white-pure border-top-divider">
+                <div class="section-content-wrapper website-section-layout">
+                    <div class="website-meta-side">
+                        <div class="large-avatar-frame rounded-rect">
+                            <img src="fort mart logo.png" alt="Fort Mart Logo">
+                        </div>
+                        <div class="website-info-block">
+                            <div class="header-inline-edit-row">
+                                <h3 id="fm-title-text">Fort Mart – Marketplace and Chat</h3>
+                                <button class="btn-sm-pencil hidden" onclick="openWebsiteEditModal('fort-mart-section', 'fm-title-text', 'fm-info-text')">✏️ Edit</button>
+                            </div>
+                            <p id="fm-info-text" class="margin-top-xs">An e-market which offers you the opportunity to be a consumer or a trader. There is also the chat feature which allows you to chat with your customers / retailers (Not yet live)</p>
+                        </div>
+                    </div>
+                    <div class="margin-top-md">
+                        <button class="btn-blue" onclick="navigateToFortMart()">Visit Website</button>
+                    </div>                    
+                </div>
+            </section>
+        </div>
+
+        <footer class="border-top-divider text-center" style="padding: 20px; background-color: var(--fort-gray-bg);">
+            <p>By using Fort Website, You accept and agree to their <a href="fort dev terms and conditions.html" target="_blank">terms and conditions</a> and <a href="fort dev privacy policy.html" target="_blank">privacy policy</a></p>
+        </footer>        
+
+        <footer class="border-top-divider text-center" style="padding: 20px; background-color: var(--fort-gray-bg);">
+            <button id="admin-auth-trigger" class="btn-gray" style="font-size: 0.75rem; padding: 4px 10px;" onclick="openModal('admin-modal')">Admin Authentication</button>
+            <span id="admin-status-indicator" class="profile-mode-tag-label personal hidden" style="margin-left: 10px;">Admin Mode Active</span>
+        </footer>
+
+    </div>
+
+    <button id="admin-fab" class="floating-action-plus-button-node hidden" onclick="openModal('add-website-modal')">+</button>
+
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box rounded-rect">
+            <h2>Sign in (for admin)</h2>
+            <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                <div class="form-input-container">
+                    <label>Identifier Text</label>
+                    <input type="text" id="admin-email" class="form-field-control" required autocomplete="username">
+                </div>
+                <div class="form-input-container">
+                    <label>Password</label>
+                    <input type="password" id="admin-password" class="form-field-control" required autocomplete="current-password">
+                    <div class="password-toggle-container">
+                        <input type="checkbox" id="toggle-password-view" onchange="togglePasswordVisibility('admin-password')">
+                        <label for="toggle-password-view" style="text-transform: none; font-weight: normal; margin-bottom:0; display:inline;">Show Password</label>
+                    </div>
+                </div>
+                <div id="admin-login-error" class="text-danger-alert hidden-node">Invalid credentials</div>
+                <div class="btn-group">
+                    <button type="button" class="btn-gray" onclick="closeModal('admin-modal')">Cancel</button>
+                    <button type="submit" class="btn-blue">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-website-modal" class="modal-overlay">
+        <div class="modal-box rounded-rect">
+            <h3>Add New Website Instance</h3>
+            <form id="add-website-form" onsubmit="handleCreateWebsite(event)">
+                <div class="form-input-container">
+                    <label>Select Logo Source File</label>
+                    <input type="file" id="new-web-logo" class="upload-btn" accept="image/png, image/jpeg" onchange="handleLogoPreview(event, 'new-logo-preview')" required>
+                    <div class="preview-box form-input-container-image" style="margin-top: 10px; border: 2px dashed var(--fort-gray-border); width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img id="new-logo-preview" src="" alt="Preview Target" style="max-width: 100%; max-height: 100%; display: none;">
+                        <span id="preview-placeholder" style="color: var(--fort-gray-slate); font-size: 0.85rem;">No file chosen</span>
+                    </div>
+                </div>
+                <div class="form-input-container">
+                    <label>Website Generic Display Name</label>
+                    <input type="text" id="new-web-name" class="form-field-control" placeholder="e.g., Fort Cloud" required>
+                </div>
+                <div class="form-input-container">
+                    <label>Comprehensive Suite Info Block</label>
+                    <textarea id="new-web-info" class="form-text-area" placeholder="Describe the application features scope..." required></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-gray" onclick="closeModal('add-website-modal')">Cancel</button>
+                    <button type="submit" class="btn-blue">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-field-modal" class="modal-overlay">
+        <div class="modal-box rounded-rect">
+            <h3 id="edit-modal-headline">Edit Field Data</h3>
+            <form id="edit-field-form" onsubmit="handleFieldUpdate(event)">
+                <div class="form-input-container">
+                    <label id="edit-field-label">Current Configuration Value</label>
+                    <textarea id="edit-field-input" class="form-text-area" required></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-gray" onclick="closeModal('edit-field-modal')">Cancel</button>
+                    <button type="submit" class="btn-blue">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="fort dev script.js"></script>
+</body>
+</html>
