@@ -1,0 +1,243 @@
+/* Core Styling Tokens Configuration Matrix */
+:root {
+    --fort-blue-primary: #0044cc;
+    --fort-blue-dark: #002244;
+    --fort-blue-light: #0288d1;
+    --fort-blue-teal: #004d40;
+    --fort-blue-mint: #e0f2f1;
+    --fort-white-pure: #ffffff;
+    --fort-white-snow: #fcfcfc;
+    --fort-gray-bg: #f4f7f6;
+    --fort-gray-border: #cbd5e0;
+    --fort-gray-slate: #718096;
+    --fort-danger-red: #e53e3e;
+    --fort-danger-bg: #fff5f5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    background-color: var(--fort-gray-bg);
+    color: var(--fort-blue-dark);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* UI Layout Utilities Architecture Structure */
+.rounded-rect {
+    border-radius: 8px;
+    border: 1px solid var(--fort-gray-border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.scrollable-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.hidden-node, .hidden {
+    display: none !important;
+}
+
+.text-center { text-align: center; }
+.bold-text { font-weight: 700; }
+.margin-top-xs { margin-top: 4px; }
+.margin-top-sm { margin-top: 10px; }
+.margin-top-md { margin-top: 20px; }
+.margin-top-lg { margin-top: 30px; }
+.border-top-divider { border-top: 1px solid var(--fort-gray-border); }
+.text-muted { color: var(--fort-gray-slate); font-size: 0.92rem; line-height: 1.5; }
+
+/* Structural Controls Execution Engine Elements */
+.btn-blue, .btn-gray, .btn-danger, .btn-sm-pencil {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-blue { background-color: var(--fort-blue-light); color: var(--fort-white-pure); }
+.btn-blue:hover { background-color: #0277bd; }
+
+.btn-gray { background-color: #e2e8f0; color: #4a5568; }
+.btn-gray:hover { background-color: #cbd5e0; }
+
+.btn-sm-pencil { 
+    padding: 4px 8px; 
+    font-size: 0.8rem; 
+    background-color: #edf2f7; 
+    border: 1px solid #cbd5e0; 
+    margin-left: 8px;
+}
+.btn-group { display: flex; gap: 12px; margin-top: 14px; }
+
+/* System Shell Segment Background Controls */
+.app-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+.bg-white-pure { background-color: var(--fort-white-pure); }
+.bg-blue-section { background-color: #ebf8ff; border-top: 1px solid #bee3f8; border-bottom: 1px solid #bee3f8; }
+
+/* Structural Page Scaffolding Grid Wrapper Layer Mapping */
+.view-page {
+    padding: 60px 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.section-content-wrapper {
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* Intro Section Specific Configurations Header Viewports */
+.intro-header-block {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.intro-logo-frame {
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.intro-logo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.intro-text-pane {
+    flex: 1;
+}
+
+.intro-text-pane h1 {
+    font-size: 2.5rem;
+    color: var(--fort-blue-primary);
+}
+
+.redirect-link {
+    color: var(--fort-blue-light);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--fort-blue-light);
+}
+.font-accent-weight { font-weight: 700; }
+
+/* Table of Contents & Navigation List Mechanics */
+.drawer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.drawer-links li { background: var(--fort-white-pure); border: 1px solid var(--fort-gray-border); border-radius: 6px; }
+.drawer-links li a { 
+    display: block; 
+    padding: 14px; 
+    font-weight: 600; 
+    font-size: 0.95rem; 
+    color: var(--fort-blue-dark); 
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.drawer-links li:hover a { background-color: var(--fort-white-snow); color: var(--fort-blue-light); padding-left: 20px; }
+
+/* Customer Care Field Containers Layout Rows */
+.header-inline-edit-row { display: flex; align-items: center; gap: 12px; }
+.suite-extensions-vertical-stack { display: flex; flex-direction: column; gap: 12px; }
+.editable-field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: var(--fort-white-snow);
+    border: 1px solid var(--fort-gray-border);
+    border-radius: 6px;
+}
+.detail-row-item label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--fort-gray-slate); text-transform: uppercase; margin-bottom: 4px; }
+
+/* Platform Cards Products Discovery Grid Panel Module Layout */
+.products-master-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.product-item-card-container {
+    background-color: var(--fort-white-pure);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 240px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-item-card-container:hover { transform: translateY(-4px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+.product-card-image-box { width: 100%; height: 170px; background-color: #fff; display: flex; align-items: center; justify-content: center; padding: 15px; border-bottom: 1px solid var(--fort-gray-border); }
+.product-card-image-box img { width: 100%; height: 100%; object-fit: contain; }
+.product-card-details-block { padding: 12px; display: flex; align-items: center; justify-content: center; }
+.product-card-title { font-size: 0.95rem; font-weight: 700; color: var(--fort-blue-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Individual Product Module Sections Architecture Viewports */
+.website-section-layout { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; width: 100%; }
+.website-meta-side { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
+.large-avatar-frame { width: 120px; height: 120px; background-color: #fff; padding: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.large-avatar-frame img { width: 100%; height: 100%; object-fit: contain; }
+.website-info-block { flex: 1; }
+.website-info-block h3 { font-size: 1.4rem; color: var(--fort-blue-primary); font-weight: 800; }
+.website-info-block p { font-size: 1rem; color: var(--fort-blue-dark); line-height: 1.6; }
+
+/* Infrastructure Layer Overlays Windows (Modal Box Stack) */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 34, 68, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--fort-white-pure); padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+.modal-box h2, .modal-box h3 { color: var(--fort-blue-primary); margin-bottom: 16px; font-weight: 800; }
+
+/* Operational Master Forms Components Engine Styles Mapping */
+.form-input-container { margin-bottom: 16px; text-align: left; }
+.form-input-container label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--fort-blue-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.form-field-control, .form-text-area { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--fort-gray-border); font-size: 0.95rem; color: var(--fort-blue-dark); background-color: var(--fort-white-snow); }
+.form-field-control:focus, .form-text-area:focus { border-color: var(--fort-blue-light); outline: none; }
+.form-text-area { height: 90px; resize: none; }
+.password-toggle-container { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-top: 6px; color: var(--fort-gray-slate); }
+.text-danger-alert { background-color: var(--fort-danger-bg); color: var(--fort-danger-red); border: 1px solid #feb2b2; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-top: 10px; }
+
+/* Floating Functional Access Controls Structure Action Element */
+.floating-action-plus-button-node {
+    position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--fort-blue-light); color: #fff; border: none; font-size: 2rem;
+    font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(2,136,209,0.4); transition: transform 0.2s, background-color 0.2s;
+    z-index: 100;
+}
+.floating-action-plus-button-node:hover { transform: scale(1.05); background-color: #0277bd; }
+.profile-mode-tag-label { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; background-color: #fed7d7; color: #9b2c2c; }
+
+/* Adaptive Responsive Scaling Framework Override Layout Breakpoints */
+@media (max-width: 1024px) {
+    .products-master-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .intro-header-block { flex-direction: column; text-align: center; gap: 16px; }
+    .products-master-grid { grid-template-columns: repeat(1, 1fr); }
+    .website-meta-side { flex-direction: column; align-items: center; text-align: center; }
+    .large-avatar-frame { margin: 0 auto; }
+}
