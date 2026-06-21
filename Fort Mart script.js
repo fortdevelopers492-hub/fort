@@ -1992,9 +1992,16 @@ function executePipelineCommitNewInventoryPostRecord() {
     // Logic Fix: Save actual Base64 visual image string representation data 
     const productImgDataUrl = imagePreview.src;
 
+    // Isolate owner profile data points to store on the product object
+    const ownerUid = APP_STATE.currentUser.uid;
+    const ownerName = APP_STATE.currentUser.identityName || "User Account";
+    const ownerBusinessName = APP_STATE.currentUser.businessName || ownerName;
+
     const finalProductInstanceObjectNode = {
         pid: "p_" + Date.now(),
-        ownerUid: APP_STATE.currentUser.uid,
+        ownerUid: ownerUid,
+        ownerName: ownerName,
+        ownerBusinessName: ownerBusinessName,
         name: name,
         category: cat,
         info: info,
@@ -2004,7 +2011,16 @@ function executePipelineCommitNewInventoryPostRecord() {
         clickCount: 0
     };
     
+    // Save to local tracked state
     SYSTEM_DATABASE.products.push(finalProductInstanceObjectNode);
+    
+    // Sync live payload changes directly up to Firestore if layer configuration is present
+    if (window.FortMartFirebase) {
+        const { db, doc, setDoc } = window.FortMartFirebase;
+        setDoc(doc(db, "products", finalProductInstanceObjectNode.pid), finalProductInstanceObjectNode)
+            .catch(err => console.error("Cloud inventory post storage failure synchronization traceback:", err));
+    }
+
     syncPlatformDatabaseStateToWebStorage();
     
     closeActiveModalDirectly('auth-modal');
