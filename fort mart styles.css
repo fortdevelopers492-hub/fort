@@ -162,7 +162,7 @@ body {
 
 /* Core Layout Routing Multi Viewports Surface Surface Nodes */
 .content-view-port { flex: 1; padding: 24px; height: 100%; background-color: var(--fort-gray-bg); position: relative; }
-.view-page { display: flex; flex-direction: column; height: 100%; width: 100%; }
+.view-page { display: flex; flex-direction: column; height: 90%; width: 100%; }
 
 /* Category Ribbon Sub System Wrapper Control Layout Elements */
 .categories-bar-wrapper { margin-bottom: 20px; background-color: var(--fort-white-pure); padding: 12px; border-radius: 8px; border: 1px solid var(--fort-gray-border); }

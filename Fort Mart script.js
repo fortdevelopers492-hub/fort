@@ -198,8 +198,84 @@ function closeActiveModalWithConfirmationFlow(modalElementId) {
  * Complete User Accounts Authentication Flow Subsystem Management Wizard Module
  */
 function triggerAuthenticationModalSequence() {
+    try {
+        // Safe lookups inside localStorage to protect global script execution state
+        const savedSessionRaw = localStorage.getItem("fort_mart_remembered_user");
+        
+        if (savedSessionRaw) {
+            const savedData = JSON.parse(savedSessionRaw);
+            const currentTime = Date.now();
+            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7-day automated expiration lifespans
+
+            // If the saved session is still valid, show choice UI layouts
+            if (currentTime - savedData.timestamp < sevenDaysInMs) {
+                renderRememberedUserPromptLayout(savedData);
+                document.getElementById("auth-modal").classList.add("active");
+                return;
+            } else {
+                // Lifespan exceeded window parameters, clear securely
+                localStorage.removeItem("fort_mart_remembered_user");
+            }
+        }
+    } catch (e) {
+        console.error("Authentication persistence module context read warning:", e);
+        localStorage.removeItem("fort_mart_remembered_user");
+    }
+
+    // Default flow if no valid saved user exists
     renderSignInModalStepContentLayout();
     document.getElementById("auth-modal").classList.add("active");
+}
+
+/**
+ * Renders the selection prompt for an existing saved user profile vs a new login session
+ */
+function renderRememberedUserPromptLayout(savedData) {
+    const wrapperTargetNode = document.getElementById("auth-modal-content");
+    
+    // Convert variables safely by replacing single quotes to prevent early closure bugs inside HTML event triggers
+    const safeUid = (savedData.uid || '').replace(/'/g, "\\'");
+    const safeIdentifier = (savedData.identifierText || 'User').replace(/'/g, "\\'");
+
+    wrapperTargetNode.innerHTML = `
+        <h2>Welcome Back to Fort Mart</h2>
+        <div class="text-center margin-top-sm margin-bottom-sm">
+            <p style="font-size: 1.1rem;">Would you like to continue using your saved account?</p>
+        </div>
+        <div class="btn-group" style="display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="executeRememberedUserSignIn('${safeUid}')" class="btn-blue" style="width: 100%;">
+                Continue as ${safeIdentifier}
+            </button>
+            <button onclick="renderSignInModalStepContentLayout()" class="btn-gray" style="width: 100%;">
+                Sign in as new user
+            </button>
+        </div>
+        <div class="text-center margin-top-xs">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-link" style="background: none; border: none; color: gray; cursor: pointer;">Cancel</button>
+        </div>
+    `;
+}
+
+/**
+ * Automatically authenticates a remembered user directly via their cached UID profile reference
+ */
+function executeRememberedUserSignIn(uid) {
+    if (typeof SYSTEM_DATABASE === 'undefined' || !SYSTEM_DATABASE.users) {
+        console.error("Runtime exception intercepted: Database context is uninitialized.");
+        renderSignInModalStepContentLayout();
+        return;
+    }
+
+    const accountRecordMatch = SYSTEM_DATABASE.users.find(u => u.uid === uid);
+    
+    if (!accountRecordMatch) {
+        // Fallback cleanup execution loop if records mutated remotely out of scope
+        localStorage.removeItem("fort_mart_remembered_user");
+        renderSignInModalStepContentLayout();
+        return;
+    }
+
+    finalizeSuccessfulAuthenticationSequence(accountRecordMatch);
 }
 
 function renderSignInModalStepContentLayout() {
@@ -212,6 +288,7 @@ function renderSignInModalStepContentLayout() {
                 <option value="Nigeria|+234">Nigeria (+234)</option>
             </select>
         </div>
+      
         <div class="form-input-container">
             <label>Input Registered Email Address / Phone Number:</label>
             <input type="text" id="auth-signin-identifier" class="form-field-control" placeholder="Input email address/phone number">
@@ -221,9 +298,15 @@ function renderSignInModalStepContentLayout() {
             <label>Account Password:</label>
             <input type="password" id="auth-signin-password" class="form-field-control" placeholder="Enter password">
             <div id="err-signin-password" class="text-danger-alert hidden-node"></div>
+            
             <div class="margin-top-xs">
                 <input type="checkbox" id="chk-signin-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'auth-signin-password')">
                 <label for="chk-signin-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
+            </div>
+            
+            <div class="margin-top-xs">
+                <input type="checkbox" id="chk-signin-rememberme">
+                <label for="chk-signin-rememberme" style="font-size:0.85rem; font-weight:400;">Remember Me</label>
             </div>
         </div>
         <div class="text-center margin-top-xs">
@@ -241,7 +324,9 @@ function renderSignInModalStepContentLayout() {
 
 function toggleFormPasswordFieldVisibility(checkboxElement, targetPasswordFieldId) {
     const passwordField = document.getElementById(targetPasswordFieldId);
-    passwordField.type = checkboxElement.checked ? "text" : "password";
+    if (passwordField) {
+        passwordField.type = checkboxElement.checked ? "text" : "password";
+    }
 }
 
 function executeAccountSignInAuthenticationRequest() {
@@ -254,12 +339,17 @@ function executeAccountSignInAuthenticationRequest() {
     errIdNode.classList.add("hidden-node");
     errPassNode.classList.add("hidden-node");
     
+    if (typeof SYSTEM_DATABASE === 'undefined' || !SYSTEM_DATABASE.users) {
+        errIdNode.innerText = "System error: Database layer is unreachable.";
+        errIdNode.classList.remove("hidden-node");
+        return;
+    }
+    
     // Find operational account record match
     const accountRecordMatch = SYSTEM_DATABASE.users.find(u => 
         u.dialingCode === countryRawValue[1] && 
         u.identifierText.toLowerCase() === identifierInput.toLowerCase()
     );
-    
     if(!accountRecordMatch) {
         errIdNode.innerText = "No registered matching account found for specified credentials within specified region.";
         errIdNode.classList.remove("hidden-node");
@@ -272,25 +362,61 @@ function executeAccountSignInAuthenticationRequest() {
         return;
     }
     
+    // Check if the user selected 'Remember Me'
+    const rememberMeChecked = document.getElementById("chk-signin-rememberme").checked;
+    if (rememberMeChecked) {
+        const payloadToPersist = {
+            uid: accountRecordMatch.uid,
+            identifierText: accountRecordMatch.identifierText, // Persists the original identifier address cleanly
+            timestamp: Date.now() // Lifetime validation sequence anchor point
+        };
+        localStorage.setItem("fort_mart_remembered_user", JSON.stringify(payloadToPersist));
+    } else {
+        // Purge if unchecked during manual authorization entry overrides
+        localStorage.removeItem("fort_mart_remembered_user");
+    }
+    
+    finalizeSuccessfulAuthenticationSequence(accountRecordMatch);
+}
+
+/**
+ * Shared helper utility containing the common success operations UI updates
+ */
+function finalizeSuccessfulAuthenticationSequence(accountRecordMatch) {
+    if (typeof APP_STATE === 'undefined') {
+        window.APP_STATE = {};
+    }
+
     // Success State Login Sequence Activation
     APP_STATE.currentUser = accountRecordMatch;
     closeActiveModalDirectly('auth-modal');
     
     // Refresh structural visual nodes dependencies based on admin flag states
-    if(accountRecordMatch.uid === 'admin') {
-        document.getElementById("admin-nav-item").classList.remove("hidden-admin-node");
-        document.getElementById("admin-add-suite-site-btn").classList.remove("hidden-node");
+    const adminNavItem = document.getElementById("admin-nav-item");
+    const adminSuiteBtn = document.getElementById("admin-add-suite-site-btn");
+    
+    if (accountRecordMatch.uid === 'admin') {
+        if (adminNavItem) adminNavItem.classList.remove("hidden-admin-node");
+        if (adminSuiteBtn) adminSuiteBtn.classList.remove("hidden-node");
     } else {
-        document.getElementById("admin-nav-item").classList.add("hidden-admin-node");
-        document.getElementById("admin-add-suite-site-btn").classList.add("hidden-node");
+        if (adminNavItem) adminNavItem.classList.add("hidden-admin-node");
+        if (adminSuiteBtn) adminSuiteBtn.classList.add("hidden-node");
     }
     
     // Render profile interface modifications context arrays
-    document.getElementById("nav-user-avatar").src = accountRecordMatch.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+    const navUserAvatar = document.getElementById("nav-user-avatar");
+    if (navUserAvatar) {
+        navUserAvatar.src = accountRecordMatch.avatar ||
+        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+    }
     
     // Launch Success Overlay Greeting Box
-    document.getElementById("welcome-modal").classList.add("active");
-    renderMarketplaceProductsDisplayLoop();
+    const welcomeModal = document.getElementById("welcome-modal");
+    if (welcomeModal) welcomeModal.classList.add("active");
+    
+    if (typeof renderMarketplaceProductsDisplayLoop === 'function') {
+        renderMarketplaceProductsDisplayLoop();
+    }
 }
 
 /** Registration System Multi-step Engine Framework Array */
