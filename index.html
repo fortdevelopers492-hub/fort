@@ -35,6 +35,7 @@
                     <li><a href="#customer-care">Customer Care Info</a></li>
                     <li><a href="#more-from-fort">More from Fort</a></li>
                     <li><a href="#fort-mart-section">Fort Mart – Marketplace and Chat</a></li>
+                    <li><a href="#fort-createawebsite-section">Fort – Create a Website</a></li>
                 </ul>
             </div>
         </section>
@@ -83,7 +84,7 @@
             </div>
         </section>
 
-        <section id="customer-care" class="view-page bg-white-pure">
+        <section id="custom-website" class="view-page bg-white-pure">
             <div class="section-content-wrapper">
                 <div class="header-inline-edit-row">
                     <h2>Custom Website Creation</h2>
@@ -94,10 +95,12 @@
                 <div class="editable-field-row" id="email-row">
                     <div class="detail-row-item">
                         <label>Need a Simple Business Website?</label>
-                        <span id="cc-email-val" class="bold-text">Contact us through our customer care lines. Just proper explanation and the rest is taken care of by us.</span>
+                        <span id="cc-email-val" class="bold-text">Just follow the procedures on the fort (create a website) page.</span> 
                     </div>
                     <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
                 </div>
+                <br>
+                <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Website Creation</button>
             </div>
         </section>
 
@@ -113,7 +116,17 @@
                             <span class="product-card-title">Fort Mart</span>
                         </div>
                     </div>
+                </div>
+                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
+                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-createawebsite-section'">
+                        <div class="product-card-image-box">
+                            <img src="fort logo.png" alt="Fort Create A Website">
+                        </div>
+                        <div class="product-card-details-block text-center">
+                            <span class="product-card-title">Fort || Website Builder Wizard</span>
+                        </div>
                     </div>
+                </div>
             </div>
         </section>
 
@@ -134,6 +147,29 @@
                     </div>
                     <div class="margin-top-md">
                         <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fort/fort%20mart%20index.html', '_blank')">Visit Website</button>
+                    </div>                    
+                </div>
+            </section>
+        </div>
+
+
+        <div id="dynamic-websites-container">
+            <section id="fort-createawebsite-section" class="view-page bg-white-pure border-top-divider">
+                <div class="section-content-wrapper website-section-layout">
+                    <div class="website-meta-side">
+                        <div class="large-avatar-frame rounded-rect">
+                            <img src="fort logo.png" alt="Fort Logo">
+                        </div>
+                        <div class="website-info-block">
+                            <div class="header-inline-edit-row">
+                                <h3 id="fm-title-text">Fort || Website Builder Wizard</h3>
+                                <button class="btn-sm-pencil hidden" onclick="openWebsiteEditModal('fort-mart-section', 'fm-title-text', 'fm-info-text')">✏️ Edit</button>
+                            </div>
+                            <p id="fm-info-text" class="margin-top-xs">A website made particularly for communicating your desired website features and layouts to fort developers. Here you type all your info and send to fort developers for it to be created by them.</p>
+                        </div>
+                    </div>
+                    <div class="margin-top-md">
+                        <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Visit Website</button>
                     </div>                    
                 </div>
             </section>
