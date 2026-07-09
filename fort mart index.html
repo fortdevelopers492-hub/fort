@@ -18,17 +18,6 @@
         </div>
     </div>
 
-    <div id="device-modal" class="modal-overlay active">
-        <div class="modal-box rounded-rect">
-            <h2>Welcome to Fort Mart</h2>
-            <p>Please select your operating device to optimize controls and layout scaling:</p>
-            <div class="btn-group">
-                <button onclick="setDeviceMode('laptop')" class="btn-blue">Laptop / Desktop</button>
-                <button onclick="setDeviceMode('phone')" class="btn-blue">Mobile Phone</button>
-            </div>
-        </div>
-    </div>
-
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-box rounded-rect">
             <h3>Are you sure?</h3>
@@ -213,6 +202,7 @@
                                         </div>
                                         <div class="detail-row-item border-top-divider btn-group" style="margin-top: 20px; padding-top: 16px; justify-content: space-between;">
                                             <button class="btn-gray" onclick="openProfileEditWizard('password')">🔒 Change Account Security Password</button>
+                                            <button onclick="openLogoutConfirmationModal()" class="btn-danger">Logout</button>
                                         </div>
                                     </div>
                                 </div>
@@ -287,8 +277,46 @@
                                         </div>
                                     </div>
                                     <h2>Explore Alternative Product Offerings from Fort Developers</h2>
+                                    <hr>
+                                    <br>
                                     <div id="suite-extensions-display-grid" class="suite-extensions-vertical-stack">
-                                        <p>To view other of our websites, visit the <a href="https://fortdevelopers492-hub.github.io/fort/" target="_blank">Fort Dev Home Page</a> and navigate to the More from Fort section</p>
+                                        <div id="dynamic-websites-container-fortdev">
+                                            <div class="section-content-wrapper-fortdev website-section-layout">
+                                                <div class="website-meta-side">
+                                                    <div class="large-avatar-frame-fortdev rounded-rect">
+                                                        <img src="fort logo.png" alt="Fort Mart Logo">
+                                                    </div>
+                                                    <div class="website-info-block-fortdev">
+                                                        <div class="header-inline-edit-row-fortdev">
+                                                            <h3 id="fm-title-text">Fort Developers</h3>
+                                                        </div>
+                                                        <p id="fm-info-text" class="margin-top-xs">The main webpage of fort developers, which shows all about fort developers and includes their "about us" document.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="margin-top-md">
+                                                    <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fort/index.html', '_blank')">Visit Website</button>
+                                                </div>                    
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div id="dynamic-websites-container-fortdev">
+                                            <div class="section-content-wrapper-fortdev website-section-layout">
+                                                <div class="website-meta-side">
+                                                    <div class="large-avatar-frame-fortdev rounded-rect">
+                                                        <img src="fort logo.png" alt="Fort Logo">
+                                                    </div>
+                                                    <div class="website-info-block-fortdev">
+                                                        <div class="header-inline-edit-row-fortdev">
+                                                            <h3 id="fm-title-text">Fort || Website Builder Wizard</h3>
+                                                        </div>
+                                                        <p id="fm-info-text" class="margin-top-xs">A website made particularly for communicating your desired website features and layouts to fort developers. Here you type all your info and send to fort developers for it to be created by them.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="margin-top-md">
+                                                    <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Visit Website</button>
+                                                </div>                    
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -334,6 +362,37 @@
         <div class="modal-box-expanded rounded-rect scrollable-container" id="product-detail-modal-body"></div>
     </div>
 
+
+    <div id="logout-confirm-modal" class="modal-overlay">
+        <div class="modal-content" id="logout-modal-content">
+            <h2>Confirm Account Logout</h2>
+            <p style="font-size: 1rem; color: #555; margin-bottom: 15px;">
+                For security reasons, please enter your password to confirm logging out of this device.
+            </p>
+            
+            <div class="form-input-container">
+                <label>Account Password:</label>
+                <input type="password" id="logout-auth-password" class="form-field-control" placeholder="Enter your current password">
+                <div id="err-logout-password" class="text-danger-alert hidden-node"></div>
+                
+                <div class="margin-top-xs">
+                    <input type="checkbox" id="chk-logout-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'logout-auth-password')">
+                    <label for="chk-logout-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button onclick="closeActiveModalDirectly('logout-confirm-modal')" class="btn-gray">Cancel</button>
+                <button onclick="executeSecureAccountLogout()" class="btn-danger">Confirm Logout</button>
+            </div>
+        </div>
+    </div>
+
     <script src="Fort Mart script.js"></script>
 </body>
 </html>
+
+
+
+
+

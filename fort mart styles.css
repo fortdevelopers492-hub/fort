@@ -162,7 +162,7 @@ body {
 
 /* Core Layout Routing Multi Viewports Surface Surface Nodes */
 .content-view-port { flex: 1; padding: 24px; height: 100%; background-color: var(--fort-gray-bg); position: relative; }
-.view-page { display: flex; flex-direction: column; height: 90%; width: 100%; }
+.view-page { display: flex; flex-direction: column; height: 100%; width: 100%; }
 
 /* Category Ribbon Sub System Wrapper Control Layout Elements */
 .categories-bar-wrapper { margin-bottom: 20px; background-color: var(--fort-white-pure); padding: 12px; border-radius: 8px; border: 1px solid var(--fort-gray-border); }
@@ -323,29 +323,6 @@ body {
 
 .suite-extensions-vertical-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .suite-extension-row-card { display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--fort-gray-border); background-color: var(--fort-white-snow); }
-
-/* Adaptive Responsive Layout Scaling Framework Overrides Parameters Matrices Rules */
-@media (max-width: 1024px) {
-    .products-master-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.mode-phone .products-master-grid { grid-template-columns: repeat(1, 1fr) !important; gap: 14px; }
-.mode-phone .settings-control-grid { grid-template-columns: 1fr; }
-.mode-phone .side-drawer-menu {
-    position: absolute; top: 0; left: 0; height: 100%; width: 280px; transform: translateX(-100%); position: fixed; height: 100vh;
-}
-.mode-phone .side-drawer-menu.active-phone-drawer { transform: translateX(0); }
-.mode-phone .messages-split-layout { grid-template-columns: 1fr; position: relative; }
-.mode-phone .chat-conversation-workspace {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 60;
-}
-.mode-phone .chat-conversation-workspace.phone-active-thread { display: flex !important; }
-
-.form-input-container-image {
-    body { font-family: sans-serif; padding: 20px; text-align: center; }
-    .preview-box { width: 300px; height: 300px; border: 2px dashed #ccc; margin: 20px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    #imagePreview { max-width: 100%; max-height: 100%; display: none; }
-    .upload-btn { padding: 10px 20px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 5px; }
-}
 
 /* Base message bubble relative positioning */
 .message-bubble {
@@ -522,4 +499,194 @@ body {
 .website-info-block h3 { font-size: 1.4rem; color: var(--fort-blue-primary); font-weight: 800; }
 .website-info-block p { font-size: 1rem; color: var(--fort-blue-dark); line-height: 1.6; }
 
+
+
+
+/* Platform Cards Products Discovery Grid Panel Module Layout */
+.products-master-grid-fortdev {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.product-item-card-container-fortdev {
+    background-color: var(--fort-white-pure);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 240px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-item-card-container-fortdev:hover { transform: translateY(-4px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+.product-card-image-box-fortdev { width: 100%; height: 170px; background-color: #fff; display: flex; align-items: center; justify-content: center; padding: 15px; border-bottom: 1px solid var(--fort-gray-border); }
+.product-card-image-box-fortdev img { width: 100%; height: 100%; object-fit: contain; }
+.product-card-details-block-fortdev { padding: 12px; display: flex; align-items: center; justify-content: center; }
+.product-card-title-fortdev { font-size: 0.95rem; font-weight: 700; color: var(--fort-blue-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.section-content-wrapper-fortdev {
+    width: 100%;
+    max-width: 1000px;
+}
+
+.large-avatar-frame-fortdev { width: 120px; height: 120px; background-color: #fff; padding: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.large-avatar-frame-fortdev img { width: 100%; height: 100%; object-fit: contain; }
+
+.header-inline-edit-row-fortdev { display: flex; align-items: center; gap: 12px; }
+
+.website-info-block-fortdev { flex: 1; }
+.website-info-block-fortdev h3 { font-size: 1rem; color: var(--fort-blue-primary); font-weight: 800; }
+.website-info-block-fortdev p { font-size: 1rem; color: var(--fort-blue-dark); line-height: 1.6; }
+
+
+/* ==========================================================================
+   Adaptive Responsive Layout Framework (Pure CSS Media Queries)
+   ========================================================================== */
+
+/* Laptop / Desktop Default (No classes needed) */
+.products-master-grid { 
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px;
+}
+.settings-control-grid { 
+    display: grid;
+    grid-template-columns: 250px 1fr; 
+}
+.messages-split-layout { 
+    display: grid;
+    grid-template-columns: 350px 1fr; 
+}
+
+/* Tablet / Small Laptop Layout */
+@media (max-width: 1024px) {
+    .products-master-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+/* Mobile Phone Layout (Auto-detected) */
+@media (max-width: 768px) {
+    /* Homepage: One product per row */
+    .products-master-grid { 
+        grid-template-columns: repeat(1, 1fr) !important; 
+        gap: 14px; 
+    }
+
+    /* Settings: Categories aligned horizontally at the top */
+    .settings-control-grid { 
+        grid-template-columns: 1fr; 
+        display: flex;
+        flex-direction: column;
+    }
+    .settings-sidebar-or-categories { /* Adjust selector to your settings menu container */
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 10px;
+        padding-bottom: 10px;
+    }
+
+    /* Mobile Side Drawer Navigation */
+    .side-drawer-menu {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        height: 100vh; 
+        width: 280px; 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease;
+        z-index: 100;
+    }
+    .side-drawer-menu.active-phone-drawer { 
+        transform: translateX(0); 
+    }
+
+    /* Messages: Expanded chat view covers the chat list */
+    .messages-split-layout { 
+        grid-template-columns: 1fr; 
+        position: relative; 
+    }
+    .chat-conversation-workspace {
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        display: none; 
+        z-index: 60; 
+        background: #fff; /* Ensures the chat list underneath is fully covered */
+    }
+    .chat-conversation-workspace.phone-active-thread { 
+        display: flex !important; 
+    }
+
+    /* Message Input Container: Stretch input while keeping button right-aligned */
+    .message-input-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    .message-input-container input {
+        flex-grow: 1; /* Automatically resizes input to fill remaining space */
+        width: 100%;
+    }
+    .message-input-container .send-btn {
+        margin-left: auto; /* Pushes the send button to the absolute right end */
+    }
+
+    /* Responsive Modals */
+    .modal-box {
+        width: 90% !important;
+        max-width: 400px;
+        margin: auto;
+        box-sizing: border-box;
+    }
+}
+
+/* Image Preview Block Formatting Fix */
+.form-input-container-image {
+    font-family: sans-serif; 
+    padding: 20px; 
+    text-align: center;
+}
+.form-input-container-image .preview-box { 
+    width: 300px; 
+    height: 300px; 
+    border: 2px dashed #ccc; 
+    margin: 20px auto; 
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    overflow: hidden; 
+}
+.form-input-container-image #imagePreview { 
+    max-width: 100%; 
+    max-height: 100%; 
+    display: none; 
+}
+.form-input-container-image .upload-btn { 
+    padding: 10px 20px; 
+    background: #007BFF; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    border-radius: 5px; 
+}
+
+
+/* Default Laptop/Desktop Navbar Height */
+.navbar {
+    height: 70px; 
+}
+
+/* Auto-adjust Navbar Height for Mobile Screens */
+@media (max-width: 768px) {
+    .navbar {
+        height: 55px; /* Or whatever height you want for mobile */
+    }
+}
 

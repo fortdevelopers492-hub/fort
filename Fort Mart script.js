@@ -33,16 +33,9 @@ let SYSTEM_DATABASE = {
         { pid: "p1", ownerUid: "user_sarah", name: "Premium Noise-Cancelling Headphones", category: "Electrical Appliances", info: "High fidelity wireless noise isolating audio headphones with dynamic surround drivers.", price: 45000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M12 2c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z'/></svg>", aiInfo: "Features 40hr battery life, ANC processing chipsets, and Bluetooth 5.2 architecture components.", clickCount: 142 },
         { pid: "p2", ownerUid: "user_sarah", name: "Smart OLED Television Set 4K", category: "Electrical Appliances", info: "Ultra thin 55 inch high refresh gaming entertainment screen with integrated processing units.", price: 320000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z'/></svg>", aiInfo: "HDR10+ decoding ready, 120Hz micro-dimming array setups, integrated WebOS hub.", clickCount: 98 }
     ],
-    chats: [
-        { chatId: "chat_sarah_john", dynamicParticipants: ["user_sarah", "user_john"], messageLog: [
-            { mid: "m1", senderUid: "user_john", text: "Hello! Is the 4K OLED TV unit price structure negotiable?", timestamp: "10:14 AM", status: "seen" },
-            { mid: "m2", senderUid: "user_sarah", text: "Hello John, pricing schemes are fixed but we offer logistics distribution allowances.", timestamp: "10:16 AM", status: "seen" }
-        ]}
-    ],
+    chats: [],
     platformFeedback: [],
-    networkSuiteEntities: [
-        { siteId: "s1", logo: "Fort AI Logo.png", name: "Fort AI System Assistant Node", info: "Advanced cognitive artificial intelligence analytical interface running backend automation tasks.", url: "https://fortai.example.tech" }
-    ]
+    networkSuiteEntities: []
 };
 
 // Ensure leaderboard array structure exists within system storage layers
@@ -91,29 +84,21 @@ window.addEventListener("DOMContentLoaded", () => {
 /**
  * Structural Architecture, Layout & View Rendering Module Engines
  */
-function setDeviceMode(selectedMode) {
-    APP_STATE.deviceMode = selectedMode;
-    document.body.className = (selectedMode === 'laptop') ? 'mode-laptop' : 'mode-phone';
-    closeActiveModalDirectly('device-modal');
-}
-
 function toggleSideDrawer() {
     const drawerNode = document.getElementById("side-drawer");
-    if(APP_STATE.deviceMode === 'phone') {
+    
+    // Check screen width instead of a manual state
+    if (window.innerWidth <= 1024) {
         drawerNode.classList.toggle("active-phone-drawer");
     } else {
         drawerNode.classList.toggle("closed");
     }
 }
 
-function toggleNavbarHeight() {
-    const navbarNode = document.getElementById("top-navbar");
-    APP_STATE.navbarExpanded = !APP_STATE.navbarExpanded;
-    if(APP_STATE.navbarExpanded) {
-        navbarNode.classList.remove("relapsed-nav");
-    } else {
-        navbarNode.classList.add("relapsed-nav");
-    }
+// Close phone responsive side layouts drawer automatically upon completion
+if (window.innerWidth <= 1024) {
+    const sideDrawer = document.getElementById("side-drawer");
+    if (sideDrawer) sideDrawer.classList.remove("active-phone-drawer");
 }
 
 function navigateToPage(targetPageId) {
@@ -184,13 +169,58 @@ function displayConfirmationModalOverlayAction(messageStringText, callbackFuncti
     });
 }
 
+// 1. Closes the main modal directly
 function closeActiveModalDirectly(modalElementId) {
-    document.getElementById(modalElementId).classList.remove("active");
+    const modalNode = document.getElementById(modalElementId);
+    if (modalNode) {
+        modalNode.classList.remove("active");
+    }
 }
 
+// 2. Initiates the confirmation flow
 function closeActiveModalWithConfirmationFlow(modalElementId) {
-    displayConfirmationModalOverlayAction("Are you sure you want to exit this window? Progress or entered structural fields changes may be permanently lost.", () => {
-        closeActiveModalDirectly(modalElementId);
+    displayConfirmationModalOverlayAction(
+        "Are you sure you want to exit this window? Progress or entered structural fields changes may be permanently lost.", 
+        () => {
+            // This is the callback that runs ONLY when "Yes" is clicked
+            closeActiveModalDirectly(modalElementId);
+        }
+    );
+}
+
+// 3. The confirmation handler (Make sure your function looks like this)
+function displayConfirmationModalOverlayAction(message, onConfirmCallback) {
+    const confirmModal = document.getElementById("confirmationModal");
+    const confirmMessage = document.getElementById("confirmationMessage");
+    const yesButton = document.getElementById("confirmYesBtn");
+    const noButton = document.getElementById("confirmNoBtn");
+
+    if (!confirmModal || !confirmMessage || !yesButton || !noButton) {
+        console.error("Confirmation modal DOM elements missing.");
+        return;
+    }
+
+    // Set the dynamic warning message
+    confirmMessage.textContent = message;
+
+    // Show the confirmation modal
+    confirmModal.classList.add("active");
+
+    // Clean up old event listeners to prevent duplicate triggers
+    const newYesButton = yesButton.cloneNode(true);
+    const newNoButton = noButton.cloneNode(true);
+    yesButton.parentNode.replaceChild(newYesButton, yesButton);
+    noButton.parentNode.replaceChild(newNoButton, noButton);
+
+    // YES Flow: Run the callback (close main modal) and hide confirmation
+    newYesButton.addEventListener("click", () => {
+        onConfirmCallback(); 
+        confirmModal.classList.remove("active");
+    });
+
+    // NO Flow: Just hide the confirmation modal, leaving the main modal open
+    newNoButton.addEventListener("click", () => {
+        confirmModal.classList.remove("active");
     });
 }
 
@@ -2019,20 +2049,74 @@ function handleFloatingActionButtonTrigger() {
         return;
     }
     
-    // Launch Dynamic Upload Product Framework Canvas Template Window Modals Engine
+    // Launch the security verification step first
+    launchUploadProductPasswordVerificationStep();
+}
+
+/**
+ * Step 1: Verify account ownership via password authentication
+ */
+function launchUploadProductPasswordVerificationStep() {
+    const modalContentTargetNode = document.getElementById("auth-modal-content");
+    modalContentTargetNode.innerHTML = `
+        <h3>Enter Current Password (Step 1 of 2)</h3>
+        <p style="font-size:0.85rem; color:var(--fort-blue-dark); margin-top:4px;">
+            To execute product catalog uploads, confirm your current active account verification safety access password phrase key:
+        </p>
+        
+        <div class="form-input-container margin-top-sm">
+            <label>Active Profile Validation Password Expression Key Phrase:</label>
+            <input type="password" id="upload-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
+            
+            <div class="margin-top-xs">
+                <input type="checkbox" id="chk-upload-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'upload-verify-password')">
+                <label for="chk-upload-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
+            </div>
+            
+            <div id="err-upload-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
+            <button onclick="verifyPasswordAndProceed()" class="btn-blue">Verify Password Phrase</button>
+        </div>
+    `;
+    document.getElementById("auth-modal").classList.add("active"); 
+}
+
+/**
+ * Validates Step 1 password against active system state variables and advances to Step 2
+ */
+function verifyPasswordAndProceed() {
+    const enteredPassword = document.getElementById("upload-verify-password").value;
+    const errNode = document.getElementById("err-upload-reauth-msg");
+    
+    errNode.classList.add("hidden-node");
+    
+    if (enteredPassword !== APP_STATE.currentUser.secretKey) { 
+        errNode.innerText = "Incorrect Password"; 
+        errNode.classList.remove("hidden-node"); 
+        return;
+    }
+    
+    // Step 1 Success -> Proceed to Step 2 Form Inventory Template Layout
     launchUploadProductInventoryModalFormLayoutShell();
 }
 
+/**
+ * Step 2: Input product details and specifications
+ */
 function launchUploadProductInventoryModalFormLayoutShell() {
     const modalContentTargetNode = document.getElementById("auth-modal-content");
     modalContentTargetNode.innerHTML = `
-        <h3>Product Upload Modal</h3>
+        <h3>Product Upload - Step 2 of 2</h3>
         <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Products created are localized and viewable exclusively within corresponding matching legal registration domain regions [Country Scope: <strong>${APP_STATE.currentUser.country}</strong>]</p>
         
         <div class="form-input-container margin-top-sm">
             <label>Product Name</label>
             <input type="text" id="newprod-name" class="form-field-control" placeholder="Enter concise commercial inventory title text">
         </div>
+ 
         <div class="form-input-container">
             <label>Select Logistics Catalog Classification Category:</label>
             <select id="newprod-cat" class="form-field-control">
@@ -2040,7 +2124,7 @@ function launchUploadProductInventoryModalFormLayoutShell() {
                 <option value="Mobile Devices & Computers">Mobile Devices & Computers</option>
                 <option value="Home Furniture">Home Furniture</option>
                 <option value="Fashion Clothing Apparel">Fashion Clothing Apparel</option>
-                <option value= "Others">Others</option>
+                <option value="Others">Others</option>
             </select>
         </div>
         <div class="form-input-container">
@@ -2076,7 +2160,9 @@ function launchUploadProductInventoryModalFormLayoutShell() {
     document.getElementById("auth-modal").classList.add("active");
 }
 
-// Logic Addition: Handles live preview display
+/**
+ * Logic Addition: Handles live preview display
+ */
 function setupImagePreviewListener() {
     const imageInput = document.getElementById("imageInput");
     const imagePreview = document.getElementById("imagePreview");
@@ -2100,6 +2186,9 @@ function setupImagePreviewListener() {
     });
 }
 
+/**
+ * Final Submission: Collects variables, processes files, updates databases
+ */
 function executePipelineCommitNewInventoryPostRecord() {
     const name = document.getElementById("newprod-name").value.trim();
     const cat = document.getElementById("newprod-cat").value;
@@ -2108,7 +2197,7 @@ function executePipelineCommitNewInventoryPostRecord() {
     const imagePreview = document.getElementById("imagePreview");
     const aiInfo = document.getElementById("newprod-aiinfo").value.trim();
     const priceRaw = document.getElementById("newprod-price").value;
-    
+
     // Logic Fix: Validate if an actual file was selected instead of string path
     if(name === "" || info === "" || priceRaw === "" || !imageInput.files[0]) {
         alert("All compulsory info must be imputed.");
@@ -2136,10 +2225,10 @@ function executePipelineCommitNewInventoryPostRecord() {
         aiInfo: aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.",
         clickCount: 0
     };
-    
+
     // Save to local tracked state
     SYSTEM_DATABASE.products.push(finalProductInstanceObjectNode);
-    
+
     // Sync live payload changes directly up to Firestore if layer configuration is present
     if (window.FortMartFirebase) {
         const { db, doc, setDoc } = window.FortMartFirebase;
@@ -2263,19 +2352,19 @@ function clearAiChatHistory() {
  * Profile Settings, Dynamic User Info Data Mutation & Feedback Subsystem Controllers Modules
  */
 function switchSettingsSection(selectedSectionTabIdKey) {
-    document.querySelectorAll(".settings-tab-btn").forEach(btn => btn.classList.remove("active")); // [cite: 295, 424, 469]
-    document.querySelectorAll(".settings-sub-panel").forEach(panel => panel.classList.add("hidden-node")); // [cite: 296, 425, 470]
+    document.querySelectorAll(".settings-tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".settings-sub-panel").forEach(panel => panel.classList.add("hidden-node"));
     
     // Activate target parameters arrays tracking nodes loops elements
-    event.currentTarget.classList.add("active"); // [cite: 296, 425, 470]
-    document.getElementById(`settings-node-${selectedSectionTabIdKey}`).classList.remove("hidden-node"); // [cite: 296, 425, 470]
+    event.currentTarget.classList.add("active");
+    document.getElementById(`settings-node-${selectedSectionTabIdKey}`).classList.remove("hidden-node");
     if(selectedSectionTabIdKey === 'my-products') {
-         renderAccountInventoryLedgerManagementDashboardGrid(); // [cite: 297, 425, 471]
+         renderAccountInventoryLedgerManagementDashboardGrid();
     }
 }
 
 function initializeProfileDetailsAccountManagementFieldsValues() {
-    if(!APP_STATE.currentUser) return; // [cite: 298, 426, 472]
+    if(!APP_STATE.currentUser) return;
     
     // Fallback default system vector if no custom avatar data is assigned to user account profile
     const globalDefaultVectorAvatarURI = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230288d1'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
@@ -2300,22 +2389,21 @@ function initializeProfileDetailsAccountManagementFieldsValues() {
     }
 
     // Sync alphanumeric display keys strings tracking targets labels text nodes registers
-    document.getElementById("txt-profile-username-val").innerText = APP_STATE.currentUser.identityName; 
-    
+    document.getElementById("txt-profile-username-val").innerText = APP_STATE.currentUser.identityName;
     const bizFieldsNodeWrapper = document.getElementById("business-profile-only-fields"); 
     if(APP_STATE.currentUser.accountType === 'business' || APP_STATE.currentUser.uid === 'admin') { 
-        bizFieldsNodeWrapper.classList.remove("hidden-node"); 
+        bizFieldsNodeWrapper.classList.remove("hidden-node");
         document.getElementById("txt-profile-busname-val").innerText = APP_STATE.currentUser.businessName || "N/A"; 
-        document.getElementById("txt-profile-businfo-val").innerText = APP_STATE.currentUser.businessInfo || "N/A"; 
+        document.getElementById("txt-profile-businfo-val").innerText = APP_STATE.currentUser.businessInfo || "N/A";
     } else {
-        bizFieldsNodeWrapper.classList.add("hidden-node"); 
+        bizFieldsNodeWrapper.classList.add("hidden-node");
     }
 }
 
 function openProfileEditWizard(targetFieldNameStringTokenKey) {
-    const modalTargetNode = document.getElementById("auth-modal-content"); 
+    const modalTargetNode = document.getElementById("auth-modal-content");
     modalTargetNode.innerHTML = `
-        <h3>Enter Current Password(Step 1 of 3)</h3>
+        <h3>Enter Current Password (Step 1 of 2)</h3>
         <p style="font-size:0.85rem; color:var(--fort-blue-dark); margin-top:4px;">To execute administrative profile changes tracking variables fields structural configurations data sets adjustments, confirm your current active account verification safety access password phrase key:</p>
         <div class="form-input-container margin-top-sm">
             <label>Active Profile Validation Password Expression Key Phrase:</label>
@@ -2330,79 +2418,46 @@ function openProfileEditWizard(targetFieldNameStringTokenKey) {
             <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
             <button onclick="executeValidateProfileReauthSessionTokenStep('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Password Phrase</button>
         </div>
-    `; 
+    `;
     document.getElementById("auth-modal").classList.add("active"); 
 }
 
 function executeValidateProfileReauthSessionTokenStep(targetFieldNameStringTokenKey) {
     const enteredPass = document.getElementById("profile-reauth-key").value; 
     const errNode = document.getElementById("err-profile-reauth-msg"); 
-    errNode.classList.add("hidden-node"); 
-    
+    errNode.classList.add("hidden-node");
     if(enteredPass !== APP_STATE.currentUser.secretKey) { 
         errNode.innerText = "Incorrect Password"; 
         errNode.classList.remove("hidden-node"); 
-        return; 
+        return;
     }
     
-    // Advanced step layout wizard mapping chain pipeline tracking structural parameter states
-    const modalTargetNode = document.getElementById("auth-modal-content"); 
-    modalTargetNode.innerHTML = `
-        <h3>Modify Profile Parameters Node Log - Validate Ownership Context (Step 2 of 3)</h3>
-        <p style="font-size:0.85rem; margin-top:4px;">Input your unique 4-digit Account Authentication Verification Code to confirm you want to change your info:</p>
-        <div class="form-input-container margin-top-sm">
-            <label>Input Verification Code:</label>
-            <input type="text" id="profile-reauth-otp" class="form-field-control" placeholder="Enter 4-digit verification code">
-            <div id="err-profile-reauth-otp-msg" class="text-danger-alert hidden-node">Incorrect</div> 
-        </div>
-        <div class="btn-group">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
-            <button onclick="executeFinalProfileDataEditCommitStepThreeFormLayout('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Process</button> 
-        </div>
-    `; 
+    // Verification code requirement removed[cite: 1]. Navigating directly to configuration layout.
+    executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStringTokenKey);
 }
 
-// Temporary variable to track image selections locally during the 3rd step layout
-let TEMPORARY_PROFILE_AVATAR_DATA_URL = ""; 
-
+// Temporary variable to track image selections locally during the data edit layout
+let TEMPORARY_PROFILE_AVATAR_DATA_URL = "";
 function executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStringTokenKey) {
-    const enteredOtp = document.getElementById("profile-reauth-otp").value.trim(); 
-    const errNode = document.getElementById("err-profile-reauth-otp-msg"); 
-    errNode.classList.add("hidden-node"); 
-    
-    // Extract real identity authentication baseline constraints safely
-    const actualAuthCode = String(
-        APP_STATE.currentUser.UserAccountAuthenticationVerificationCode || 
-        APP_STATE.currentUser.verificationCode || 
-        ""
-    ).trim(); 
-    
-    if(enteredOtp !== actualAuthCode) { 
-         errNode.innerText = "Incorrect verification code"; 
-         errNode.classList.remove("hidden-node"); 
-         return; 
-    }
-    
-    const modalTargetNode = document.getElementById("auth-modal-content"); 
-    // Inject custom target property modification text boxes fields configurations elements tracking structures mapping logic values
-    let injectionMarkupFormHTML = ""; 
+    const modalTargetNode = document.getElementById("auth-modal-content");
+    let injectionMarkupFormHTML = "";
     TEMPORARY_PROFILE_AVATAR_DATA_URL = ""; // Reset temporary memory block 
     
     if(targetFieldNameStringTokenKey === 'username') { 
         injectionMarkupFormHTML = `
             <label>Define New Profile User Identity Display Label Title Name:</label>
             <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.identityName}">
-        `; 
+        `;
     } else if(targetFieldNameStringTokenKey === 'businessName') { 
         injectionMarkupFormHTML = `
-            <label>Define New Corporate Legal Trading Entity Name Label Struct [Changeable once in 60 days limits tracking rules]:</label>
+            <label>Define New Corporate Legal Trading Entity Name Label Struct:</label>
             <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.businessName || ''}">
-        `; 
+        `;
     } else if(targetFieldNameStringTokenKey === 'businessInfo') {
         injectionMarkupFormHTML = `
-            <label>Define New Public Summary Overview Descriptive Information Paragraph Frame Struct [Changeable once in 30 days limits]:</label>
+            <label>Define New Public Summary Overview Descriptive Information Paragraph Frame Struct:</label>
             <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.businessInfo || ''}">
-        `; 
+        `;
     } else if(targetFieldNameStringTokenKey === 'password') { 
         injectionMarkupFormHTML = `
             <label>Define New Hardened Core Account Access Entry Security Key Password String Expression:</label>
@@ -2410,9 +2465,9 @@ function executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStr
             <label class="margin-top-xs">Re-type Code Syntax to Confirm Structural Convergence Parity Logic Matches:</label>
             <input type="password" id="new-profile-val-field-confirm" class="form-field-control" placeholder="Confirm New Password Syntax Combo">
             <div id="err-profile-pass-complex-feedback-lbl" class="text-danger-alert hidden-node"></div>
-        `; 
+        `;
     } else if(targetFieldNameStringTokenKey === 'avatar') { 
-        const currentAvatarSrc = APP_STATE.currentUser.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230288d1'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>"; // [cite: 443, 444, 495, 496]
+        const currentAvatarSrc = APP_STATE.currentUser.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230288d1'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
         injectionMarkupFormHTML = `
             <label>Modify Profile Image File Node Vector:</label>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 15px 0;">
@@ -2422,11 +2477,11 @@ function executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStr
                 <input type="file" id="new-profile-avatar-file-input" class="form-field-control" accept=".png, .jpg, .jpeg" onchange="processWizardAvatarFileSelectionDirectly()">
             </div>
             <input type="hidden" id="new-profile-val-field" value="AVATAR_MUTATION_TOKEN">
-        `; 
+        `;
     }
     
     modalTargetNode.innerHTML = `
-        <h3>Modify Profile Parameters Node Log - Commit Data Value Mutation (Step 3 of 3)</h3>
+        <h3>Modify Profile Parameters Node Log - Commit Data Value Mutation (Step 2 of 2)</h3>
         <div class="form-input-container margin-top-md">
             ${injectionMarkupFormHTML}
         </div>
@@ -2434,18 +2489,18 @@ function executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStr
             <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Discard Mutation</button>
             <button onclick="executePipelineSaveFinalProfileFieldsValuesChanges('${targetFieldNameStringTokenKey}')" class="btn-blue">Commit System Database Save</button> 
         </div>
-    `; 
+    `;
 }
 
 function processWizardAvatarFileSelectionDirectly() {
-    const fileNode = document.getElementById("new-profile-avatar-file-input"); 
+    const fileNode = document.getElementById("new-profile-avatar-file-input");
     if(fileNode && fileNode.files && fileNode.files[0]) { 
-        const readerInstance = new FileReader(); 
+        const readerInstance = new FileReader();
         readerInstance.onload = function(e) { 
-            TEMPORARY_PROFILE_AVATAR_DATA_URL = e.target.result; 
+            TEMPORARY_PROFILE_AVATAR_DATA_URL = e.target.result;
             const previewImageElement = document.getElementById("profile-edit-wizard-avatar-preview"); 
             if(previewImageElement) { 
-                previewImageElement.src = e.target.result; 
+                previewImageElement.src = e.target.result;
             }
         };
         readerInstance.readAsDataURL(fileNode.files[0]); 
@@ -2453,24 +2508,23 @@ function processWizardAvatarFileSelectionDirectly() {
 }
 
 function executePipelineSaveFinalProfileFieldsValuesChanges(targetFieldNameStringTokenKey) {
-    const inputPrimaryElement = document.getElementById("new-profile-val-field"); 
+    const inputPrimaryElement = document.getElementById("new-profile-val-field");
     let targetCoreMutationStringValueValue = inputPrimaryElement ? inputPrimaryElement.value.trim() : ""; 
     
     // Strict intercept validation tracking metrics scopes for password complex structure criteria assertions rules values
     if(targetFieldNameStringTokenKey === 'password') { 
-         const p2 = document.getElementById("new-profile-val-field-confirm").value; 
+         const p2 = document.getElementById("new-profile-val-field-confirm").value;
          const errLabel = document.getElementById("err-profile-pass-complex-feedback-lbl"); 
          errLabel.classList.add("hidden-node"); 
          
          if(targetCoreMutationStringValueValue !== p2) { 
-             errLabel.innerText = "Entry verification parity error discovery matches logic syntax profiles fields values checks loops configurations models."; 
+             errLabel.innerText = "Entry verification parity error discovery matches logic syntax profiles fields values checks loops configurations models.";
              errLabel.classList.remove("hidden-node"); 
              return; 
          }
          
-         // Fixed syntax pattern: corrected extra double bracket bracket syntax '[[^A-Za-z0-9]' to '[^A-Za-z0-9]'
          if(targetCoreMutationStringValueValue.length < 6 || !/[A-Z]/.test(targetCoreMutationStringValueValue) || !/[a-z]/.test(targetCoreMutationStringValueValue) || !/[0-9]/.test(targetCoreMutationStringValueValue) || !/[^A-Za-z0-9]/.test(targetCoreMutationStringValueValue)) { 
-             errLabel.innerText = "Any password created should have at least one uppercase letter, one lowercase letter, one symbol, one number and should be at least six characters."; 
+             errLabel.innerText = "Any password created should have at least one uppercase letter, one lowercase letter, one symbol, one number and should be at least six characters.";
              errLabel.classList.remove("hidden-node"); 
              return; 
          }
@@ -2485,16 +2539,16 @@ function executePipelineSaveFinalProfileFieldsValuesChanges(targetFieldNameStrin
     }
     
     if(targetCoreMutationStringValueValue === "") { 
-        alert("Field value entry parameter constraints validation alert: Mutation cannot accept blank structural values mappings data sets logs expressions attributes."); 
+        alert("Field value entry parameter constraints validation alert: Mutation cannot accept blank structural values mappings data sets logs expressions attributes.");
         return; 
     }
     
     // Apply core localized data mutation mappings sets indices updates safely directly inside target data baseline arrays frameworks models keys pointers
-    const targetedUserIndexId = SYSTEM_DATABASE.users.findIndex(u => u.uid === APP_STATE.currentUser.uid); 
+    const targetedUserIndexId = SYSTEM_DATABASE.users.findIndex(u => u.uid === APP_STATE.currentUser.uid);
     if(targetedUserIndexId !== -1) { 
-        if(targetFieldNameStringTokenKey === 'username') SYSTEM_DATABASE.users[targetedUserIndexId].identityName = targetCoreMutationStringValueValue; 
+        if(targetFieldNameStringTokenKey === 'username') SYSTEM_DATABASE.users[targetedUserIndexId].identityName = targetCoreMutationStringValueValue;
         else if(targetFieldNameStringTokenKey === 'businessName') SYSTEM_DATABASE.users[targetedUserIndexId].businessName = targetCoreMutationStringValueValue; 
-        else if(targetFieldNameStringTokenKey === 'businessInfo') SYSTEM_DATABASE.users[targetedUserIndexId].businessInfo = targetCoreMutationStringValueValue; 
+        else if(targetFieldNameStringTokenKey === 'businessInfo') SYSTEM_DATABASE.users[targetedUserIndexId].businessInfo = targetCoreMutationStringValueValue;
         else if(targetFieldNameStringTokenKey === 'password') SYSTEM_DATABASE.users[targetedUserIndexId].secretKey = targetCoreMutationStringValueValue; 
         else if(targetFieldNameStringTokenKey === 'avatar') SYSTEM_DATABASE.users[targetedUserIndexId].avatar = targetCoreMutationStringValueValue;
         
@@ -2506,22 +2560,22 @@ function executePipelineSaveFinalProfileFieldsValuesChanges(targetFieldNameStrin
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
             status: "bold-double"
         };
-        
-        let existingSystemAdminThreadNodePointerIndex = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes("admin")); // [cite: 333, 249, 358]
+        let existingSystemAdminThreadNodePointerIndex = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes("admin"));
         if(existingSystemAdminThreadNodePointerIndex) {
-            existingSystemAdminThreadNodePointerIndex.messageLog.push(automatedTelemetryLogEntryNotificationNodeValue); 
+            existingSystemAdminThreadNodePointerIndex.messageLog.push(automatedTelemetryLogEntryNotificationNodeValue);
         }
         
         // Sync working system memory caches directly back downstream into browser tracking mechanisms structures layers fields context
-        APP_STATE.currentUser = SYSTEM_DATABASE.users[targetedUserIndexId]; 
+        APP_STATE.currentUser = SYSTEM_DATABASE.users[targetedUserIndexId];
         syncPlatformDatabaseStateToWebStorage(); 
         
+        // Closes the modal window framework directly
         closeActiveModalDirectly('auth-modal'); 
         
         // Rerender all layout placeholders across the application instantly
-        initializeProfileDetailsAccountManagementFieldsValues(); 
+        initializeProfileDetailsAccountManagementFieldsValues();
         
-        alert("System Database Pipeline Notice Statement: Structural context updates compiled, verified, and saved safely to global baseline operational ledger data arrays registers mapping frameworks logs indicators parameters models values."); // [cite: 335, 251, 360]
+        alert("Changes made successfully");
     }
 }
 
@@ -2533,7 +2587,6 @@ function renderAccountInventoryLedgerManagementDashboardGrid() {
     
     if(!APP_STATE.currentUser) return;
     const userOwnedInventoryItemsArray = SYSTEM_DATABASE.products.filter(p => p.ownerUid === APP_STATE.currentUser.uid);
-    
     if(userOwnedInventoryItemsArray.length === 0) {
         listContainerNodeElement.innerHTML = `<div style="padding:16px; color:var(--fort-gray-slate); font-size:0.85rem;"><p>Your profile data log lists no actively running commercial inventory postings indices structures metrics fields inside system clusters registries logs.</p></div>`;
         return;
@@ -2567,8 +2620,10 @@ function renderAccountInventoryLedgerManagementDashboardGrid() {
     });
 }
 
+/**
+ * Step 1: Launches password confirmation field layout tracking validation checks
+ */
 function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueString) {
-    // Locate the existing product record
     const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
     if (!targetProduct) {
         alert("Product record could not be found.");
@@ -2577,7 +2632,60 @@ function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueS
 
     const modalContentTargetNode = document.getElementById("auth-modal-content");
     modalContentTargetNode.innerHTML = `
-        <h3>Edit Product Details</h3>
+        <h3>Enter Current Password (Step 1 of 2)</h3>
+        <p style="font-size:0.85rem; color:var(--fort-blue-dark); margin-top:4px;">
+            To execute administrative product modifications, confirm your current active account verification safety access password phrase key:
+        </p>
+        
+        <div class="form-input-container margin-top-sm">
+            <label>Active Profile Validation Password Expression Key Phrase:</label>
+            <input type="password" id="edit-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
+            
+            <div class="margin-top-xs">
+                <input type="checkbox" id="chk-edit-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'edit-verify-password')">
+                <label for="chk-edit-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
+            </div>
+            
+            <div id="err-edit-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
+            <button onclick="verifyEditPasswordAndProceedNonFirebase('${targetProductIdKeyValueString}')" class="btn-blue">Verify Password Phrase</button>
+        </div>
+    `;
+    document.getElementById("auth-modal").classList.add("active");
+}
+
+/**
+ * Validates the password inline and proceeds to Step 2 form view
+ */
+function verifyEditPasswordAndProceedNonFirebase(targetProductIdKeyValueString) {
+    const enteredPassword = document.getElementById("edit-verify-password").value;
+    const errNode = document.getElementById("err-edit-reauth-msg");
+    
+    errNode.classList.add("hidden-node");
+    
+    if (enteredPassword !== APP_STATE.currentUser.secretKey) {
+        errNode.innerText = "Incorrect Password"; 
+        errNode.classList.remove("hidden-node"); 
+        return;
+    }
+    
+    // Proceed to Step 2 Form Presentation
+    renderActualEditProductFormNonFirebase(targetProductIdKeyValueString);
+}
+
+/**
+ * Step 2: Displays information inputs for the specified asset post
+ */
+function renderActualEditProductFormNonFirebase(targetProductIdKeyValueString) {
+    const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
+    if (!targetProduct) return;
+
+    const modalContentTargetNode = document.getElementById("auth-modal-content");
+    modalContentTargetNode.innerHTML = `
+        <h3>Edit Product Details (Step 2 of 2)</h3>
         <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Updating information for your listed commercial asset.</p>
         
         <div class="form-input-container margin-top-sm">
@@ -2626,10 +2734,7 @@ function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueS
             <button onclick="executePipelineCommitUpdatedInventoryPostRecord('${targetProduct.pid}')" class="btn-blue">Save Changes</button>
         </div>
     `;
-
-    // Re-use your existing live preview attachment engine
     setupImagePreviewListener();
-    document.getElementById("auth-modal").classList.add("active");
 }
 
 function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValueString) {
@@ -2640,17 +2745,13 @@ function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValue
     const aiInfo = document.getElementById("editprod-aiinfo").value.trim();
     const priceRaw = document.getElementById("editprod-price").value;
     
-    // Validation matches your upload criteria (image is already present via preview src)
     if(name === "" || info === "" || priceRaw === "" || !imagePreview.src || imagePreview.src === "") {
         alert("All compulsory info must be imputed.");
         return;
     }
     
-    // Find the product location in your global app state array
     const productStructuralIndexMatchId = SYSTEM_DATABASE.products.findIndex(p => p.pid === targetProductIdKeyValueString);
-    
     if(productStructuralIndexMatchId !== -1) {
-        // Retain tracking configurations (pid, ownerUid, clickCount) while updating user fields
         SYSTEM_DATABASE.products[productStructuralIndexMatchId].name = name;
         SYSTEM_DATABASE.products[productStructuralIndexMatchId].category = cat;
         SYSTEM_DATABASE.products[productStructuralIndexMatchId].info = info;
@@ -2658,13 +2759,11 @@ function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValue
         SYSTEM_DATABASE.products[productStructuralIndexMatchId].coverPhoto = imagePreview.src;
         SYSTEM_DATABASE.products[productStructuralIndexMatchId].aiInfo = aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.";
         
-        // Persist database context states dynamically across modules
         syncPlatformDatabaseStateToWebStorage();
         
         closeActiveModalDirectly('auth-modal');
         alert("System Pipeline Core Notification Process Switch Event Alert: Product Details Updated Successfully.");
         
-        // Refresh display instances live
         renderAccountInventoryLedgerManagementDashboardGrid();
         renderMarketplaceProductsDisplayLoop();
     } else {
@@ -2681,6 +2780,28 @@ function executeDeletePlatformInventoryItemListingPostRecord(targetProductIdKeyV
             renderAccountInventoryLedgerManagementDashboardGrid();
             renderMarketplaceProductsDisplayLoop();
         }
+    });
+}
+
+function displayConfirmationModalOverlayAction(messageStringText, callbackFunctionReference) {
+    const confirmModalNode = document.getElementById("confirm-modal");
+    document.getElementById("confirm-modal-text").innerText = messageStringText;
+    confirmModalNode.classList.add("active");
+    
+    const yesButtonNode = document.getElementById("confirm-yes-btn");
+    const noButtonNode = document.getElementById("confirm-no-btn");
+    
+    const cleanYesNode = yesButtonNode.cloneNode(true);
+    const cleanNoNode = noButtonNode.cloneNode(true);
+    yesButtonNode.parentNode.replaceChild(cleanYesNode, yesButtonNode);
+    noButtonNode.parentNode.replaceChild(cleanNoNode, noButtonNode);
+    
+    cleanYesNode.addEventListener("click", () => {
+        confirmModalNode.classList.remove("active");
+        callbackFunctionReference();
+    });
+    cleanNoNode.addEventListener("click", () => {
+        confirmModalNode.classList.remove("active");
     });
 }
 
