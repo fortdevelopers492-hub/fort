@@ -44,6 +44,57 @@ if (!SYSTEM_DATABASE.pinnedLeaderboard) {
 }
 
 /**
+ * Utility Helper: Sets a browser cookie
+ */
+/**
+ * Sets a secure browser cookie optimized for HTTPS, HTTP, and local filesystem environments
+ */
+function setSecureAuthCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    
+    const protocol = window.location.protocol;
+    
+    // Base configuration parameters
+    let cookieString = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    
+    if (protocol === "https:") {
+        // Enforce maximum production security requirements over encrypted HTTPS networks
+        cookieString += "; Secure; SameSite=Strict";
+        document.cookie = cookieString;
+    } else if (protocol === "http:") {
+        // Relax strict policies for standard unencrypted local development servers (http://localhost)
+        cookieString += "; SameSite=Lax";
+        document.cookie = cookieString;
+    } else {
+        // file:// or other protocols do not support setting cookies; log a silent note
+        console.warn("Cookies are not supported on the current protocol context:", protocol);
+    }
+}
+
+function getSecureAuthCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+}
+
+/**
+ * Utility Helper: Deletes a browser cookie
+ */
+function eraseSecureAuthCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict';
+}
+
+/**
  * Persists and commits state updates across database abstraction wrappers
  */
 function administrativeSaveAndRefreshDisplay(activeProductId = null) {
@@ -75,10 +126,22 @@ function loadPlatformDatabaseStateFromWebStorage() {
 
 // System Init Bootstrap Hooks Lifecycle Engine Activation Loop
 window.addEventListener("DOMContentLoaded", () => {
+    // 1. MUST LOAD CACHED COPIES FIRST
     loadPlatformDatabaseStateFromWebStorage();
-    renderMarketplaceProductsDisplayLoop();
-    buildCategoryRibbonFilterInterfaceElements();
-    populateNetworkSuiteExtensionsDisplayView();
+    
+    // 2. RUN RENDER LOOPS
+    if (typeof renderMarketplaceProductsDisplayLoop === 'function') {
+        renderMarketplaceProductsDisplayLoop();
+    }
+    if (typeof buildCategoryRibbonFilterInterfaceElements === 'function') {
+        buildCategoryRibbonFilterInterfaceElements();
+    }
+    if (typeof populateNetworkSuiteExtensionsDisplayView === 'function') {
+        populateNetworkSuiteExtensionsDisplayView();
+    }
+
+    // 3. EXECUTE COOKIE CHECK LAST (Once SYSTEM_DATABASE is fully prepared)
+    triggerAuthenticationModalSequence(); 
 });
 
 /**
@@ -225,89 +288,55 @@ function displayConfirmationModalOverlayAction(message, onConfirmCallback) {
 }
 
 /**
- * Complete User Accounts Authentication Flow Subsystem Management Wizard Module
+ * =========================================================================
+ * COMPLETE USER ACCOUNTS AUTHENTICATION FLOW SUBSYSTEM (COOKIE MODIFIED)
+ * =========================================================================
+ */
+
+/**
+ * REPLACED: Updated Authentication Sequence initializing directly via Cookies
+ * completely bypassing the legacy "Continue As" choice workflow.
+ */
+/**
+ * Authentication Sequence initializing via Cookies with a Local Storage fallback for file:// protocols
  */
 function triggerAuthenticationModalSequence() {
     try {
-        // Safe lookups inside localStorage to protect global script execution state
-        const savedSessionRaw = localStorage.getItem("fort_mart_remembered_user");
-        
-        if (savedSessionRaw) {
-            const savedData = JSON.parse(savedSessionRaw);
-            const currentTime = Date.now();
-            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7-day automated expiration lifespans
+        // 1. Try to read from browser cookies first (Works on https:// and http://)
+        let savedUid = getSecureAuthCookie("fort_mart_logged_uid");
 
-            // If the saved session is still valid, show choice UI layouts
-            if (currentTime - savedData.timestamp < sevenDaysInMs) {
-                renderRememberedUserPromptLayout(savedData);
-                document.getElementById("auth-modal").classList.add("active");
+        // 2. Fallback check: If cookies aren't set or blocked (e.g. running via file://), check local storage fallback
+        if (!savedUid) {
+            savedUid = localStorage.getItem("fort_mart_cookie_fallback_uid");
+        }
+
+        if (savedUid && typeof SYSTEM_DATABASE !== 'undefined' && SYSTEM_DATABASE.users) {
+            // Find user in the system database array
+            const accountRecordMatch = SYSTEM_DATABASE.users.find(u => u.uid === savedUid);
+            
+            if (accountRecordMatch) {
+                // Bypass login prompt modal structures entirely and validate session
+                finalizeSuccessfulAuthenticationSequence(accountRecordMatch);
                 return;
             } else {
-                // Lifespan exceeded window parameters, clear securely
-                localStorage.removeItem("fort_mart_remembered_user");
+                eraseSecureAuthCookie("fort_mart_logged_uid");
+                localStorage.removeItem("fort_mart_cookie_fallback_uid");
             }
         }
     } catch (e) {
-        console.error("Authentication persistence module context read warning:", e);
-        localStorage.removeItem("fort_mart_remembered_user");
+        console.error("Authentication initialization exception context:", e);
+        eraseSecureAuthCookie("fort_mart_logged_uid");
+        localStorage.removeItem("fort_mart_cookie_fallback_uid");
     }
 
-    // Default flow if no valid saved user exists
+    // Default flow if no session token profile is active
     renderSignInModalStepContentLayout();
     document.getElementById("auth-modal").classList.add("active");
 }
 
 /**
- * Renders the selection prompt for an existing saved user profile vs a new login session
+ * Renders the default Sign-In interface view inside the authentication modal target wrapper
  */
-function renderRememberedUserPromptLayout(savedData) {
-    const wrapperTargetNode = document.getElementById("auth-modal-content");
-    
-    // Convert variables safely by replacing single quotes to prevent early closure bugs inside HTML event triggers
-    const safeUid = (savedData.uid || '').replace(/'/g, "\\'");
-    const safeIdentifier = (savedData.identifierText || 'User').replace(/'/g, "\\'");
-
-    wrapperTargetNode.innerHTML = `
-        <h2>Welcome Back to Fort Mart</h2>
-        <div class="text-center margin-top-sm margin-bottom-sm">
-            <p style="font-size: 1.1rem;">Would you like to continue using your saved account?</p>
-        </div>
-        <div class="btn-group" style="display: flex; flex-direction: column; gap: 10px;">
-            <button onclick="executeRememberedUserSignIn('${safeUid}')" class="btn-blue" style="width: 100%;">
-                Continue as ${safeIdentifier}
-            </button>
-            <button onclick="renderSignInModalStepContentLayout()" class="btn-gray" style="width: 100%;">
-                Sign in as new user
-            </button>
-        </div>
-        <div class="text-center margin-top-xs">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-link" style="background: none; border: none; color: gray; cursor: pointer;">Cancel</button>
-        </div>
-    `;
-}
-
-/**
- * Automatically authenticates a remembered user directly via their cached UID profile reference
- */
-function executeRememberedUserSignIn(uid) {
-    if (typeof SYSTEM_DATABASE === 'undefined' || !SYSTEM_DATABASE.users) {
-        console.error("Runtime exception intercepted: Database context is uninitialized.");
-        renderSignInModalStepContentLayout();
-        return;
-    }
-
-    const accountRecordMatch = SYSTEM_DATABASE.users.find(u => u.uid === uid);
-    
-    if (!accountRecordMatch) {
-        // Fallback cleanup execution loop if records mutated remotely out of scope
-        localStorage.removeItem("fort_mart_remembered_user");
-        renderSignInModalStepContentLayout();
-        return;
-    }
-
-    finalizeSuccessfulAuthenticationSequence(accountRecordMatch);
-}
-
 function renderSignInModalStepContentLayout() {
     const wrapperTargetNode = document.getElementById("auth-modal-content");
     wrapperTargetNode.innerHTML = `
@@ -326,6 +355,7 @@ function renderSignInModalStepContentLayout() {
         </div>
         <div class="form-input-container">
             <label>Account Password:</label>
+         
             <input type="password" id="auth-signin-password" class="form-field-control" placeholder="Enter password">
             <div id="err-signin-password" class="text-danger-alert hidden-node"></div>
             
@@ -352,6 +382,9 @@ function renderSignInModalStepContentLayout() {
     `;
 }
 
+/**
+ * Utility helper toggling clear-text/password field visibility states dynamically
+ */
 function toggleFormPasswordFieldVisibility(checkboxElement, targetPasswordFieldId) {
     const passwordField = document.getElementById(targetPasswordFieldId);
     if (passwordField) {
@@ -359,6 +392,9 @@ function toggleFormPasswordFieldVisibility(checkboxElement, targetPasswordFieldI
     }
 }
 
+/**
+ * MODIFIED: Authenticate Sign In request updated to target secure device cookies
+ */
 function executeAccountSignInAuthenticationRequest() {
     const countryRawValue = document.getElementById("auth-signin-country").value.split("|");
     const identifierInput = document.getElementById("auth-signin-identifier").value.trim();
@@ -368,20 +404,20 @@ function executeAccountSignInAuthenticationRequest() {
     const errPassNode = document.getElementById("err-signin-password");
     errIdNode.classList.add("hidden-node");
     errPassNode.classList.add("hidden-node");
-    
+   
     if (typeof SYSTEM_DATABASE === 'undefined' || !SYSTEM_DATABASE.users) {
         errIdNode.innerText = "System error: Database layer is unreachable.";
         errIdNode.classList.remove("hidden-node");
         return;
     }
     
-    // Find operational account record match
     const accountRecordMatch = SYSTEM_DATABASE.users.find(u => 
         u.dialingCode === countryRawValue[1] && 
         u.identifierText.toLowerCase() === identifierInput.toLowerCase()
     );
+
     if(!accountRecordMatch) {
-        errIdNode.innerText = "No registered matching account found for specified credentials within specified region.";
+        errIdNode.innerText = "No registered matching account found for specified credentials.";
         errIdNode.classList.remove("hidden-node");
         return;
     }
@@ -392,18 +428,16 @@ function executeAccountSignInAuthenticationRequest() {
         return;
     }
     
-    // Check if the user selected 'Remember Me'
     const rememberMeChecked = document.getElementById("chk-signin-rememberme").checked;
+    
     if (rememberMeChecked) {
-        const payloadToPersist = {
-            uid: accountRecordMatch.uid,
-            identifierText: accountRecordMatch.identifierText, // Persists the original identifier address cleanly
-            timestamp: Date.now() // Lifetime validation sequence anchor point
-        };
-        localStorage.setItem("fort_mart_remembered_user", JSON.stringify(payloadToPersist));
+        // Set persistent 7-day cookie (HTTPS/HTTP) + backup fallback key (file://)
+        setSecureAuthCookie("fort_mart_logged_uid", accountRecordMatch.uid, 7);
+        localStorage.setItem("fort_mart_cookie_fallback_uid", accountRecordMatch.uid);
     } else {
-        // Purge if unchecked during manual authorization entry overrides
-        localStorage.removeItem("fort_mart_remembered_user");
+        // Session validation context only
+        setSecureAuthCookie("fort_mart_logged_uid", accountRecordMatch.uid, null);
+        localStorage.removeItem("fort_mart_cookie_fallback_uid");
     }
     
     finalizeSuccessfulAuthenticationSequence(accountRecordMatch);
@@ -3114,84 +3148,88 @@ function executeInlineAdminSave(userId) {
     }
 }
 
-
-// Function to return to the root landing engine homepage cleanly
-function returnToHome(event) {
-    if (event) event.preventDefault(); // Stop default anchor jump loops
+/**
+ * NEW: Displays the password secure logout prompt layout
+ */
+function openLogoutConfirmationModal() {
+    const passInput = document.getElementById("logout-auth-password");
+    const errNode = document.getElementById("err-logout-password");
     
-    // 1. Strip the custom subpath parameters and fallback to standard root directory context
-    const homeUrl = window.location.origin + window.location.pathname.replace('fort mart index.html', '').replace('fortmart', '') + 'index.html';
-    window.history.pushState({ page: 'home' }, 'Fort Developers', homeUrl);
+    if (passInput) passInput.value = "";
+    if (errNode) errNode.classList.add("hidden-node");
     
-    // 2. Head back to the main home portfolio surface screen safely
-    window.location.href = 'index.html';
+    const logoutModal = document.getElementById("logout-confirm-modal");
+    if (logoutModal) logoutModal.classList.add("active");
 }
 
-// Safeguard check for address bar modifications or direct access routing paste links
-window.addEventListener('DOMContentLoaded', () => {
-    // Ensure that if they hit the page directly, the URL context maintains visual formatting consistency
-    if (!window.location.pathname.endsWith('fortmart') && window.location.pathname.includes('fort mart index.html')) {
-        const structuralUrl = window.location.origin + window.location.pathname.replace('fort mart index.html', '') + 'fortmart';
-        window.history.replaceState({ page: 'fortmart' }, 'Fort Mart - Marketplace & Chat', structuralUrl);
-    }
-});
-
-// --- Fort Suite SPA Router Engine ---
-
-// Run checking routine as soon as the window finishes parsing DOM
-window.addEventListener('DOMContentLoaded', () => {
-    checkCurrentURLRoute();
-});
-
-// Capture browser forward/back buttons actions
-window.addEventListener('popstate', () => {
-    checkCurrentURLRoute();
-});
-
-function checkCurrentURLRoute() {
-    const path = window.location.pathname;
+/**
+ * NEW: Verifies secret key credentials before clearing security cookie tokens 
+ */
+function executeSecureAccountLogout() {
+    const errNode = document.getElementById("err-logout-password");
+    const passwordInput = document.getElementById("logout-auth-password").value;
     
-    // Check if the URL points to /fortmart or if a hash fallback exists
-    if (path.endsWith('/fortmart') || window.location.hash === '#fortmart') {
-        // If we are currently on the home page index, load Fort Mart
-        if (typeof loadFortMart === 'function') {
-            loadFortMart();
-        } else {
-            // If accessing locally or direct file setup, safely shift view
-            window.location.href = 'fort mart index.html';
+    errNode.classList.add("hidden-node");
+
+    if (typeof APP_STATE === 'undefined' || !APP_STATE.currentUser) {
+        // Fallback if system app state configuration drops cleanly out of loop bounds
+        performGlobalSessionPurge();
+        return;
+    }
+
+    // Authenticate the current context user against the stored database match record
+    if (APP_STATE.currentUser.secretKey !== passwordInput) {
+        errNode.innerText = "Incorrect password. Logout verification failed.";
+        errNode.classList.remove("hidden-node");
+        return;
+    }
+
+    // Verification successful, execute state clear
+    performGlobalSessionPurge();
+}
+
+/**
+ * NEW: Secondary clean workflow execution to clear cookies, DOM classes, and structural roots
+ */
+function performGlobalSessionPurge() {
+    // Clear both the active device cookie trace and local storage fallback keys cleanly
+    eraseSecureAuthCookie("fort_mart_logged_uid");
+    localStorage.removeItem("fort_mart_cookie_fallback_uid");
+
+    // Force application view panels directly back to the home page display layout
+    document.querySelectorAll(".view-page").forEach(page => {
+        page.classList.add("hidden-view");
+        page.classList.remove("active-view");
+    });
+    
+    const homePageElement = document.getElementById("page-home");
+    if (homePageElement) {
+        homePageElement.classList.add("active-view");
+        homePageElement.classList.remove("hidden-view");
+        if (typeof APP_STATE !== 'undefined') {
+            APP_STATE.activeViewPage = 'home';
         }
     }
-}
 
-// Action: User clicks "Visit Website" inside Main Home Hub
-function navigateToFortMart() {
-    if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
-        // Local machine behavior: Traditional file transition fallback
-        window.location.href = 'fort mart index.html';
-    } else {
-        // Live production deployment behavior (GitHub Pages/Custom Domain)
-        // Pushes clean '/fortmart' text onto address bar matrix layout
-        history.pushState({ page: 'fortmart' }, 'Fort Mart - Marketplace & Chat', '/fortmart');
-        
-        // Execute your structural logic payload function
-        if (typeof loadFortMart === 'function') {
-            loadFortMart();
-        } else {
-            window.location.href = 'fort mart index.html';
-        }
+    if (typeof APP_STATE !== 'undefined') {
+        APP_STATE.currentUser = null;
     }
-}
 
-// Action: User clicks "Fort Dev Home Page" inside Fort Mart Node
-function navigateToHome(event) {
-    if (event) event.preventDefault();
+    closeActiveModalDirectly('logout-confirm-modal');
+
+    const adminNavItem = document.getElementById("admin-nav-item");
+    const adminSuiteBtn = document.getElementById("admin-add-suite-site-btn");
+    if (adminNavItem) adminNavItem.classList.add("hidden-admin-node");
+    if (adminSuiteBtn) adminSuiteBtn.classList.add("hidden-node");
+
+    const navUserAvatar = document.getElementById("nav-user-avatar");
+    if (navUserAvatar) {
+        navUserAvatar.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+    }
+
+    if (typeof renderMarketplaceProductsDisplayLoop === 'function') {
+        renderMarketplaceProductsDisplayLoop();
+    }
     
-    if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
-        // Local machine fallback
-        window.location.href = 'index.html#more-from-fort';
-    } else {
-        // Production address cleaner back to core domain root url matrix 
-        history.pushState({ page: 'home' }, 'Fort Developers', '/');
-        window.location.href = 'index.html#more-from-fort';
-    }
+    triggerAuthenticationModalSequence();
 }
