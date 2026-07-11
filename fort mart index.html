@@ -6,6 +6,16 @@
     <title>Fort Mart - Marketplace & Chat</title>
     <link rel="icon" href="Fort Mart Logo Circle Cropped.png" type="image/png">
     <link rel="stylesheet" href="fort mart styles.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+    (function(){
+        // Initialize with your production EmailJS Public Key API configuration
+        emailjs.init({
+            publicKey: "BIkzBsPuCKiv2Wqxu",
+        });
+    })();
+    </script>
+    <script src="Fort Mart script.js"></script>
 </head>
 <body class="mode-laptop">
 
@@ -33,6 +43,7 @@
         <div class="modal-box rounded-rect text-center">
             <h2>Welcome to Fort Mart!</h2>
             <p><strong>Your one-stop shop for everything.</strong></p>
+            <br>
             <button onclick="closeActiveModalDirectly('welcome-modal')" class="btn-blue">Start Exploring</button>
         </div>
     </div>
@@ -373,11 +384,11 @@
                 <label>Account Password:</label>
                 <input type="password" id="logout-auth-password" class="form-field-control" placeholder="Enter your current password">
                 <div id="err-logout-password" class="text-danger-alert hidden-node"></div>
-                
-                <div class="margin-top-xs">
-                    <input type="checkbox" id="chk-logout-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'logout-auth-password')">
-                    <label for="chk-logout-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
-                </div>
+            </div>
+
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" id="chk-logout-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'logout-auth-password')">
+                <label for="chk-logout-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>
             </div>
 
             <div class="btn-group" style="margin-top: 20px;">
@@ -387,11 +398,5 @@
         </div>
     </div>
 
-    <script src="Fort Mart script.js"></script>
 </body>
 </html>
-
-
-
-
-
