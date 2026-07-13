@@ -216,13 +216,12 @@ function displayConfirmationModalOverlayAction(messageStringText, callbackFuncti
     
     const yesButtonNode = document.getElementById("confirm-yes-btn");
     const noButtonNode = document.getElementById("confirm-no-btn");
-    
-    // Unbind prior listeners
+
     const cleanYesNode = yesButtonNode.cloneNode(true);
     const cleanNoNode = noButtonNode.cloneNode(true);
     yesButtonNode.parentNode.replaceChild(cleanYesNode, yesButtonNode);
     noButtonNode.parentNode.replaceChild(cleanNoNode, noButtonNode);
-    
+
     cleanYesNode.addEventListener("click", () => {
         confirmModalNode.classList.remove("active");
         callbackFunctionReference();
@@ -358,17 +357,18 @@ function renderSignInModalStepContentLayout() {
          
             <input type="password" id="auth-signin-password" class="form-field-control" placeholder="Enter password">
             <div id="err-signin-password" class="text-danger-alert hidden-node"></div>
-            
-            <div class="margin-top-xs">
-                <input type="checkbox" id="chk-signin-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'auth-signin-password')">
-                <label for="chk-signin-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
-            </div>
-            
-            <div class="margin-top-xs">
-                <input type="checkbox" id="chk-signin-rememberme">
-                <label for="chk-signin-rememberme" style="font-size:0.85rem; font-weight:400;">Remember Me</label>
-            </div>
         </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-signin-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'auth-signin-password')">
+            <label for="chk-signin-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-signin-rememberme">
+            <label for="chk-signin-rememberme" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Remember Me</label>            
+        </div>
+
         <div class="text-center margin-top-xs">
             <span style="color:var(--fort-blue-light); cursor:pointer; font-size:0.9rem;" onclick="renderForgotPasswordModalWorkflow()">Forgot Password?</span>
         </div>
@@ -700,10 +700,11 @@ function renderSignUpModalWizardStepThree() {
             <label>Re-type Password to Confirm:</label>
             <input type="password" id="reg-password-2" class="form-field-control" placeholder="Confirm Password">
             <div id="err-reg-step3-validation-msg" class="text-danger-alert hidden-node"></div>
-            <div class="margin-top-xs">
-                <input type="checkbox" id="chk-reg-showpass" onchange="toggleFormPasswordVisibilityChainSignUp()">
-                <label for="chk-reg-showpass" style="font-size:0.85rem; font-weight:400;">Show Passwords</label>
-            </div>
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-reg-showpass" onchange="toggleFormPasswordVisibilityChainSignUp()">
+            <label for="chk-reg-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Passwords</label>            
         </div>
 
         <div class="btn-group margin-top-md">
@@ -848,12 +849,12 @@ function initiateSignUpOtpResendCooldown() {
         const resendLinkNode = document.getElementById("signup-otp-resend-link");
         if (resendLinkNode) {
             if (SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft > 0) {
-                resendLinkNode.innerText = `resend in ${SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft}s`;
+                resendLinkNode.innerText = `Resend in ${SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft}s`;
                 resendLinkNode.style.opacity = "0.5";
                 resendLinkNode.style.fontWeight = "400";
                 resendLinkNode.style.pointerEvents = "none";
             } else {
-                resendLinkNode.innerText = "resend";
+                resendLinkNode.innerText = "Resend";
                 resendLinkNode.style.opacity = "1";
                 resendLinkNode.style.fontWeight = "600";
                 resendLinkNode.style.pointerEvents = "auto";
@@ -883,7 +884,7 @@ function renderSignUpModalWizardStepFour() {
     
     // Evaluate cooldown details to sustain layout state seamlessly on rendering
     const secondsLeft = SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft || 0;
-    const textLabel = secondsLeft > 0 ? `resend in ${secondsLeft}s` : "resend";
+    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "resend";
     const opacityStyle = secondsLeft > 0 ? "0.5" : "1";
     const weightStyle = secondsLeft > 0 ? "400" : "600";
     const pointerEventsStyle = secondsLeft > 0 ? "none" : "auto";
@@ -1139,12 +1140,12 @@ function initiateOtpResendCooldown() {
         const resendLinkNode = document.getElementById("forgot-otp-resend-link");
         if (resendLinkNode) {
             if (SIGNUP_WIZARD_TEMPORARY_OBJECT.otpCooldownSecondsLeft > 0) {
-                resendLinkNode.innerText = `resend in ${SIGNUP_WIZARD_TEMPORARY_OBJECT.otpCooldownSecondsLeft}s`;
+                resendLinkNode.innerText = `Resend in ${SIGNUP_WIZARD_TEMPORARY_OBJECT.otpCooldownSecondsLeft}s`;
                 resendLinkNode.style.opacity = "0.5";
                 resendLinkNode.style.fontWeight = "400";
                 resendLinkNode.style.pointerEvents = "none";
             } else {
-                resendLinkNode.innerText = "resend";
+                resendLinkNode.innerText = "Resend";
                 resendLinkNode.style.opacity = "1";
                 resendLinkNode.style.fontWeight = "600";
                 resendLinkNode.style.pointerEvents = "auto";
@@ -1175,7 +1176,7 @@ function renderForgotPasswordOtpVerificationLayout() {
 
     // Evaluate state properties dynamically on initial layout attachment
     const secondsLeft = SIGNUP_WIZARD_TEMPORARY_OBJECT.otpCooldownSecondsLeft || 0;
-    const textLabel = secondsLeft > 0 ? `resend in ${secondsLeft}s` : "resend";
+    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "Resend";
     const opacityStyle = secondsLeft > 0 ? "0.5" : "1";
     const weightStyle = secondsLeft > 0 ? "400" : "600";
     const pointerEventsStyle = secondsLeft > 0 ? "none" : "auto";
@@ -1527,7 +1528,7 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
         
     detailOverlayBodyNode.innerHTML = `
         <div class="modal-expanded-header-row" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--fort-gray-border); padding-bottom:14px;">
-            <h3>Product Specification Comprehensive Expanded Data Context View</h3>
+            <h3>Product Detailed Specifications</h3>
             <button onclick="closeActiveModalDirectly('product-detail-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
         <div class="modal-expanded-content-split-grid margin-top-md" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
@@ -1541,7 +1542,7 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
                     <img src="${(operationalTargetProfileOwnerRecord && operationalTargetProfileOwnerRecord.avatar) ? operationalTargetProfileOwnerRecord.avatar : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a0aec0\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'}" style="width:44px; height:44px;" class="circle-container" alt="Vendor Big Profile Photo">
                     <div>
                         <h4 style="color:var(--fort-blue-primary);">${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.businessName : 'External Distribution Entity Framework Node Line'}</h4>
-                        <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Inventory Verification Origin Region Node Log: ${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.country : 'Global Matrix Platform Partner Network'}</span>
+                        <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Country: ${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.country : 'Global Matrix Platform Partner Network'}</span>
                     </div>
                 </div>
                 
@@ -1886,10 +1887,14 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
     document.getElementById("chat-pane-empty-notice").classList.add("hidden-node");
     const activeWorkspaceBlockNode = document.getElementById("chat-pane-active-view");
     activeWorkspaceBlockNode.classList.remove("hidden-node");
+    
+    // 👇 ADD THIS LINE: It tells the pane to overlap the list on smaller devices
+    document.getElementById("chat-conversation-pane")?.classList.add("phone-active-thread");
+    
     if(APP_STATE.deviceMode === 'phone') {
          document.getElementById("chat-conversation-pane").classList.add("phone-active-thread");
     }
-    
+
     const targetToolbarNodeElement = document.getElementById("chat-window-top-toolbar");
     if (targetCounterpartyUidValue === 'broadcast_personal' || targetCounterpartyUidValue === 'broadcast_business') {
         const headlineLabel = targetCounterpartyUidValue === 'broadcast_personal' ? 'Broadcast to All Personal Accounts' : 'Broadcast to All Business Accounts';
@@ -1905,7 +1910,11 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
         targetToolbarNodeElement.innerHTML = `
             <div style="display:flex; align-items:center; gap:10px; width:100%; justify-content:space-between; background-color: var(--fort-blue-primary); color:var(--fort-white-pure); padding:8px 14px;" class="rounded-rect">
                 <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="launchDetailedUserProfileContextOverlaySummaryModal('${targetCounterpartyUidValue}')">
-                    ${APP_STATE.deviceMode === 'phone' ? `<button onclick="event.stopPropagation(); closePhoneConversationOverlayViewBlock()" style="background:none; border:none; color:#fff; font-size:1.1rem; margin-right:4px;">←</button>` : ''}
+                    
+                    <button onclick="event.stopPropagation(); closePhoneConversationOverlayViewBlock()" class="mobile-close-chat-btn" style="background:none; border:none; color:#fff; font-size:1.3rem; margin-right:8px; padding: 0 5px; cursor:pointer;">
+                        ←
+                    </button>
+                    
                     <img src="${counterpartyUserRecord.avatar || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ffffff\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'}" style="width:32px; height:32px;" class="circle-container" alt="User Avatar Image Context">
                     <span style="font-weight:600; font-size:0.9rem;">${counterpartyUserRecord.identityName}</span>
                 </div>
@@ -1915,15 +1924,18 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
             </div>
         `;
     }
-    
+
     refreshMessengerActiveStreamBubblesDisplayList();
 }
 
 function closePhoneConversationOverlayViewBlock() {
+    // 👇 ADD THIS LINE: It removes the overlap view and reveals the chat roster list again
+    document.getElementById("chat-conversation-pane")?.classList.remove("phone-active-thread");
+    
     document.getElementById("chat-conversation-pane").classList.remove("phone-active-thread");
     APP_STATE.activeChatTargetUserHash = null;
     renderUserConversationsLogRoster();
-}
+}    
 
 function refreshMessengerActiveStreamBubblesDisplayList() {
     const streamTargetBoxNode = document.getElementById("chat-bubble-stream-area");
@@ -2281,7 +2293,7 @@ function executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData) {
 }
 
 function executeWipeEntireDialogueLogsHistoryContextChain() {
-    displayConfirmationModalOverlayAction("Are you absolutely sure you want to purge all text rows entries inside this workspace log trace container? This cannot be undone.", () => {
+    displayConfirmationModalOverlayAction("Are you sure you want to clear this chat?", () => {
         const threadIndexId = SYSTEM_DATABASE.chats.findIndex(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
         if(threadIndexId !== -1) {
             SYSTEM_DATABASE.chats[threadIndexId].messageLog = [];
@@ -2407,7 +2419,7 @@ function executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData) {
 }
 
 function executeWipeEntireDialogueLogsHistoryContextChain() {
-    displayConfirmationModalOverlayAction("Are you absolutely sure you want to purge all text rows entries inside this workspace log trace container? This cannot be undone.", () => {
+    displayConfirmationModalOverlayAction("Are you sure you want to clear this chat?", () => {
         const threadIndexId = SYSTEM_DATABASE.chats.findIndex(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
         if(threadIndexId !== -1) {
             SYSTEM_DATABASE.chats[threadIndexId].messageLog = [];
@@ -2448,12 +2460,12 @@ function launchUploadProductPasswordVerificationStep() {
             <label>Active Passsword:</label>
             <input type="password" id="upload-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
             
-            <div class="margin-top-xs">
-                <input type="checkbox" id="chk-upload-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'upload-verify-password')">
-                <label for="chk-upload-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
-            </div>
-            
             <div id="err-upload-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-upload-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'upload-verify-password')">
+            <label for="chk-upload-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
         </div>
 
         <div class="text-center margin-top-xs">
@@ -2790,8 +2802,15 @@ function initializeProfileDetailsAccountManagementFieldsValues() {
  * Enforces current password validation followed by a secure email OTP check before saving mutations.
  */
 
+/**
+ * Profile Edit Multi-step Wizard Management System
+ * Enforces current password validation followed by a secure email OTP check before saving mutations.
+ */
+
 function openProfileEditWizard(targetFieldNameStringTokenKey) {
     const modalTargetNode = document.getElementById("auth-modal-content");
+    if (!modalTargetNode) return;
+
     modalTargetNode.innerHTML = `
         <h3>Validate Account Ownership (Step 1 of 3)</h3>
         <div class="form-input-container margin-top-sm">
@@ -2805,62 +2824,49 @@ function openProfileEditWizard(targetFieldNameStringTokenKey) {
             <label for="chk-signin-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>
         </div>
 
-        <div class="text-center margin-top-xs">
-            <span style="color:var(--fort-blue-light); cursor:pointer; font-size:0.9rem;" onclick="renderForgotPasswordModalWorkflow()">Forgot Password?</span>
-        </div>
-        <br>
-        <div class="btn-group">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
-            <button id="btn-profile-reauth-submit" onclick="executeValidateProfileReauthSessionTokenStep('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Password Phrase</button>
+        <div class="btn-group margin-top-md">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button>
+            <button onclick="executeVerifyProfileReauthCredentialPasswordMatch('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Password</button>
         </div>
     `;
-    document.getElementById("auth-modal").classList.add("active"); 
+    
+    // FIXED CRITICAL MISSING LINK: Added display initialization instructions
+    document.getElementById("auth-modal").classList.add("active");
 }
 
-async function executeValidateProfileReauthSessionTokenStep(targetFieldNameStringTokenKey) {
-    const enteredPass = document.getElementById("profile-reauth-key").value; 
-    const errNode = document.getElementById("err-profile-reauth-msg"); 
-    const submitBtn = document.getElementById("btn-profile-reauth-submit");
-
-    errNode.classList.add("hidden-node");
+function executeVerifyProfileReauthCredentialPasswordMatch(targetFieldNameStringTokenKey) {
+    const enteredPasswordValue = document.getElementById("profile-reauth-key").value;
+    const errorDisplayNode = document.getElementById("err-profile-reauth-msg");
     
-    if(enteredPass !== APP_STATE.currentUser.secretKey) { 
-        errNode.innerText = "Incorrect Password"; 
-        errNode.classList.remove("hidden-node"); 
+    errorDisplayNode.classList.add("hidden-node");
+    if (enteredPasswordValue !== APP_STATE.currentUser.secretKey) {
+        errorDisplayNode.innerText = "Incorrect Password";
+        errorDisplayNode.classList.remove("hidden-node");
         return;
     }
     
-    if (submitBtn) submitBtn.disabled = true;
-
-    // Advance directly to Step 2 (Send dynamic EmailJS OTP)
-    await sendProfileMutationEmailJsOtpWorkflow(targetFieldNameStringTokenKey, true);
+    sendProfileEditWizardEmailJsOtpWorkflow(targetFieldNameStringTokenKey, true);
 }
 
-/**
- * Handles generating, tracking, and executing EmailJS calls for Profile Changes OTP validation.
- * Enforces a daily constraint limit of 5 total sent requests per account.
- */
-async function sendProfileMutationEmailJsOtpWorkflow(targetFieldNameStringTokenKey, isInitialLaunch = false) {
-    const targetEmail = APP_STATE.currentUser.identifierText || APP_STATE.currentUser.email || "";
-    const userNameStr = APP_STATE.currentUser.identityName || "User";
-    const todayKeyStr = "otp_profile_limit_" + new Date().toISOString().split('T')[0] + "_" + targetEmail.toLowerCase();
+async function sendProfileEditWizardEmailJsOtpWorkflow(targetFieldNameStringTokenKey, isInitialLaunch = false) {
+    const targetEmail = APP_STATE.currentUser.identifierText;
+    const todayKeyStr = "profile_otp_limit_" + new Date().toISOString().split('T')[0] + "_" + targetEmail.toLowerCase();
     
     let dailyAttemptsCount = parseInt(localStorage.getItem(todayKeyStr) || "0", 10);
-    
     if (dailyAttemptsCount >= 5) {
         if (!isInitialLaunch) {
-            const feedbackElement = document.getElementById("err-profile-otp-feedback");
+            const feedbackElement = document.getElementById("err-profile-step2-feedback");
             if (feedbackElement) {
-                feedbackElement.innerText = "Maximum daily limit reached. You can only send up to 5 validation OTPs per day.";
+                feedbackElement.innerText = "Maximum daily limit reached. You can only send up to 5 OTPs per day.";
                 feedbackElement.style.color = "red";
                 feedbackElement.classList.remove("hidden-node");
             }
         } else {
-            renderProfileEditOtpVerificationLayout(targetFieldNameStringTokenKey);
+            renderProfileEditWizardStepTwoLayout(targetFieldNameStringTokenKey);
             setTimeout(() => {
-                const feedbackElement = document.getElementById("err-profile-otp-feedback");
+                const feedbackElement = document.getElementById("err-profile-step2-feedback");
                 if (feedbackElement) {
-                    feedbackElement.innerText = "Maximum daily limit reached. You can only send up to 5 validation OTPs per day.";
+                    feedbackElement.innerText = "Maximum daily limit reached. You can only send up to 5 OTPs per day.";
                     feedbackElement.style.color = "red";
                     feedbackElement.classList.remove("hidden-node");
                 }
@@ -2869,20 +2875,16 @@ async function sendProfileMutationEmailJsOtpWorkflow(targetFieldNameStringTokenK
         return;
     }
 
-    // Generate a secure 4-digit token parameters
+    initiateProfileEditOtpResendCooldown(targetFieldNameStringTokenKey);
     const freshGeneratedOtpCode = Math.floor(1000 + Math.random() * 9000);
-    if (!window.SIGNUP_WIZARD_TEMPORARY_OBJECT) {
-        window.SIGNUP_WIZARD_TEMPORARY_OBJECT = {};
-    }
-    SIGNUP_WIZARD_TEMPORARY_OBJECT.activeProfileEditOtp = freshGeneratedOtpCode;
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.profileActiveVerificationOtp = freshGeneratedOtpCode;
 
     dailyAttemptsCount++;
     localStorage.setItem(todayKeyStr, dailyAttemptsCount.toString());
-
     if (!isInitialLaunch) {
-        const feedbackElement = document.getElementById("err-profile-otp-feedback");
+        const feedbackElement = document.getElementById("err-profile-step2-feedback");
         if (feedbackElement) {
-            feedbackElement.innerText = "Sending fresh token key paths...";
+            feedbackElement.innerText = "Sending fresh token...";
             feedbackElement.style.color = "blue";
             feedbackElement.classList.remove("hidden-node");
         }
@@ -2892,241 +2894,238 @@ async function sendProfileMutationEmailJsOtpWorkflow(targetFieldNameStringTokenK
         if (window.emailjs) {
             await window.emailjs.send(
                 "service_ejag5pe", 
-                "template_nzub7tk", 
+                "template_jz0s31e", 
                 {
                     to_email: targetEmail,
-                    user_name: userNameStr,
+                    user_name: APP_STATE.currentUser.identityName,
                     otp_code: freshGeneratedOtpCode
                 }
             );
-            
             if (isInitialLaunch) {
-                renderProfileEditOtpVerificationLayout(targetFieldNameStringTokenKey);
+                renderProfileEditWizardStepTwoLayout(targetFieldNameStringTokenKey);
             } else {
-                const feedbackElement = document.getElementById("err-profile-otp-feedback");
+                const feedbackElement = document.getElementById("err-profile-step2-feedback");
                 if (feedbackElement) {
-                    feedbackElement.innerText = "A new verification code token string has been sent.";
+                    feedbackElement.innerText = "A new verification code has been successfully sent.";
                     feedbackElement.style.color = "green";
+                    feedbackElement.classList.remove("hidden-node");
                 }
             }
         } else {
-            console.warn("EmailJS script structure is missing.");
-            if (isInitialLaunch) renderProfileEditOtpVerificationLayout(targetFieldNameStringTokenKey);
+            console.warn("EmailJS context missing.");
+            if (isInitialLaunch) renderProfileEditWizardStepTwoLayout(targetFieldNameStringTokenKey);
         }
     } catch (sendErr) {
-        console.error("EmailJS profile mutation validation delivery sequence failure:", sendErr);
+        console.error("EmailJS profile update error:", sendErr);
         if (isInitialLaunch) {
-            renderProfileEditOtpVerificationLayout(targetFieldNameStringTokenKey);
+            renderProfileEditWizardStepTwoLayout(targetFieldNameStringTokenKey);
         } else {
-            const feedbackElement = document.getElementById("err-profile-otp-feedback");
+            const feedbackElement = document.getElementById("err-profile-step2-feedback");
             if (feedbackElement) {
-                feedbackElement.innerText = "Failed transmission delivery. Please verify connectivity.";
+                feedbackElement.innerText = "Failed to send code. Please check your network connection.";
                 feedbackElement.style.color = "red";
+                feedbackElement.classList.remove("hidden-node");
             }
         }
     }
 }
 
-function renderProfileEditOtpVerificationLayout(targetFieldNameStringTokenKey) {
+function initiateProfileEditOtpResendCooldown(targetFieldNameStringTokenKey) {
+    if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval) {
+        clearInterval(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval);
+    }
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft = 30;
+
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval = setInterval(() => {
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft--;
+        const resendLinkNode = document.getElementById("profile-otp-resend-link");
+        
+        if (resendLinkNode) {
+            if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft > 0) {
+                resendLinkNode.innerText = `Resend in ${SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft}s`;
+                resendLinkNode.style.opacity = "0.5";
+                resendLinkNode.style.fontWeight = "400";
+                resendLinkNode.style.pointerEvents = "none";
+            } else {
+                resendLinkNode.innerText = "Resend";
+                resendLinkNode.style.opacity = "1";
+                resendLinkNode.style.fontWeight = "600";
+                resendLinkNode.style.pointerEvents = "auto";
+                clearInterval(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval);
+                SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval = null;
+            }
+        } else if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft <= 0) {
+            clearInterval(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval);
+            SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval = null;
+        }
+    }, 1000);
+}
+
+function handleProfileEditOtpResendClickInterception(targetFieldNameStringTokenKey) {
+    if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft > 0) return;
+    sendProfileEditWizardEmailJsOtpWorkflow(targetFieldNameStringTokenKey, false);
+}
+
+function renderProfileEditWizardStepTwoLayout(targetFieldNameStringTokenKey) {
     const modalTargetNode = document.getElementById("auth-modal-content");
-    const targetEmail = APP_STATE.currentUser.identifierText || APP_STATE.currentUser.email || "";
+    const targetEmail = APP_STATE.currentUser.identifierText;
+    const secondsLeft = SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft || 0;
+    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "Resend";
+    const opacityStyle = secondsLeft > 0 ? "0.5" : "1";
+    const weightStyle = secondsLeft > 0 ? "400" : "600";
+    const pointerStyle = secondsLeft > 0 ? "none" : "auto";
 
     modalTargetNode.innerHTML = `
-        <h3>Verify Identity - Security Token (Step 2 of 3)</h3>
-        <p style="font-size:0.92rem; color:var(--fort-blue-dark); line-height: 1.5; margin-top:12px; font-weight: 500;">
-            Enter the OTP sent to ${targetEmail}
+        <h3>Verify Security Profile Identity (Step 2 of 3)</h3>
+        <p style="font-size:0.9rem; margin-top:6px; color:var(--fort-gray-slate);">
+            An identity verification message code was sent to your registered profile email address: ${targetEmail}
         </p>
-        
-        <div class="form-input-container margin-top-sm" style="margin-top:15px;">
-            <label style="font-size:0.82rem; font-weight:700; color:var(--fort-gray-slate);">Input 4-Digit Security Authorization Code:</label>
+
+        <div class="form-input-container margin-top-sm">
+            <label>Input 4-Digit Security OTP Token Key:</label>
             <input type="text" id="profile-otp-input" class="form-field-control" placeholder="X X X X" maxlength="4" style="text-align:center; font-size:1.25rem; letter-spacing:8px;">
-            <div id="err-profile-otp-feedback" class="text-danger-alert hidden-node" style="color: red; font-size: 0.8rem; margin-top: 4px;"></div>
+            <div id="err-profile-step2-feedback" class="text-danger-alert hidden-node" style="color: red; font-size: 0.8rem; margin-top: 4px;"></div>
         </div>
 
         <div style="margin-top: 10px; font-size: 0.85rem;">
             <span>Didn't receive message? </span>
-            <a href="javascript:void(0)" onclick="sendProfileMutationEmailJsOtpWorkflow('${targetFieldNameStringTokenKey}', false)" style="color: #007bff; font-weight: 600; text-decoration: none;">Resend</a>
+            <a href="javascript:void(0)" id="profile-otp-resend-link" onclick="handleProfileEditOtpResendClickInterception('${targetFieldNameStringTokenKey}')" style="color: #007bff; text-decoration:none; font-weight:${weightStyle}; opacity:${opacityStyle}; pointer-events:${pointerStyle};">${textLabel}</a>
         </div>
 
-        <p style="font-size:0.92rem; color:var(--fort-blue-dark); line-height: 1.5; margin-top:12px; font-weight: 500;">
-            Note: If you didn't see the message in your inbox, also check the spam section in your email and tag the email "Not Spam".
-        </p>
-        
-        <div class="btn-group margin-top-lg" style="margin-top: 20px;">
-            <button onclick="openProfileEditWizard('${targetFieldNameStringTokenKey}')" class="btn-gray">Back</button>
-            <button id="btn-profile-finalize-otp" onclick="executeValidateProfileOtpEntryToken('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Code</button>
+        <div class="btn-group margin-top-md">
+            <button onclick="handleClearProfileTimersAndReturnToStepOne('${targetFieldNameStringTokenKey}')" class="btn-gray">Back</button>
+            <button onclick="executeValidateProfileWizardOtpTokenKey('${targetFieldNameStringTokenKey}')" class="btn-blue">Verify Security Code</button>
         </div>
     `;
 }
 
-function executeValidateProfileOtpEntryToken(targetFieldNameStringTokenKey) {
-    const userInputCodeField = document.getElementById("profile-otp-input");
-    const feedbackElement = document.getElementById("err-profile-otp-feedback");
-    
-    if (feedbackElement) {
-        feedbackElement.classList.add("hidden-node");
-        feedbackElement.style.color = "red";
+function handleClearProfileTimersAndReturnToStepOne(targetFieldNameStringTokenKey) {
+    if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval) {
+        clearInterval(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval);
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval = null;
     }
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft = 0;
+    openProfileEditWizard(targetFieldNameStringTokenKey);
+}
 
-    const typedOtpValue = userInputCodeField.value.trim();
-    const systemExpectedValue = String(SIGNUP_WIZARD_TEMPORARY_OBJECT.activeProfileEditOtp || "");
+function executeValidateProfileWizardOtpTokenKey(targetFieldNameStringTokenKey) {
+    const inputVal = document.getElementById("profile-otp-input").value.trim();
+    const feedback = document.getElementById("err-profile-step2-feedback");
+    
+    feedback.classList.add("hidden-node");
+    feedback.style.color = "red";
 
-    if (!typedOtpValue || typedOtpValue !== systemExpectedValue) {
-        if (feedbackElement) {
-            feedbackElement.innerText = "Invalid security verification token matched. Verify entry values.";
-            feedbackElement.classList.remove("hidden-node");
-        }
+    const systemExpected = String(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileActiveVerificationOtp || "");
+    if (!inputVal || inputVal !== systemExpected) {
+        feedback.innerText = "Invalid verification token code expression entry parameter configuration.";
+        feedback.classList.remove("hidden-node");
         return;
     }
 
-    // OTP matches cleanly -> Proceed to configuration payload fields view
-    executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStringTokenKey);
+    if (SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval) {
+        clearInterval(SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval);
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpInterval = null;
+    }
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.profileOtpSecondsLeft = 0;
+
+    renderProfileEditWizardStepThreeFinalModificationInputLayout(targetFieldNameStringTokenKey);
 }
 
-// Temporary variable to track image selections locally during the data edit layout
-let TEMPORARY_PROFILE_AVATAR_DATA_URL = "";
-function executeFinalProfileDataEditCommitStepThreeFormLayout(targetFieldNameStringTokenKey) {
+function renderProfileEditWizardStepThreeFinalModificationInputLayout(targetFieldNameStringTokenKey) {
     const modalTargetNode = document.getElementById("auth-modal-content");
-    let injectionMarkupFormHTML = "";
-    TEMPORARY_PROFILE_AVATAR_DATA_URL = ""; // Reset temporary memory block 
-    
-    if(targetFieldNameStringTokenKey === 'username') { 
-        injectionMarkupFormHTML = `
-            <label>Define New Profile Username:</label>
-            <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.identityName}">
-        `;
-    } else if(targetFieldNameStringTokenKey === 'businessName') { 
-        injectionMarkupFormHTML = `
-            <label>Define New Business Name:</label>
-            <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.businessName || ''}">
-        `;
-    } else if(targetFieldNameStringTokenKey === 'businessInfo') {
-        injectionMarkupFormHTML = `
-            <label>Define New Public Business Summary:</label>
-            <input type="text" id="new-profile-val-field" class="form-field-control" value="${APP_STATE.currentUser.businessInfo || ''}">
-        `;
-    } else if(targetFieldNameStringTokenKey === 'password') { 
-        injectionMarkupFormHTML = `
-            <label>Create New Password:</label>
-            <input type="password" id="new-profile-val-field" class="form-field-control" placeholder="Input New Password Syntax Combo">
-            <label class="margin-top-xs">Re-type Code Syntax to Confirm Structural Convergence Parity Logic Matches:</label>
-            <input type="password" id="new-profile-val-field-confirm" class="form-field-control" placeholder="Confirm New Password Syntax Combo">
-            <div id="err-profile-pass-complex-feedback-lbl" class="text-danger-alert hidden-node" style="color: red; font-size: 0.8rem; margin-top: 4px;"></div>
-        `;
-    } else if(targetFieldNameStringTokenKey === 'avatar') { 
-        const currentAvatarSrc = APP_STATE.currentUser.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230288d1'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
-        injectionMarkupFormHTML = `
-            <label>Change Profile Picture:</label>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 15px 0;">
-                <div class="large-avatar-frame circle-container" style="width: 110px; height: 110px; position: relative; overflow: hidden; border-radius: 50%;">
-                    <img id="profile-edit-wizard-avatar-preview" src="${currentAvatarSrc}" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <input type="file" id="new-profile-avatar-file-input" class="form-field-control" accept=".png, .jpg, .jpeg" onchange="processWizardAvatarFileSelectionDirectly()">
+    let inputFieldTypeLayoutPlaceholderHTML = ``;
+
+    if (targetFieldNameStringTokenKey === 'secretKey') {
+        inputFieldTypeLayoutPlaceholderHTML = `
+            <div class="form-input-container margin-top-sm">
+                <label>Input New Security Password Expression:</label>
+                <input type="password" id="profile-new-value-1" class="form-field-control" placeholder="New structural value">
             </div>
-            <input type="hidden" id="new-profile-val-field" value="AVATAR_MUTATION_TOKEN">
+            <div class="form-input-container">
+                <label>Confirm Entry Configuration Parameters Match:</label>
+                <input type="password" id="profile-new-value-2" class="form-field-control" placeholder="Retype expression code configurations">
+            </div>
+        `;
+    } else {
+        const structuralDisplayLabelText = targetFieldNameStringTokenKey === 'identityName' ?
+            'Personal Full Name Context' : 
+            (targetFieldNameStringTokenKey === 'businessName' ? 'Business Trading Enterprise Title' : 'Business Strategy Description Information Portfolio Summary Statement');
+        inputFieldTypeLayoutPlaceholderHTML = `
+            <div class="form-input-container margin-top-sm">
+                <label>Modify ${structuralDisplayLabelText}:</label>
+                <input type="text" id="profile-new-value-1" class="form-field-control" value="${APP_STATE.currentUser[targetFieldNameStringTokenKey] || ''}" placeholder="Enter updated field text value mappings">
+            </div>
         `;
     }
-    
+
     modalTargetNode.innerHTML = `
-        <h3>Modify Profile Parameters Node Log - Commit Data Value Mutation (Step 3 of 3)</h3>
-        <div class="form-input-container margin-top-md">
-            ${injectionMarkupFormHTML}
+        <h3>Commit Field Mutations (Step 3 of 3)</h3>
+        <div id="profile-mutation-fields-context-node-target">
+            ${inputFieldTypeLayoutPlaceholderHTML}
+            <div id="err-profile-step3-feedback" class="text-danger-alert hidden-node" style="color: red; font-size: 0.8rem; margin-top: 4px;"></div>
         </div>
-        <div class="btn-group" style="margin-top: 15px;">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Discard Mutation</button>
-            <button onclick="executePipelineSaveFinalProfileFieldsValuesChanges('${targetFieldNameStringTokenKey}')" class="btn-blue">Commit System Database Save</button> 
+
+        <div class="btn-group margin-top-md">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button>
+            <button onclick="executeSaveProfileWizardModificationsToDatabase('${targetFieldNameStringTokenKey}')" class="btn-blue">Save Changes</button>
         </div>
     `;
 }
 
-function processWizardAvatarFileSelectionDirectly() {
-    const fileNode = document.getElementById("new-profile-avatar-file-input");
-    if(fileNode && fileNode.files && fileNode.files[0]) { 
-        const readerInstance = new FileReader();
-        readerInstance.onload = function(e) { 
-            TEMPORARY_PROFILE_AVATAR_DATA_URL = e.target.result;
-            const previewImageElement = document.getElementById("profile-edit-wizard-avatar-preview"); 
-            if(previewImageElement) { 
-                previewImageElement.src = e.target.result;
-            }
-        };
-        readerInstance.readAsDataURL(fileNode.files[0]); 
+function executeSaveProfileWizardModificationsToDatabase(targetFieldNameStringTokenKey) {
+    const val1 = document.getElementById("profile-new-value-1").value.trim();
+    const errorNode = document.getElementById("err-profile-step3-feedback");
+    errorNode.classList.add("hidden-node");
+    if (!val1) {
+        errorNode.innerText = "Structural modifications field expression cannot post blank spaces updates tokens.";
+        errorNode.classList.remove("hidden-node");
+        return;
     }
-}
 
-function executePipelineSaveFinalProfileFieldsValuesChanges(targetFieldNameStringTokenKey) {
-    const inputPrimaryElement = document.getElementById("new-profile-val-field");
-    let targetCoreMutationStringValueValue = inputPrimaryElement ? inputPrimaryElement.value.trim() : ""; 
-    
-    // Strict intercept validation tracking metrics scopes for password complex structure criteria assertions rules values
-    if(targetFieldNameStringTokenKey === 'password') { 
-         const p2 = document.getElementById("new-profile-val-field-confirm").value;
-         const errLabel = document.getElementById("err-profile-pass-complex-feedback-lbl"); 
-         errLabel.classList.add("hidden-node"); 
-         
-         if(targetCoreMutationStringValueValue !== p2) { 
-             errLabel.innerText = "Entry verification parity error discovery matches logic syntax profiles fields values checks loops configurations models.";
-             errLabel.classList.remove("hidden-node"); 
-             return; 
-         }
-         
-         if(targetCoreMutationStringValueValue.length < 6 || !/[A-Z]/.test(targetCoreMutationStringValueValue) || !/[a-z]/.test(targetCoreMutationStringValueValue) || !/[0-9]/.test(targetCoreMutationStringValueValue) || !/[^A-Za-z0-9]/.test(targetCoreMutationStringValueValue)) { 
-             errLabel.innerText = "Any password created should have at least one uppercase letter, one lowercase letter, one symbol, one number and should be at least six characters.";
-             errLabel.classList.remove("hidden-node"); 
-             return; 
-         }
-    }
-    
-    if(targetFieldNameStringTokenKey === 'avatar') { 
-        if(TEMPORARY_PROFILE_AVATAR_DATA_URL === "") { 
-            alert("Field value entry parameter constraints validation alert: Please browse and select a valid profile picture file framework first.");
+    if (targetFieldNameStringTokenKey === 'secretKey') {
+        const val2 = document.getElementById("profile-new-value-2").value.trim();
+        if (val1 !== val2) {
+            errorNode.innerText = "Password mismatch configuration parameter error mapping tracking metrics discovered.";
+            errorNode.classList.remove("hidden-node");
             return;
         }
-        targetCoreMutationStringValueValue = TEMPORARY_PROFILE_AVATAR_DATA_URL;
-    }
-    
-    if(targetCoreMutationStringValueValue === "") { 
-        alert("Field value entry parameter constraints validation alert: Mutation cannot accept blank structural values mappings data sets logs expressions attributes.");
-        return; 
-    }
-    
-    // Apply core localized data mutation mappings sets indices updates safely directly inside target data baseline arrays frameworks models keys pointers
-    const targetedUserIndexId = SYSTEM_DATABASE.users.findIndex(u => u.uid === APP_STATE.currentUser.uid);
-    if(targetedUserIndexId !== -1) { 
-        if(targetFieldNameStringTokenKey === 'username') SYSTEM_DATABASE.users[targetedUserIndexId].identityName = targetCoreMutationStringValueValue;
-        else if(targetFieldNameStringTokenKey === 'businessName') SYSTEM_DATABASE.users[targetedUserIndexId].businessName = targetCoreMutationStringValueValue; 
-        else if(targetFieldNameStringTokenKey === 'businessInfo') SYSTEM_DATABASE.users[targetedUserIndexId].businessInfo = targetCoreMutationStringValueValue;
-        else if(targetFieldNameStringTokenKey === 'password') {
-            SYSTEM_DATABASE.users[targetedUserIndexId].secretKey = targetCoreMutationStringValueValue; 
-            SYSTEM_DATABASE.users[targetedUserIndexId].password = targetCoreMutationStringValueValue; 
+        if (val1.length < 6 || !/[A-Z]/.test(val1) || !/[a-z]/.test(val1) || !/[0-9]/.test(val1) || !/[^A-Za-z0-9]/.test(val1)) {
+            errorNode.innerText = "Any password created should have at least one uppercase letter, one lowercase letter, one symbol, one number and should be at least six characters.";
+            errorNode.classList.remove("hidden-node");
+            return;
         }
-        else if(targetFieldNameStringTokenKey === 'avatar') SYSTEM_DATABASE.users[targetedUserIndexId].avatar = targetCoreMutationStringValueValue;
-        
-        // Push structural administrative telemetry notification broadcast logging alert strings entries loop directly maps context thread channels structures parameters
+    }
+
+    const targetedUserIndexId = SYSTEM_DATABASE.users.findIndex(u => u.uid === APP_STATE.currentUser.uid);
+    if (targetedUserIndexId !== -1) {
+        SYSTEM_DATABASE.users[targetedUserIndexId][targetFieldNameStringTokenKey] = val1;
+        if (targetFieldNameStringTokenKey === 'secretKey') {
+            SYSTEM_DATABASE.users[targetedUserIndexId].password = val1;
+        }
+
         const automatedTelemetryLogEntryNotificationNodeValue = {
-            mid: "telemetry_sys_" + Date.now(),
+            mid: "telemetry_" + Date.now(),
             senderUid: "admin",
-            text: `[System Core Parameters Administrative Mutation Notification Broadcast Tracker Event Log Alert]: Security credential variables field pointer parameter "${targetFieldNameStringTokenKey}" value statement modified successfully on active execution logs registers maps frameworks tracking.`, 
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+            text: `[Profile Edit Notification]: Security credential variables field pointer parameter "${targetFieldNameStringTokenKey}" value updated successfully.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: "bold-double"
         };
-        let existingSystemAdminThreadNodePointerIndex = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes("admin"));
-        if(existingSystemAdminThreadNodePointerIndex) {
-            existingSystemAdminThreadNodePointerIndex.messageLog.push(automatedTelemetryLogEntryNotificationNodeValue);
+        
+        let existingSystemAdminThreadNodePointerIndex = SYSTEM_DATABASE.chats.find(c => 
+            c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes("admin")
+        );
+        if (existingSystemAdminThreadNodePointerIndex) {
+            existingSystemAdminThreadNodePointerIndex.messageLog.push(automatedTelemetryLogEntryNotificationNodeNodeValue || automatedTelemetryLogEntryNotificationNodeValue);
         }
-        
-        // Sync working system memory caches directly back downstream into browser tracking mechanisms structures layers fields context
+
         APP_STATE.currentUser = SYSTEM_DATABASE.users[targetedUserIndexId];
-        syncPlatformDatabaseStateToWebStorage(); 
-        
-        // Closes the modal window framework directly
-        closeActiveModalDirectly('auth-modal'); 
-        
-        // Rerender all layout placeholders across the application instantly
+        syncPlatformDatabaseStateToWebStorage();
+
+        closeActiveModalDirectly('auth-modal');
         if (typeof initializeProfileDetailsAccountManagementFieldsValues === "function") {
             initializeProfileDetailsAccountManagementFieldsValues();
         }
-        
+
         alert("Changes made successfully");
     }
 }
@@ -3160,7 +3159,7 @@ function renderAccountInventoryLedgerManagementDashboardGrid() {
                 <img src="${item.coverPhoto}" style="width:40px; height:40px; object-fit:cover;" class="rounded-rect" alt="Thumb">
                 <div>
                     <h5 style="font-weight:700; color:var(--fort-blue-dark);">${item.name}</h5>
-                    <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Category Vector Pointer Struct: ${item.category} | Analytics Metrics Impression Counter Hits Score Indicator Value: ${item.clickCount || 0} hits</span>
+                    <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Category: ${item.category} | Analytics Metrics Hits Counter Value: ${item.clickCount || 0} hits</span>
                 </div>
             </div>
             <div style="display:flex; gap:8px;">
@@ -3190,12 +3189,12 @@ function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueS
             <label>Active Password:</label>
             <input type="password" id="edit-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
             
-            <div class="margin-top-xs">
-                <input type="checkbox" id="chk-edit-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'edit-verify-password')">
-                <label for="chk-edit-showpass" style="font-size:0.85rem; font-weight:400;">Show Password</label>
-            </div>
-            
             <div id="err-edit-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-edit-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'edit-verify-password')">
+            <label for="chk-edit-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
         </div>
 
         <div class="text-center margin-top-xs">
@@ -3372,12 +3371,12 @@ function displayConfirmationModalOverlayAction(messageStringText, callbackFuncti
             <label style="font-weight: 700; font-size: 0.85rem; color: var(--fort-blue-dark);">Confirm Password:</label>
             <input type="password" id="delete-verify-password" class="form-field-control" placeholder="Enter password to authorize permanent deletion" style="margin-top: 6px; width: 100%; box-sizing: border-box; padding: 6px;">
             
-            <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
-                <input type="checkbox" id="chk-delete-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'delete-verify-password')">
-                <label for="chk-delete-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>
-            </div>
-            
             <div id="err-delete-reauth-msg" class="text-danger-alert" style="color: red; font-size: 0.8rem; margin-top: 6px; display: none;">Incorrect Password Phrase</div>
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-delete-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'delete-verify-password')">
+            <label for="chk-delete-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
         </div>
     `;
 
@@ -3629,8 +3628,7 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
             
             <div class="margin-top-sm" style="display:flex; flex-direction:column; gap:8px;">
                  ${administrativeControlsInlineHTML}
-                 <p style="font-size:0.85rem; color:var(--fort-gray-slate); font-weight:600; margin-top:2px;">Origin Country Routing Address Context: <span style="color:var(--fort-blue-dark);">${targetUserObjMatchRecord.country || 'N/A'} (${targetUserObjMatchRecord.dialingCode || ''})</span></p>
-                 <p style="font-size:0.85rem; color:var(--fort-gray-slate); font-weight:600; margin-top:2px;">Platform Runtime Dynamic Network Presence Operational Baseline: <span style="color:var(--fort-green-check); font-weight:700;">Active Online Presence Parameter Baseline Sync Pulse Ready</span></p>
+                 <p style="font-size:0.85rem; color:var(--fort-gray-slate); font-weight:600; margin-top:2px;">Country (Dailing Code): <span style="color:var(--fort-blue-dark);">${targetUserObjMatchRecord.country || 'N/A'} (${targetUserObjMatchRecord.dialingCode || ''})</span></p>
                  ${subAccountClassificationMetadataDetailsBlockHTML}
             </div>
             
