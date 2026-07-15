@@ -19,6 +19,16 @@
 </head>
 <body class="mode-laptop">
 
+    <div id="preloader-container">
+        <img src="fort mart logo.png" alt="Fort Mart Logo" class="preloader-logo">
+        
+        <div class="progress-meter-container">
+            <div id="preloader-progress-bar" class="progress-meter-bar"></div>
+        </div>
+        
+        <div id="preloader-percentage-text" class="preloader-text">Loading 0%</div>
+    </div>
+
     <!-- Universal Custom Modal Alert Hook Target Box Container Context Matrix Grid Element -->
     <div id="alert-modal-hook-element" class="modal-overlay">
         <div class="modal-box rounded-rect text-center">
@@ -87,7 +97,7 @@
                     <img id="drawer-user-avatar-frame-node" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>" alt="document.getElementById("drawer-user-avatar)">
                     <div style="overflow: hidden;">
                         <h4 id="drawer-user-identity-fullname-lbl" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fort-blue-dark); font-weight: 700;">Guest Terminal Node</h4>
-                        <span id="drawer-user-classification-badge-lbl" class="profile-mode-tag-label personal">Offline Sandbox Mode</span>
+                        <span id="drawer-user-classification-badge-lbl" class="profile-mode-tag-label personal">Logged Out (Guest)</span>
                     </div>
                 </div>
                 <ul class="drawer-links">
@@ -96,6 +106,9 @@
                     <li id="nav-item-my-account" onclick="navigateToPage('my-account')">⚙️ My Account Settings</li>
                     <li id="admin-nav-item" class="hidden-admin-node" onclick="navigateToPage('admin-dashboard')">🛡️ Admin Dashboard</li>
                     <br>
+                    <div id="justForButton" class="drawer-links-three">
+                        <button id="changeable-logout-btn" onclick="doubleButtonFunction()" class="btn-blue">Sign in</button>
+                    </div>
                     <button onclick="toggleSideDrawer()" class="btn-gray">Close</button>
                 </ul>
             </nav>
@@ -295,7 +308,7 @@
                                             <div class="section-content-wrapper-fortdev website-section-layout">
                                                 <div class="website-meta-side">
                                                     <div class="large-avatar-frame-fortdev rounded-rect">
-                                                        <img src="fort logo.png" alt="Fort Mart Logo">
+                                                        <img src="Fort Logo Circle Cropped.png" alt="Fort Mart Logo">
                                                     </div>
                                                     <div class="website-info-block-fortdev">
                                                         <div class="header-inline-edit-row-fortdev">
@@ -314,7 +327,7 @@
                                             <div class="section-content-wrapper-fortdev website-section-layout">
                                                 <div class="website-meta-side">
                                                     <div class="large-avatar-frame-fortdev rounded-rect">
-                                                        <img src="fort logo.png" alt="Fort Logo">
+                                                        <img src="Fort Logo Circle Cropped.png" alt="Fort Logo">
                                                     </div>
                                                     <div class="website-info-block-fortdev">
                                                         <div class="header-inline-edit-row-fortdev">

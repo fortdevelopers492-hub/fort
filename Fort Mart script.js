@@ -475,6 +475,7 @@ function finalizeSuccessfulAuthenticationSequence(accountRecordMatch) {
     }
 
     syncDrawerGuestTerminalNodeToActiveUser();
+    changelogoutosignupviceVersa();
     
     // Launch Success Overlay Greeting Box
     const welcomeModal = document.getElementById("welcome-modal");
@@ -575,6 +576,12 @@ function renderSignUpModalWizardStepTwo() {
             </div>
             <div class="form-input-container">
                 <label>Upload Profile Picture (Optional):</label>
+                <div class="form-input-container-image">
+                    <div class="preview-box" style="min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-bottom: 10px;">
+                        <span id="placeholderTextimg-signup">No image selected</span>
+                        <img id="imagePreview-signup" alt="Image Preview" style="max-width: 100%; max-height: 200px; display: none;">
+                    </div>
+                </div>
                 <input type="file" id="reg-avatar-file" class="form-field-control" accept=".png, .jpg, .jpeg" onchange="processSignUpAvatarFileSelection()">
             </div>
             <div id="err-reg-step2-feedback" class="text-danger-alert hidden-node">Input all information properly</div>
@@ -586,6 +593,7 @@ function renderSignUpModalWizardStepTwo() {
         </div>
     `;
     SIGNUP_WIZARD_TEMPORARY_OBJECT.avatar = ""; 
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = false;
     validateSignUpStepTwoDataFormCompleteness();
 }
 
@@ -599,6 +607,12 @@ function toggleSignUpStepTwoClassificationFormsLayout(selectedClassificationType
             </div>
             <div class="form-input-container">
                 <label>Upload Profile Picture (Optional):</label>
+                <div class="form-input-container-image">
+                    <div class="preview-box" style="min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-bottom: 10px;">
+                        <span id="placeholderTextimg-signup">No image selected</span>
+                        <img id="imagePreview-signup" alt="Image Preview" style="max-width: 100%; max-height: 200px; display: none;">
+                    </div>
+                </div>
                 <input type="file" id="reg-avatar-file" class="form-field-control" accept=".png, .jpg, .jpeg" onchange="processSignUpAvatarFileSelection()">
             </div>
             <div id="err-reg-step2-feedback" class="text-danger-alert hidden-node">Input all information properly</div>
@@ -623,23 +637,69 @@ function toggleSignUpStepTwoClassificationFormsLayout(selectedClassificationType
             </div>
             <div class="form-input-container">
                 <label>Upload Profile Picture (Optional):</label>
+                <div class="form-input-container-image">
+                    <div class="preview-box" style="min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-bottom: 10px;">
+                        <span id="placeholderTextimg-signup">No image selected</span>
+                        <img id="imagePreview-signup" alt="Image Preview" style="max-width: 100%; max-height: 200px; display: none;">
+                    </div>
+                </div>
                 <input type="file" id="reg-avatar-file" class="form-field-control" accept=".png, .jpg, .jpeg" onchange="processSignUpAvatarFileSelection()">
             </div>
             <div id="err-reg-step2-feedback" class="text-danger-alert hidden-node">Input all information properly</div>
         `;
     }
     SIGNUP_WIZARD_TEMPORARY_OBJECT.avatar = ""; 
+    SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = false;
     validateSignUpStepTwoDataFormCompleteness();
 }
 
 function processSignUpAvatarFileSelection() {
     const fileNode = document.getElementById("reg-avatar-file");
-    if(fileNode && fileNode.files && fileNode.files[0]) {
+    const placeholder = document.getElementById("placeholderTextimg-signup");
+    const preview = document.getElementById("imagePreview-signup");
+
+    if (fileNode && fileNode.files && fileNode.files[0]) {
+        // Step A: Flag that we've started reading the selected file.
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = true;
+        validateSignUpStepTwoDataFormCompleteness(); // This disables and lightens the Next button instantly
+
         const readerInstance = new FileReader();
+        
         readerInstance.onload = function(e) {
+            // Step B: Set the preview image source, make it visible, and hide placeholder text.
+            if (preview) {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+            }
+            if (placeholder) {
+                placeholder.style.display = "none";
+            }
+            
+            // Step C: Complete registration tracking and clear wait locks.
             SIGNUP_WIZARD_TEMPORARY_OBJECT.avatar = e.target.result;
+            SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = false;
+            validateSignUpStepTwoDataFormCompleteness(); // Re-evaluate and release the Next button lock
         };
+
+        readerInstance.onerror = function() {
+            // Reset read state if file loading errors out.
+            SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = false;
+            validateSignUpStepTwoDataFormCompleteness();
+        };
+
         readerInstance.readAsDataURL(fileNode.files[0]);
+    } else {
+        // If file input was cleared, revert preview boxes to default.
+        if (preview) {
+            preview.src = "";
+            preview.style.display = "none";
+        }
+        if (placeholder) {
+            placeholder.style.display = "block";
+        }
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.avatar = "";
+        SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading = false;
+        validateSignUpStepTwoDataFormCompleteness();
     }
 }
 
@@ -648,6 +708,13 @@ function validateSignUpStepTwoDataFormCompleteness() {
     const nextBtn = document.getElementById("btn-signup-step2-next");
     const personalNameInput = document.getElementById("reg-personal-name") ? document.getElementById("reg-personal-name").value.trim() : "";
     
+    // Core check: If the FileReader is currently working, keep nextBtn disabled & faintly colored
+    if (SIGNUP_WIZARD_TEMPORARY_OBJECT.isAvatarReading) {
+        nextBtn.disabled = true;
+        nextBtn.classList.add("faintly-colored");
+        return;
+    }
+
     if(currentType === 'personal') {
         if(personalNameInput.length > 1) {
             nextBtn.disabled = false;
@@ -781,13 +848,11 @@ async function sendSignUpEmailJsOtpWorkflow(isInitialLaunch = false) {
 
     // Trigger visual/logical 30-second resend cooldown block on successful checks
     initiateSignUpOtpResendCooldown();
-
     const freshGeneratedOtpCode = Math.floor(1000 + Math.random() * 9000);
     SIGNUP_WIZARD_TEMPORARY_OBJECT.activeVerificationOtp = freshGeneratedOtpCode;
 
     dailyAttemptsCount++;
     localStorage.setItem(todayKeyStr, dailyAttemptsCount.toString());
-
     if (!isInitialLaunch) {
         const feedbackElement = document.getElementById("err-reg-step4-feedback");
         if (feedbackElement) {
@@ -883,10 +948,9 @@ function handleSignUpOtpResendActionClickInterception() {
 function renderSignUpModalWizardStepFour() {
     const wrapperTargetNode = document.getElementById("auth-modal-content");
     const maskedTargetEmail = SIGNUP_WIZARD_TEMPORARY_OBJECT.identifierText;
-    
     // Evaluate cooldown details to sustain layout state seamlessly on rendering
     const secondsLeft = SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft || 0;
-    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "resend";
+    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "Resend";
     const opacityStyle = secondsLeft > 0 ? "0.5" : "1";
     const weightStyle = secondsLeft > 0 ? "400" : "600";
     const pointerEventsStyle = secondsLeft > 0 ? "none" : "auto";
@@ -956,7 +1020,6 @@ function executeFinalizeAccountRegistrationPipelineSubmission() {
         SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpInterval = null;
     }
     SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft = 0;
-
     const finalNewUserRecord = {
         uid: "user_" + Date.now(),
         identityName: SIGNUP_WIZARD_TEMPORARY_OBJECT.identityName,
@@ -1299,7 +1362,7 @@ function executeCommitNewPasswordToSystemDatabase() {
  * Product Discovery Inventory Pipeline Management Loop & Search Filter Subsystem Engine Modules
  */
 function buildCategoryRibbonFilterInterfaceElements() {
-    const structuralCategoryListArray = ["Trending", "Electrical Appliances", "Mobile Devices & Computers", "Home Furniture", "Fashion Clothing Apparel", "Automotive Parts & Engines", "Others"];
+    const structuralCategoryListArray = ["Trending", "Electrical Appliances", "Mobile Devices & Computers", "Home Furniture", "Fashion Clothing Apparel", "Automotive Parts & Engines","Beauty & Personal Care", "Sports, Fitness and Outdoors", "Groceries & Essentials", "Others"];
     const targetsWrapperNode = document.getElementById("category-items-container");
     targetsWrapperNode.innerHTML = "";
     
@@ -1805,7 +1868,6 @@ function renderUserConversationsLogRoster() {
         };
         return getLatestMessageTimeToken(b) - getLatestMessageTimeToken(a);
     });
-
     if(computedMatchingDialoguesArray.length === 0 && APP_STATE.currentUser.uid !== 'admin') {
         logContainerTargetNode.innerHTML = `<div class="text-center" style="padding:20px; color:var(--fort-gray-slate); font-size:0.85rem;"><p>No active history logs tracking conversation threads instances detected within specified regional parameters profile databases.</p></div>`;
         return;
@@ -1831,10 +1893,14 @@ function renderUserConversationsLogRoster() {
             if(!structuralLabelDisplayExpressionString.toLowerCase().includes(APP_STATE.searchQuery)) return;
         }
         
-        const lastMessageLogEntry = thread.messageLog[thread.messageLog.length - 1];
+        // Find last message not cleared or deleted by the user for list preview mapping
+        const validUserLog = thread.messageLog.filter(msg => !msg.deletedBy || !msg.deletedBy.includes(APP_STATE.currentUser.uid));
+        const lastMessageLogEntry = validUserLog[validUserLog.length - 1];
         let previewTextLineString = "Click thread node to initiate workspace session.";
         if (lastMessageLogEntry) {
-            if (lastMessageLogEntry.isFile) {
+            if (lastMessageLogEntry.isDeletedForAll) {
+                previewTextLineString = "This message was deleted";
+            } else if (lastMessageLogEntry.isFile) {
                 if (lastMessageLogEntry.isImage) previewTextLineString = `📷 [Image] ${lastMessageLogEntry.text}`;
                 else if (lastMessageLogEntry.isVideo) previewTextLineString = `🎥 [Video] ${lastMessageLogEntry.text}`;
                 else previewTextLineString = `📁 [File] ${lastMessageLogEntry.text}`;
@@ -1891,17 +1957,15 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
     document.getElementById("chat-pane-empty-notice").classList.add("hidden-node");
     const activeWorkspaceBlockNode = document.getElementById("chat-pane-active-view");
     activeWorkspaceBlockNode.classList.remove("hidden-node");
-    
-    // 👇 ADD THIS LINE: It tells the pane to overlap the list on smaller devices
     document.getElementById("chat-conversation-pane")?.classList.add("phone-active-thread");
-    
     if(APP_STATE.deviceMode === 'phone') {
          document.getElementById("chat-conversation-pane").classList.add("phone-active-thread");
     }
 
     const targetToolbarNodeElement = document.getElementById("chat-window-top-toolbar");
     if (targetCounterpartyUidValue === 'broadcast_personal' || targetCounterpartyUidValue === 'broadcast_business') {
-        const headlineLabel = targetCounterpartyUidValue === 'broadcast_personal' ? 'Broadcast to All Personal Accounts' : 'Broadcast to All Business Accounts';
+        const headlineLabel = targetCounterpartyUidValue === 'broadcast_personal' ?
+            'Broadcast to All Personal Accounts' : 'Broadcast to All Business Accounts';
         targetToolbarNodeElement.innerHTML = `
             <div style="display:flex; align-items:center; gap:10px; width:100%; justify-content:space-between; background-color: #2c5282; color:var(--fort-white-pure); padding:8px 14px;" class="rounded-rect">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -1914,11 +1978,9 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
         targetToolbarNodeElement.innerHTML = `
             <div style="display:flex; align-items:center; gap:10px; width:100%; justify-content:space-between; background-color: var(--fort-blue-primary); color:var(--fort-white-pure); padding:8px 14px;" class="rounded-rect">
                 <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="launchDetailedUserProfileContextOverlaySummaryModal('${targetCounterpartyUidValue}')">
-                    
                     <button onclick="event.stopPropagation(); closePhoneConversationOverlayViewBlock()" class="mobile-close-chat-btn" style="background:none; border:none; color:#fff; font-size:1.3rem; margin-right:8px; padding: 0 5px; cursor:pointer;">
                         ←
                     </button>
-                    
                     <img src="${counterpartyUserRecord.avatar || 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ffffff\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'}" style="width:32px; height:32px;" class="circle-container" alt="User Avatar Image Context">
                     <span style="font-weight:600; font-size:0.9rem;">${counterpartyUserRecord.identityName}</span>
                 </div>
@@ -1933,9 +1995,7 @@ function activateMessengerConversationWorkspaceSessionBlock(targetCounterpartyUi
 }
 
 function closePhoneConversationOverlayViewBlock() {
-    // 👇 ADD THIS LINE: It removes the overlap view and reveals the chat roster list again
     document.getElementById("chat-conversation-pane")?.classList.remove("phone-active-thread");
-    
     document.getElementById("chat-conversation-pane").classList.remove("phone-active-thread");
     APP_STATE.activeChatTargetUserHash = null;
     renderUserConversationsLogRoster();
@@ -1964,11 +2024,15 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
         if (msg.deletedBy && msg.deletedBy.includes(APP_STATE.currentUser.uid)) return;
 
         const outboundFlagCondition = msg.senderUid === APP_STATE.currentUser.uid;
+        const failedTransmissionFlag = msg.status === 'failed';
+        
         const bubbleWrapperElementNode = document.createElement("div");
-        bubbleWrapperElementNode.className = `chat-bubble-node rounded-rect ${outboundFlagCondition ? 'outgoing-msg' : 'incoming-msg'}`;
+        // Inject failed structural state layout rules
+        bubbleWrapperElementNode.className = `chat-bubble-node rounded-rect ${outboundFlagCondition ? 'outgoing-msg' : 'incoming-msg'} ${failedTransmissionFlag ? 'transmission-failed-node' : ''}`;
         
         let dynamicTicksLayoutHTML = "";
-        if(outboundFlagCondition) {
+        // Do not render status indicators if the message payload has been globally purged or failed delivery checks
+        if(outboundFlagCondition && !msg.isDeletedForAll && !failedTransmissionFlag) {
             if(msg.status === 'bold-double') {
                 dynamicTicksLayoutHTML = `<span class="tick-mark-node seen">✓✓</span>`;
             } else if(msg.status === 'double') {
@@ -1981,7 +2045,9 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
         let bodyLayoutHTML = "";
         let downloadControlHTML = "";
         
-        if (msg.isFile) {
+        if (msg.isDeletedForAll) {
+            bodyLayoutHTML = `<p style="word-break:break-word; font-style:italic; opacity:0.75;">This message was deleted</p>`;
+        } else if (msg.isFile) {
             if (msg.isImage) {
                 bodyLayoutHTML = `
                     <div style="display: block;">
@@ -1990,19 +2056,16 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
                     </div>
                 `;
             } else if (msg.isVideo) {
-                // Video preview uses a standard HTML5 video block displaying a single locked timeline clip layout.
-                // The controls attribute is stripped and a pointer-events overlay prevents playback without manual download hook triggers.
                 bodyLayoutHTML = `
                     <div style="display: block; position: relative; max-width: 240px; border-radius: 6px; overflow: hidden; background: #000; margin-bottom: 4px;">
                         <video src="${msg.fileData}" style="width: 100%; height: auto; display: block; pointer-events: none;" preload="metadata"></video>
                         <div style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.35);">
                             <span style="font-size: 2rem; color: #fff; opacity: 0.85;">▶</span>
                         </div>
-                    </div>
+                     </div>
                     <p style="word-break:break-word; font-size:0.78rem; color:inherit; opacity:0.85; margin:0; display:flex; align-items:center; gap:4px;">🎥 ${msg.text}</p>
                 `;
             } else {
-                // Documents layout file type resolution mapping engine matching criteria parameters rules
                 let documentBadgeSVGHTML = "";
                 const absoluteFileExtensionToken = msg.text.split('.').pop().toLowerCase();
                 
@@ -2031,15 +2094,34 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
                     </div>
                 `;
             }
-            downloadControlHTML = `<button class="msg-action-btn" onclick="executeMessageFileDownloadTracker('${msg.mid}')">📥 Download</button>`;
+            if (!failedTransmissionFlag) {
+                downloadControlHTML = `<button class="msg-action-btn" onclick="executeMessageFileDownloadTracker('${msg.mid}')">📥 Download</button>`;
+            }
         } else {
             bodyLayoutHTML = `<p style="word-break:break-word;">${msg.text}</p>`;
         }
         
-        // --- FEATURE: DELETE FOR ALL VISIBILITY CHECK ---
+        // --- FEATURE: PURGE CONTROLS WITH VALIDITY RUNTIME EVALUATION ---
         let deleteForAllControlHTML = "";
-        if (outboundFlagCondition) {
+        let retryControlHTML = "";
+        
+        if (failedTransmissionFlag) {
+            retryControlHTML = `<button class="msg-action-btn" style="color:#e53e3e; font-weight:700;" onclick="executeRetryMessageTransmissionPipeline('${msg.mid}')">🔄 Retry</button>`;
+        } else if (outboundFlagCondition && !msg.isDeletedForAll) {
             deleteForAllControlHTML = `<button class="msg-action-btn" style="color:#c53030; font-weight:700;" onclick="executeSelectedBubbleMessagePurgeForAll('${msg.mid}')">💥 Delete for All</button>`;
+        }
+        
+        let actionControlsMenuHTML = "";
+        if (!msg.isDeletedForAll) {
+            actionControlsMenuHTML = `
+                <div class="msg-hover-actions">
+                    ${retryControlHTML}
+                    <button class="msg-action-btn" onclick="executeMessageTextCopyClipboard('${msg.mid}')">📋 Copy</button>
+                    ${downloadControlHTML}
+                    <button class="msg-action-btn" style="color:#9b2c2c;" onclick="executeSelectedBubbleMessagePurge('${msg.mid}')">🗑️ Delete</button>
+                    ${deleteForAllControlHTML}
+                </div>
+            `;
         }
         
         bubbleWrapperElementNode.innerHTML = `
@@ -2049,12 +2131,7 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
                 <span>${msg.Date || ''}</span>
                 ${dynamicTicksLayoutHTML}
             </div>
-            <div class="msg-hover-actions">
-                <button class="msg-action-btn" onclick="executeMessageTextCopyClipboard('${msg.mid}')">📋 Copy</button>
-                ${downloadControlHTML}
-                <button class="msg-action-btn" style="color:#9b2c2c;" onclick="executeSelectedBubbleMessagePurge('${msg.mid}')">🗑️ Delete</button>
-                ${deleteForAllControlHTML}
-            </div>
+            ${actionControlsMenuHTML}
         `;
         streamTargetBoxNode.appendChild(bubbleWrapperElementNode);
     });
@@ -2082,15 +2159,37 @@ function sendChatMessageDirect() {
     
     const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
     if(operationalThreadRecordData) {
-        operationalThreadRecordData.messageLog.push({
+        // Simulating error flags toggle rule for development evaluation testing environments
+        // To verify the failed state, you can manually push objects with status: "failed"
+        const generatedMessageInstance = {
             mid: "m_" + Date.now(),
             senderUid: APP_STATE.currentUser.uid,
             text: enteredMessageTextString,
             timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', hour: '2-digit', minute: '2-digit' }),
             status: "single"
-        });
+        };
+        
+        operationalThreadRecordData.messageLog.push(generatedMessageInstance);
         textInputNodeElement.value = "";
-        renderUserConversationsLogRoster(); // Re-render target ledger layout row order arrays
+        renderUserConversationsLogRoster();
+        refreshMessengerActiveStreamBubblesDisplayList();
+        syncPlatformDatabaseStateToWebStorage();
+        
+        executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData);
+    }
+}
+
+// --- FEATURE: RETRY DISPATCH CHANNEL RE-TRIGGER PIPELINE ---
+function executeRetryMessageTransmissionPipeline(messageIdentifierKey) {
+    const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
+    if (!operationalThreadRecordData) return;
+    
+    const targetFailedMessageNode = operationalThreadRecordData.messageLog.find(m => m.mid === messageIdentifierKey);
+    if (targetFailedMessageNode && targetFailedMessageNode.status === 'failed') {
+        targetFailedMessageNode.status = 'single';
+        targetFailedMessageNode.timestamp = new Date().toLocaleTimeString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        
+        renderUserConversationsLogRoster();
         refreshMessengerActiveStreamBubblesDisplayList();
         syncPlatformDatabaseStateToWebStorage();
         
@@ -2124,7 +2223,6 @@ function handleMessageAttachedFileSelectionEvent(inputNodeContextElement) {
     const fileStorageProcessingReader = new FileReader();
     
     fileStorageProcessingReader.onload = function(readerEvent) {
-        // Build the core object configuration layout context state payload mapping
         const transportFilePayloadConfig = {
             isFile: true,
             isImage: checkIsImageFormatCondition,
@@ -2132,7 +2230,6 @@ function handleMessageAttachedFileSelectionEvent(inputNodeContextElement) {
             fileData: readerEvent.target.result
         };
 
-        // Check for active broadcast targets during selection workflows
         if (APP_STATE.activeChatTargetUserHash === 'broadcast_personal' || APP_STATE.activeChatTargetUserHash === 'broadcast_business') {
             executeSystemWideBroadcastTransmission(singleFileReference.name, transportFilePayloadConfig);
             inputNodeContextElement.value = "";
@@ -2187,7 +2284,6 @@ function executeSystemWideBroadcastTransmission(textPayloadString, filePackageCo
             SYSTEM_DATABASE.chats.push(uniqueTargetThreadNode);
         }
         
-        // Form transmission bundle message payload properties block
         const baseMessageData = {
             mid: `m_bcast_${Date.now()}_${arrayIndex}`,
             senderUid: 'admin',
@@ -2210,9 +2306,6 @@ function executeSystemWideBroadcastTransmission(textPayloadString, filePackageCo
     syncPlatformDatabaseStateToWebStorage();
 }
 
-/**
- * Bubble Level Action Controls Core Utilities
- */
 function executeMessageTextCopyClipboard(messageIdentifierKey) {
     const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
     if (!operationalThreadRecordData) return;
@@ -2227,7 +2320,7 @@ function executeMessageTextCopyClipboard(messageIdentifierKey) {
     alert("Text Copied Successfully");
 }
 
-// --- FEATURE: DELETE FOR ME ROUTINE LOGIC ---
+// --- FEATURE: SINGLE-USER PERSISTENT SELECTION PURGE ---
 function executeSelectedBubbleMessagePurge(messageIdentifierKey) {
     const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
     if (!operationalThreadRecordData) return;
@@ -2237,7 +2330,6 @@ function executeSelectedBubbleMessagePurge(messageIdentifierKey) {
         if (!exactMessagePayloadMatch.deletedBy) {
             exactMessagePayloadMatch.deletedBy = [];
         }
-        // Save current user index inside exclusions list array context parameters
         if (!exactMessagePayloadMatch.deletedBy.includes(APP_STATE.currentUser.uid)) {
             exactMessagePayloadMatch.deletedBy.push(APP_STATE.currentUser.uid);
         }
@@ -2247,17 +2339,25 @@ function executeSelectedBubbleMessagePurge(messageIdentifierKey) {
     }
 }
 
-// --- FEATURE: DELETE FOR ALL ROUTINE LOGIC ---
+// --- FEATURE: DELETE FOR ALL MUTATION ROUTINE ---
 function executeSelectedBubbleMessagePurgeForAll(messageIdentifierKey) {
     const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
     if (!operationalThreadRecordData) return;
     
-    const recordIndexTargetLocation = operationalThreadRecordData.messageLog.findIndex(m => m.mid === messageIdentifierKey);
-    if (recordIndexTargetLocation !== -1) {
-        // Completely strip message data entry from global stream object arrays lists blocks
-        operationalThreadRecordData.messageLog.splice(recordIndexTargetLocation, 1);
+    const exactMessagePayloadMatch = operationalThreadRecordData.messageLog.find(m => m.mid === messageIdentifierKey);
+    if (exactMessagePayloadMatch) {
+        // Replace base data parameters context while maintaining indices tracking nodes
+        exactMessagePayloadMatch.text = "This message was deleted";
+        exactMessagePayloadMatch.isDeletedForAll = true;
+        
+        // Clean attachment structures to safely bypass content layout rendering engines
+        delete exactMessagePayloadMatch.isFile;
+        delete exactMessagePayloadMatch.isImage;
+        delete exactMessagePayloadMatch.isVideo;
+        delete exactMessagePayloadMatch.fileData;
+        
         syncPlatformDatabaseStateToWebStorage();
-        renderUserConversationsLogRoster(); // Refresh order indexes parameters matching changes triggers
+        renderUserConversationsLogRoster();
         refreshMessengerActiveStreamBubblesDisplayList();
     }
 }
@@ -2298,66 +2398,34 @@ function executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData) {
     }
 }
 
+// --- FEATURE: CLEAR CHAT UNILATERAL RETENTION LOGIC ---
+// --- FEATURE: CLEAR CHAT UNILATERAL RETENTION LOGIC ---
 function executeWipeEntireDialogueLogsHistoryContextChain() {
     displayConfirmationModalOverlayAction("Are you sure you want to clear this chat?", () => {
-        const threadIndexId = SYSTEM_DATABASE.chats.findIndex(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
-        if(threadIndexId !== -1) {
-            SYSTEM_DATABASE.chats[threadIndexId].messageLog = [];
+        if (!APP_STATE.currentUser || !APP_STATE.activeChatTargetUserHash) return;
+
+        const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => 
+            c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && 
+            c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash)
+        );
+
+        if (operationalThreadRecordData && operationalThreadRecordData.messageLog) {
+            // Append the clearing user ID to every current message in the log so they disappear for you
+            operationalThreadRecordData.messageLog.forEach(msg => {
+                if (!msg.deletedBy) {
+                    msg.deletedBy = [];
+                }
+                if (!msg.deletedBy.includes(APP_STATE.currentUser.uid)) {
+                    msg.deletedBy.push(APP_STATE.currentUser.uid);
+                }
+            });
+            
+            // Sync up, re-render, and flush down to standard engine storage views
             syncPlatformDatabaseStateToWebStorage();
             renderUserConversationsLogRoster();
             refreshMessengerActiveStreamBubblesDisplayList();
         }
     });
-}
-
-/**
- * File System Interface Operations Hooks Definitions
- */
-function triggerMessageAttachedFileBrowserLink() {
-    const targetFileInputNode = document.getElementById("chat-message-file-attachment-input");
-    if (targetFileInputNode) {
-        targetFileInputNode.click();
-    }
-}
-
-function handleMessageAttachedFileSelectionEvent(inputNodeContextElement) {
-    if (!inputNodeContextElement.files || inputNodeContextElement.files.length === 0) return;
-    if (!APP_STATE.currentUser || !APP_STATE.activeChatTargetUserHash) return;
-    
-    if (APP_STATE.activeChatTargetUserHash === 'admin') {
-         alert("The Fort Mart profile can't be replied.");
-         inputNodeContextElement.value = "";
-         return;
-    }
-    
-    const singleFileReference = inputNodeContextElement.files[0];
-    const checkIsImageFormatCondition = singleFileReference.type.startsWith('image/');
-    const fileStorageProcessingReader = new FileReader();
-    
-    fileStorageProcessingReader.onload = function(readerEvent) {
-        const operationalThreadRecordData = SYSTEM_DATABASE.chats.find(c => c.dynamicParticipants.includes(APP_STATE.currentUser.uid) && c.dynamicParticipants.includes(APP_STATE.activeChatTargetUserHash));
-        
-        if (operationalThreadRecordData) {
-            operationalThreadRecordData.messageLog.push({
-                mid: "m_file_" + Date.now(),
-                senderUid: APP_STATE.currentUser.uid,
-                text: singleFileReference.name,
-                isFile: true,
-                isImage: checkIsImageFormatCondition, // Explicitly tracks if an img element context processing path applies
-                fileData: readerEvent.target.result, // base64 data URL string payload signature 
-                timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                status: "single"
-            });
-            
-            inputNodeContextElement.value = ""; // Clear input browser tracking element states
-            refreshMessengerActiveStreamBubblesDisplayList();
-            syncPlatformDatabaseStateToWebStorage();
-            
-            executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData);
-        }
-    };
-    
-    fileStorageProcessingReader.readAsDataURL(singleFileReference);
 }
 
 /**
@@ -2452,6 +2520,9 @@ function launchUploadProductInventoryModalFormLayoutShell() {
                 <option value="Mobile Devices & Computers">Mobile Devices & Computers</option>
                 <option value="Home Furniture">Home Furniture</option>
                 <option value="Fashion Clothing Apparel">Fashion Clothing Apparel</option>
+                <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+                <option value="Sports, Fitness and Outdoors">Sports, Fitness and Outdoors</option>
+                <option value="Groceries & Essentials">Groceries & Essentials</option>
                 <option value="Others">Others</option>
             </select>
         </div>
@@ -3074,7 +3145,7 @@ function renderAccountInventoryLedgerManagementDashboardGrid() {
     if(!APP_STATE.currentUser) return;
     const userOwnedInventoryItemsArray = SYSTEM_DATABASE.products.filter(p => p.ownerUid === APP_STATE.currentUser.uid);
     if(userOwnedInventoryItemsArray.length === 0) {
-        listContainerNodeElement.innerHTML = `<div style="padding:16px; color:var(--fort-gray-slate); font-size:0.85rem;"><p>Your profile data log lists no actively running commercial inventory postings indices structures metrics fields inside system clusters registries logs.</p></div>`;
+        listContainerNodeElement.innerHTML = `<div style="padding:16px; color:var(--fort-gray-slate); font-size:0.85rem;"><p>You have no posted products.</p></div>`;
         return;
     }
     
@@ -3188,6 +3259,9 @@ function renderActualEditProductFormNonFirebase(targetProductIdKeyValueString) {
                 <option value="Mobile Devices & Computers" ${targetProduct.category === 'Mobile Devices & Computers' ? 'selected' : ''}>Mobile Devices & Computers</option>
                 <option value="Home Furniture" ${targetProduct.category === 'Home Furniture' ? 'selected' : ''}>Home Furniture</option>
                 <option value="Fashion Clothing Apparel" ${targetProduct.category === 'Fashion Clothing Apparel' ? 'selected' : ''}>Fashion Clothing Apparel</option>
+                <option value="Beauty & Personal Care" ${targetProduct.category === 'Beauty & Personal Care' ? 'selected' : ''}>Beauty & Personal Care</option>
+                <option value="Sports, Fitness and Outdoors" ${targetProduct.category === 'Sports, Fitness and Outdoors' ? 'selected' : ''}>Sports, Fitness and Outdoors</option>
+                <option value="Groceries & Essentials" ${targetProduct.category === 'Groceries & Essentials' ? 'selected' : ''}>Groceries & Essentials</option>
                 <option value="Others" ${targetProduct.category === 'Others' ? 'selected' : ''}>Others</option>
             </select>
         </div>
@@ -3566,7 +3640,7 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
                 `;
             });
         } else {
-            productsGridItemsHTML = `<p style="font-size:0.88rem; color:var(--fort-gray-slate); font-style:italic; margin:0; padding:4px;">This business user hasn't uploaded any active product catalog listings yet.</p>`;
+            productsGridItemsHTML = `<p style="font-size:0.88rem; color:var(--fort-gray-slate); font-style:italic; margin:0; padding:4px;">This business user does not have any active product.</p>`;
         }
 
         userProductsListHTML = `
@@ -3726,6 +3800,7 @@ function executeSecureAccountLogout() {
 
     // Verification successful, execute state clear
     performGlobalSessionPurge();
+    changelogoutosignupviceVersafunctionTwo();
 }
 
 /**
@@ -3771,6 +3846,7 @@ function performGlobalSessionPurge() {
         renderMarketplaceProductsDisplayLoop();
     }
     
+    syncDrawerGuestTerminalNodeToActiveUserfunctiontwo();
     triggerAuthenticationModalSequence();
 }
 
@@ -3814,3 +3890,111 @@ function syncDrawerGuestTerminalNodeToActiveUser() {
         "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
     }
 }
+
+function changelogoutosignupviceVersa() {
+    // 2. Locate h4 label component and span label component relative to parent layout container card
+    const statusSpanNodetwo = document.getElementById("changeable-logout-btn");
+    
+    if (statusSpanNodetwo) {
+        statusSpanNodetwo.innerText = "Logout"; // Changes status
+        statusSpanNodetwo.className = "btn-danger"; // Red indicating Logout
+    }   
+}
+
+function doubleButtonFunction() {
+    if(!APP_STATE.currentUser) {
+        triggerAuthenticationModalSequence();
+        return;
+    }
+    
+    openLogoutConfirmationModal();
+}
+
+function changelogoutosignupviceVersafunctionTwo() {
+    // 2. Locate h4 label component and span label component relative to parent layout container card
+    const statusSpanNodetwo = document.getElementById("changeable-logout-btn");
+    
+    if (statusSpanNodetwo) {
+        statusSpanNodetwo.innerText = "Sign in"; // Changes status
+        statusSpanNodetwo.className = "btn-blue"; // Blue indicating sign in
+    }   
+}
+
+function syncDrawerGuestTerminalNodeToActiveUserfunctiontwo() {
+    
+    // 1. Resolve DOM node elements references matching target layout criteria
+    const drawerAvatarNode = document.getElementById("drawer-user-avatar-frame-node");
+    
+    // 2. Locate h4 label component and span label component relative to parent layout container card
+    const headerCardPane = document.querySelector(".drawer-header-pane-card");
+    
+    if (headerCardPane) {
+        const nameHeadingNode = headerCardPane.querySelector("h4");
+        const statusSpanNode = headerCardPane.querySelector("span");
+        
+        // Update user identity display text label strings context definitions
+        if (nameHeadingNode) {
+            nameHeadingNode.innerText = "Guest Terminal Node"; // Changes "Guest Terminal Node" to actual name
+        }
+        
+        if (statusSpanNode) {
+            statusSpanNode.innerText = "Logged Out (Guest)"; // Changes status
+            // Optional: add active system theme layout modification class styles here
+            statusSpanNode.className = "profile-mode-tag-label personal" // Light green indicating active online node state tracking
+            statusSpanNode.style.color = "#4a5568"
+        }
+    }
+
+    // 3. Update profile avatar display image resource mapping strings fallback paths
+    if (drawerAvatarNode) {
+        drawerAvatarNode.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+    }
+}
+
+/**
+ * Fort Mart Preloader and Progress Meter Controller Hook
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const preloader = document.getElementById("preloader-container");
+    const progressBar = document.getElementById("preloader-progress-bar");
+    const progressText = document.getElementById("preloader-percentage-text");
+
+    if (!preloader || !progressBar) return;
+
+    let progress = 0;
+    const duration = 3000; // Total loading screen time (3 seconds)
+    const intervalTime = 30; // Update step resolution in milliseconds
+    const step = (intervalTime / duration) * 100;
+
+    const progressInterval = setInterval(() => {
+        progress += step;
+
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            
+            // Turn completely solid blue in its final stage
+            progressBar.classList.add("fully-complete");
+            progressBar.style.width = "100%";
+            progressText.innerText = "Ready!";
+
+            // Smoothly remove preloader after reaching full status
+            setTimeout(() => {
+                preloader.classList.add("fade-out");
+                
+                // Let other state machine rendering scripts safely execute after opening
+                if (typeof initApplicationState === 'function') {
+                    initApplicationState();
+                }
+            }, 400); // Tiny delay to let the user see the 100% complete state
+        } else {
+            progressBar.style.width = `${progress}%`;
+            progressText.innerText = `Loading ${Math.floor(progress)}%`;
+
+            // Change to complete blue within the last 1-2 seconds of loading 
+            if (progress >= 66) { 
+                progressBar.classList.add("fully-complete");
+            }
+        }
+    }, intervalTime);
+});
