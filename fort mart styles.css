@@ -410,6 +410,11 @@ body {
     color: #2b6cb0;
 }
 
+.msg-action-btn:hover {
+    background-color: #edf2f7;
+    color: #2b6cb0;
+}
+
 /* Image Message Preview Configuration */
 .msg-action-btn:hover {
     background-color: #edf2f7;
