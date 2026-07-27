@@ -129,7 +129,17 @@ window.addEventListener("DOMContentLoaded", () => {
     // 1. MUST LOAD CACHED COPIES FIRST
     loadPlatformDatabaseStateFromWebStorage();
     
-    // 2. RUN RENDER LOOPS
+    // 2. INTERCEPT IMMEDIATELY (Move this up so it blocks unauthorized views instantly)
+    if (typeof triggerAuthenticationModalSequence === 'function') {
+        triggerAuthenticationModalSequence();
+    }
+
+    // 3. RUN BACKGROUND LIFECYCLE CHECKS
+    if (typeof executeSystemicSubscriptionExpirationLifecycleCheck === 'function') {
+        executeSystemicSubscriptionExpirationLifecycleCheck();
+    }
+    
+    // 4. RUN RENDER LOOPS LAST (Only works on prepared data for authenticated states)
     if (typeof renderMarketplaceProductsDisplayLoop === 'function') {
         renderMarketplaceProductsDisplayLoop();
     }
@@ -139,9 +149,6 @@ window.addEventListener("DOMContentLoaded", () => {
     if (typeof populateNetworkSuiteExtensionsDisplayView === 'function') {
         populateNetworkSuiteExtensionsDisplayView();
     }
-
-    // 3. EXECUTE COOKIE CHECK LAST (Once SYSTEM_DATABASE is fully prepared)
-    triggerAuthenticationModalSequence(); 
 });
 
 /**
@@ -508,11 +515,11 @@ function renderSignUpModalWizardStepOne() {
         
         <div class="form-checkbox-group-row margin-top-xs">
             <input type="checkbox" id="chk-reg-terms" onchange="evaluateSignUpStepOneFormCompletenessStateValidation()">
-            <label for="chk-reg-terms" style="font-size:0.82rem;">I accept the <a href="fort mart terms and conditions.html" target="_blank">terms and conditions</a></label>
+            <label for="chk-reg-terms" style="font-size:0.82rem;">I accept the <a href="fort mart terms and conditions.html" >terms and conditions</a></label>
         </div>
         <div class="form-checkbox-group-row margin-top-xs">
             <input type="checkbox" id="chk-reg-privacy" onchange="evaluateSignUpStepOneFormCompletenessStateValidation()">
-            <label for="chk-reg-privacy" style="font-size:0.82rem;">I accept the <a href="fort mart privacy policy.html" target="_blank">privacy policy</a></label>
+            <label for="chk-reg-privacy" style="font-size:0.82rem;">I accept the <a href="fort mart privacy policy.html" >privacy policy</a></label>
         </div>
 
         <div class="btn-group margin-top-md">
@@ -1040,7 +1047,7 @@ function executeFinalizeAccountRegistrationPipelineSubmission() {
         chatId: "chat_admin_" + finalNewUserRecord.uid,
         dynamicParticipants: ["admin", finalNewUserRecord.uid],
         messageLog: [
-            { mid: "wel1", senderUid: "admin", text: "Thanks for choosing Fort Mart. We are here with an amazing web app when it comes to online shopping. We wish you best of luck as you explore the market.", timestamp: "Just Now", status: "bold-double" }
+            { mid: "wel1", senderUid: "admin", text: "Thanks for choosing Fort Mart. We are here with an amazing web app when it comes to online shopping. We wish you best of luck as you explore the market.", timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }), }
         ]
     };
     SYSTEM_DATABASE.chats.push(systemAdminWelcomeThreadNode);
@@ -1418,12 +1425,19 @@ function handleCategorySearch(searchStringQuery) {
     renderMarketplaceProductsDisplayLoop();
 }
 
+// Ensure foundational state variables exist safely
+if (!SYSTEM_DATABASE.pinnedLeaderboard) {
+    SYSTEM_DATABASE.pinnedLeaderboard = Array(20).fill(null); // Explicit 20-slot tracking architecture
+}
+if (SYSTEM_DATABASE.adminSlot === undefined) {
+    SYSTEM_DATABASE.adminSlot = null; // High priority admin override slot
+}
+
 function renderMarketplaceProductsDisplayLoop() {
     const loopDisplayTargetGrid = document.getElementById("products-display-grid");
     if(!loopDisplayTargetGrid) return;
     
     loopDisplayTargetGrid.innerHTML = "";
-    // Isolate active currency indicators contexts parameters mapping keys rules values sets properties
     let baselineCurrencyIndicatorSymbol = "₦";
     let locationFilteringCriteriaString = "Nigeria";
     
@@ -1432,50 +1446,39 @@ function renderMarketplaceProductsDisplayLoop() {
         baselineCurrencyIndicatorSymbol = (APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
     }
     
-    // Ensure database array reference exists securely
     const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard || [];
+    const adminSlotPid = SYSTEM_DATABASE.adminSlot;
     
-    // Process matching filtration datasets loop logic constraints steps tracking parameters
     let computedInventoryOutputArray = SYSTEM_DATABASE.products.filter(item => {
         const structuralOwnerAccountPointer = SYSTEM_DATABASE.users.find(u => u.uid === item.ownerUid);
         if(!structuralOwnerAccountPointer) return false;
-        
-        // Strict operational region context localization bounds checking matching array scopes rules properties
-        if(structuralOwnerAccountPointer.country !== locationFilteringCriteriaString) 
-            return false;
-        
-        // Match checking categorizations metrics blocks
+        if(structuralOwnerAccountPointer.country !== locationFilteringCriteriaString) return false;
         if(APP_STATE.currentSelectedCategory !== 'Trending' && item.category !== APP_STATE.currentSelectedCategory) return false;
         
-        // Match checking search string criteria queries profiles keys
         if(APP_STATE.searchQuery !== '') {
             const matchTitleFlag = item.name.toLowerCase().includes(APP_STATE.searchQuery);
             const matchInfoFlag = item.info.toLowerCase().includes(APP_STATE.searchQuery);
             if(!matchTitleFlag && !matchInfoFlag) return false;
         }
-        
         return true;
     });
 
-    // Extract products currently assigned to active slots in the leaderboard
-    let pinnedItems = computedInventoryOutputArray.filter(item => leaderboard.includes(item.pid));
+    // 1. Isolate Admin Slot Item
+    let adminPinnedItem = computedInventoryOutputArray.filter(item => item.pid === adminSlotPid);
     
-    // Extract normal items not registered on the leaderboard
-    let normalItems = computedInventoryOutputArray.filter(item => !leaderboard.includes(item.pid));
+    // 2. Isolate Standard Leaderboard Pinned items
+    let pinnedItems = computedInventoryOutputArray.filter(item => leaderboard.includes(item.pid) && item.pid !== adminSlotPid);
+    
+    // 3. Normal items sorted by click/hit count descending
+    let normalItems = computedInventoryOutputArray.filter(item => !leaderboard.includes(item.pid) && item.pid !== adminSlotPid);
 
-    // Sort strategy: Pinned products are ordered matching their leaderboard indices sequence
     pinnedItems.sort((first, second) => leaderboard.indexOf(first.pid) - leaderboard.indexOf(second.pid));
-    
-    // Fallback: normal items sort down dynamically by expanded view counts
     normalItems.sort((first, second) => (second.clickCount || 0) - (first.clickCount || 0));
 
-    // Combine array paths back with pinned elements in primary slots
-    let combinedFilteredOutput = [...pinnedItems, ...normalItems];
-    
-    // Fallback external execution pipeline intercept arrays if matches count is lower than baseline limit constraints 
+    let combinedFilteredOutput = [...adminPinnedItem, ...pinnedItems, ...normalItems];
     let displayArrayToProcess = [...combinedFilteredOutput];
+    
     if(displayArrayToProcess.length < 20) {
-        // Build simulated external structural product feed mock items to backfill up to index threshold constraints
         let backfillDeficitCount = 20 - displayArrayToProcess.length;
         const structuralExternalAffiliateSourcesNamesArray = ["Jumia Hub Feed", "Temu Global Logistic Feed", "Jiji Local Ad Scraping Matrix", "Konga Digital Marketplace Warehouse"];
         for(let idx = 0; idx < backfillDeficitCount; idx++) {
@@ -1483,7 +1486,7 @@ function renderMarketplaceProductsDisplayLoop() {
             displayArrayToProcess.push({
                 pid: `ext_mock_${idx}`,
                 ownerUid: "admin",
-                name: `[Affiliate External Entity - ${sourcePointerString}] Standard Retail Inventory Match Log Block Unit #${1042 + idx}`,
+                name: `[Affiliate External Entity - ${sourcePointerString}] Standard Retail Inventory Match Log Unit #${1042 + idx}`,
                 category: APP_STATE.currentSelectedCategory,
                 info: "Synchronized fallback inventory data stream pulled from global merchant network endpoints channels tracking configurations metrics models.",
                 price: parseFloat(2250 * (idx + 3)),
@@ -1495,20 +1498,22 @@ function renderMarketplaceProductsDisplayLoop() {
         }
     }
     
-    // Render computed final layout processing stream loop context grid items rows
-    displayArrayToProcess.forEach((product, pointerIndexId) => {
-        // Evaluate framework positioning markers to execute dynamic Google AdSense interstitial layouts mock placeholders
-        
+    displayArrayToProcess.forEach((product) => {
         const contextualOwnerRecord = SYSTEM_DATABASE.users.find(u => u.uid === product.ownerUid);
         const ownerCorporateEntityLabel = contextualOwnerRecord ? contextualOwnerRecord.businessName : "External Distribution Global Network Services Partner Hub";
         const ownerCircularAvatarSrcString = (contextualOwnerRecord && contextualOwnerRecord.avatar) ? contextualOwnerRecord.avatar : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23718096'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
         const cardContainerBlockElement = document.createElement("div");
         cardContainerBlockElement.className = "product-item-card-container rounded-rect";
         
-        // Pinned badge evaluation using leaderboard records arrays tracking indicators
+        const isProductAdminPinned = (product.pid === adminSlotPid);
         const isProductPinned = leaderboard.includes(product.pid);
-        const pinnedBadgeHTML = isProductPinned ?
-            `<span style="background:var(--fort-blue-light); color:white; padding:2px 8px; font-size:0.7rem; border-radius:4px; font-weight:bold; margin-left:auto;">📌</span>` : '';
+        
+        let pinnedBadgeHTML = '';
+        if (isProductAdminPinned) {
+            pinnedBadgeHTML = `<span style="background:crimson; color:white; padding:2px 8px; font-size:0.7rem; border-radius:4px; font-weight:bold; margin-left:auto;">👑</span>`;
+        } else if (isProductPinned) {
+            pinnedBadgeHTML = `<span style="background:var(--fort-blue-light); color:white; padding:2px 8px; font-size:0.7rem; border-radius:4px; font-weight:bold; margin-left:auto;">📌</span>`;
+        }
             
         cardContainerBlockElement.innerHTML = `
             <div class="poster-profile-strip" onclick="event.stopPropagation(); launchDetailedUserProfileContextOverlaySummaryModal('${product.ownerUid}')">
@@ -1526,8 +1531,7 @@ function renderMarketplaceProductsDisplayLoop() {
                 <div class="btn-group" style="margin-top:auto;">
                     ${product.isExternalAffiliateNodeFlag ?
                         `<button class="btn-gray" style="width:100%; font-size:0.8rem;" onclick="event.stopPropagation(); alert('Redirecting external processing pipelines traces safely to affiliate endpoints portals.')">Visit Merchant Channel Portal</button>` :
-                        `<button class="btn-blue" style="width:100%; font-size:0.8rem;"
-                        onclick="event.stopPropagation(); initialDirectMessageCommunicationPipelineSetup('${product.ownerUid}')">Message Seller</button>`
+                        `<button class="btn-blue" style="width:100%; font-size:0.8rem;" onclick="event.stopPropagation(); initialDirectMessageCommunicationPipelineSetup('${product.ownerUid}')">Message Seller</button>`
                     }
                 </div>
             </div>
@@ -1536,11 +1540,25 @@ function renderMarketplaceProductsDisplayLoop() {
     });
 }
 
+/**
+ * Dedicated helper function to increment hit count and save to web storage
+ */
+function recordProductHitCount(productIdTokenKey) {
+    const targetedProduct = SYSTEM_DATABASE.products.find(p => p.pid === productIdTokenKey);
+    if (targetedProduct) {
+        targetedProduct.clickCount = (targetedProduct.clickCount || 0) + 1;
+        syncPlatformDatabaseStateToWebStorage();
+    }
+}
+
 function launchComprehensiveProductSpecificationsExpandedModalView(productIdTokenKey) {
     if(!APP_STATE.currentUser) {
         triggerAuthenticationModalSequence();
         return;
     }
+    
+    // Increment hit counter and persist to storage
+    recordProductHitCount(productIdTokenKey);
     
     let targetedProductItemMatch = SYSTEM_DATABASE.products.find(p => p.pid === productIdTokenKey);
     if(!targetedProductItemMatch) {
@@ -1549,7 +1567,6 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
         };
     }
     
-    targetedProductItemMatch.clickCount = (targetedProductItemMatch.clickCount || 0) + 1;
     const operationalTargetProfileOwnerRecord = SYSTEM_DATABASE.users.find(u => u.uid === targetedProductItemMatch.ownerUid);
     const detailOverlayBodyNode = document.getElementById("product-detail-modal-body");
     let baselineCurrencySymbolSign = (APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
@@ -1565,21 +1582,26 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
         `;
     }
 
-    // --- INTEGRATION: ADMIN PIN CONTROLS SUB-SYSTEM ---
+    // --- ADMIN PANEL CONTROLS ---
     let adminPinControlHTML = "";
     const isUserAdmin = (APP_STATE.currentUser.uid === 'admin' || APP_STATE.currentUser.id === 'admin');
     
     if (isUserAdmin) {
         const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard || [];
         const isCurrentPinned = leaderboard.includes(targetedProductItemMatch.pid);
+        const isAdminSlotOccupant = (SYSTEM_DATABASE.adminSlot === targetedProductItemMatch.pid);
         
         adminPinControlHTML = `
             <div style="background: #edf2f7; border: 1px dashed var(--fort-blue-primary); padding: 12px; border-radius: 6px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.85rem; font-weight: bold; color: var(--fort-blue-dark);">🛡️ Admin Controls: Listing Pin Option</span>
-                    <button class="${isCurrentPinned ? 'btn-gray' : 'btn-blue'}" style="padding: 6px 12px; font-size: 0.8rem; font-weight: bold;"
+                <span style="font-size: 0.85rem; font-weight: bold; color: var(--fort-blue-dark);">🛡️ Admin Controls Hub</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="${isCurrentPinned ? 'btn-gray' : 'btn-blue'}" style="flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold;"
                         onclick="executeToggleProductPinState('${targetedProductItemMatch.pid}')">
-                        ${isCurrentPinned ? '🛑 Unpin Listing' : '📌 Pin to Top'}
+                        ${isCurrentPinned ? '🛑 Unpin Standard Slot' : '📌 Pin to Standard'}
+                    </button>
+                    <button class="${isAdminSlotOccupant ? 'btn-danger' : 'btn-success'}" style="flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold; background: ${isAdminSlotOccupant ? 'crimson':'green'}; color: white; border:none; border-radius:4px; cursor:pointer;"
+                        onclick="toggleAdminExclusiveSlotState('${targetedProductItemMatch.pid}')">
+                        ${isAdminSlotOccupant ? '❌ Unassign Admin Slot' : '👑 Assign Admin Slot'}
                     </button>
                 </div>
                 <button class="btn-blue" style="width: 100%; padding: 6px; font-size: 0.8rem; font-weight: bold; margin-top: 4px;" 
@@ -1637,6 +1659,17 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
     document.getElementById("product-detail-modal").classList.add("active");
 }
 
+function toggleAdminExclusiveSlotState(pid) {
+    if (SYSTEM_DATABASE.adminSlot === pid) {
+        SYSTEM_DATABASE.adminSlot = null;
+        showTopRightToast("Admin slot unassigned successfully.", "error");
+    } else {
+        SYSTEM_DATABASE.adminSlot = pid;
+        showTopRightToast("Admin slot assigned to this product exclusively.", "success");
+    }
+    administrativeSaveAndRefreshDisplay(pid);
+}
+
 /**
  * Action execution function modifying pin placement parameter assignments fields on target listings 
  */
@@ -1653,7 +1686,7 @@ function executeToggleProductPinState(productIdKey) {
     } else {
         // Product is not pinned: append it to leaderboard if slots are available
         if (SYSTEM_DATABASE.pinnedLeaderboard.length >= 20) {
-            alert("Administrative Action Blocked: The leaderboard has hit its maximum limit of 20 slots.");
+            showTopRightToast("Administrative Action Blocked: The leaderboard has hit its maximum limit of 20 slots.", "error");
             return;
         }
         SYSTEM_DATABASE.pinnedLeaderboard.push(productIdKey);
@@ -1929,7 +1962,7 @@ function initialDirectMessageCommunicationPipelineSetup(targetVendorOwnerUidToke
         return;
     }
     if(APP_STATE.currentUser.uid === targetVendorOwnerUidTokenKey) {
-        alert("System Architecture Constraint Notice: Disallowed executing messenger loop initialization pipelines pointing to tracking origin logged profile instance identifiers values.");
+        showTopRightToast("You are the seller, and according to Fort Mart application protocols there is no message yourself feature.", "info");
         return;
     }
     
@@ -2030,18 +2063,7 @@ function refreshMessengerActiveStreamBubblesDisplayList() {
         // Inject failed structural state layout rules
         bubbleWrapperElementNode.className = `chat-bubble-node rounded-rect ${outboundFlagCondition ? 'outgoing-msg' : 'incoming-msg'} ${failedTransmissionFlag ? 'transmission-failed-node' : ''}`;
         
-        let dynamicTicksLayoutHTML = "";
-        // Do not render status indicators if the message payload has been globally purged or failed delivery checks
-        if(outboundFlagCondition && !msg.isDeletedForAll && !failedTransmissionFlag) {
-            if(msg.status === 'bold-double') {
-                dynamicTicksLayoutHTML = `<span class="tick-mark-node seen">✓✓</span>`;
-            } else if(msg.status === 'double') {
-                dynamicTicksLayoutHTML = `<span class="tick-mark-node">✓✓</span>`;
-            } else {
-                dynamicTicksLayoutHTML = `<span class="tick-mark-node">✓</span>`;
-            }
-        }
-        
+        let dynamicTicksLayoutHTML = "";        
         let bodyLayoutHTML = "";
         let downloadControlHTML = "";
         
@@ -2152,7 +2174,7 @@ function sendChatMessageDirect() {
     }
     
     if(APP_STATE.activeChatTargetUserHash === 'admin') {
-         alert("The Fort Mart profile can't be replied.");
+         showTopRightToast("The Fort Mart profile can't be replied.", "info");
          textInputNodeElement.value = "";
          return;
     }
@@ -2165,8 +2187,7 @@ function sendChatMessageDirect() {
             mid: "m_" + Date.now(),
             senderUid: APP_STATE.currentUser.uid,
             text: enteredMessageTextString,
-            timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-            status: "single"
+            timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
         };
         
         operationalThreadRecordData.messageLog.push(generatedMessageInstance);
@@ -2175,7 +2196,6 @@ function sendChatMessageDirect() {
         refreshMessengerActiveStreamBubblesDisplayList();
         syncPlatformDatabaseStateToWebStorage();
         
-        executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData);
     }
 }
 
@@ -2186,14 +2206,12 @@ function executeRetryMessageTransmissionPipeline(messageIdentifierKey) {
     
     const targetFailedMessageNode = operationalThreadRecordData.messageLog.find(m => m.mid === messageIdentifierKey);
     if (targetFailedMessageNode && targetFailedMessageNode.status === 'failed') {
-        targetFailedMessageNode.status = 'single';
-        targetFailedMessageNode.timestamp = new Date().toLocaleTimeString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        targetFailedMessageNode.timestamp = new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
         
         renderUserConversationsLogRoster();
         refreshMessengerActiveStreamBubblesDisplayList();
         syncPlatformDatabaseStateToWebStorage();
         
-        executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData);
     }
 }
 
@@ -2211,7 +2229,7 @@ function handleMessageAttachedFileSelectionEvent(inputNodeContextElement) {
     if (!inputNodeContextElement.files || inputNodeContextElement.files.length === 0) return;
     if (!APP_STATE.currentUser || !APP_STATE.activeChatTargetUserHash) return;
     if (APP_STATE.activeChatTargetUserHash === 'admin') {
-         alert("The Fort Mart profile can't be replied.");
+         showTopRightToast("The Fort Mart profile can't be replied.", "info");
          inputNodeContextElement.value = "";
          return;
     }
@@ -2246,15 +2264,13 @@ function handleMessageAttachedFileSelectionEvent(inputNodeContextElement) {
                 isImage: checkIsImageFormatCondition,
                 isVideo: checkIsVideoFormatCondition,
                 fileData: readerEvent.target.result,
-                timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                status: "single"
+                timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
             });
             inputNodeContextElement.value = "";
             renderUserConversationsLogRoster();
             refreshMessengerActiveStreamBubblesDisplayList();
             syncPlatformDatabaseStateToWebStorage();
             
-            executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData);
         }
     };
     
@@ -2268,7 +2284,7 @@ function executeSystemWideBroadcastTransmission(textPayloadString, filePackageCo
     const targetGroupString = APP_STATE.activeChatTargetUserHash === 'broadcast_personal' ? 'personal' : 'business';
     const destinationAccountsArray = SYSTEM_DATABASE.users.filter(u => u.accountType === targetGroupString && u.uid !== 'admin');
     if (destinationAccountsArray.length === 0) {
-        alert("System Notice: Broadcast processing aborted. Target account dataset matches zero profile indices records.");
+        showTopRightToast("Broadcast processing aborted. There are no target accounts.", "error");
         return;
     }
     
@@ -2288,8 +2304,7 @@ function executeSystemWideBroadcastTransmission(textPayloadString, filePackageCo
             mid: `m_bcast_${Date.now()}_${arrayIndex}`,
             senderUid: 'admin',
             text: textPayloadString,
-            timestamp: new Date().toLocaleTimeString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-            status: "single"
+            timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
         };
         if (filePackageConfigObject) {
             baseMessageData.isFile = filePackageConfigObject.isFile;
@@ -2301,7 +2316,7 @@ function executeSystemWideBroadcastTransmission(textPayloadString, filePackageCo
         uniqueTargetThreadNode.messageLog.push(baseMessageData);
     });
     
-    alert(`Broadcast routed successfully to all ${destinationAccountsArray.length} active ${targetGroupString} profile logs.`);
+    showTopRightToast(`Broadcast routed successfully to all ${destinationAccountsArray.length} active ${targetGroupString} profile logs.`, "success");
     renderUserConversationsLogRoster();
     syncPlatformDatabaseStateToWebStorage();
 }
@@ -2317,7 +2332,7 @@ function executeMessageTextCopyClipboard(messageIdentifierKey) {
         });
     }
 
-    alert("Text Copied Successfully");
+    showTopRightToast("Text Copied Successfully", "success");
 }
 
 // --- FEATURE: SINGLE-USER PERSISTENT SELECTION PURGE ---
@@ -2385,9 +2400,8 @@ function executeAutoReplyEvaluationProcessFrame(operationalThreadRecordData) {
                 operationalThreadRecordData.messageLog.push({
                     mid: "m_auto_" + Date.now(),
                     senderUid: counterpartyAccountProfile.uid,
-                    text: `[Automated Assistant System Broadcast Response Mapping Engine Log]: Thank you for reaching out to Fort Dev. Your commercial request lines have been safely indexed. We will get back to you soon.`,
-                    timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                    status: "bold-double"
+                    text: `[Automated Assistant System Broadcast Response Mapping Engine Log]: Thank you for reaching out to ${counterpartyAccountProfile.businessName ||counterpartyAccountProfile.identityName }. Your commercial request lines have been safely indexed. We will get back to you soon.`,
+                    timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
                 });
  
                 renderUserConversationsLogRoster();
@@ -2429,17 +2443,59 @@ function executeWipeEntireDialogueLogsHistoryContextChain() {
 }
 
 /**
+ * Helper to compress user-uploaded images before base64 conversion.
+ * Prevents LocalStorage QuotaExceeded errors (~5MB limit).
+ */
+function compressImageFile(file, maxWidth = 600, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+}
+
+/**
  * Universal Unified Infrastructure Floating Operations System Controller Launcher Method Engine
  */
 function handleFloatingActionButtonTrigger() {
-    if(!APP_STATE.currentUser) {
-        triggerAuthenticationModalSequence();
+    if (!APP_STATE || !APP_STATE.currentUser) {
+        if (typeof triggerAuthenticationModalSequence === 'function') {
+            triggerAuthenticationModalSequence();
+        } else {
+            showTopRightToast("Please log in to continue.", "error");
+        }
         return;
     }
     
     // Evaluate operational dynamic parameters rules routes contexts relative to view page positions
-    if(APP_STATE.currentUser.accountType !== 'business' && APP_STATE.currentUser.uid !== 'admin') {
-        alert("Personal Accounts can't upload products.");
+    if (APP_STATE.currentUser.accountType !== 'business' && APP_STATE.currentUser.uid !== 'admin') {
+        if (typeof launchadvertismentofBusinessUpgrade === 'function') {
+            launchadvertismentofBusinessUpgrade();
+        } else {
+            showTopRightToast("Upgrade to a business account to upload products.", "info");
+        }
         return;
     }
     
@@ -2452,11 +2508,13 @@ function handleFloatingActionButtonTrigger() {
  */
 function launchUploadProductPasswordVerificationStep() {
     const modalContentTargetNode = document.getElementById("auth-modal-content");
+    if (!modalContentTargetNode) return;
+
     modalContentTargetNode.innerHTML = `
         <h3>Enter Current Password (Step 1 of 2)</h3>
     
         <div class="form-input-container margin-top-sm">
-            <label>Active Passsword:</label>
+            <label>Active Password:</label>
             <input type="password" id="upload-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
             
             <div id="err-upload-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
@@ -2477,21 +2535,38 @@ function launchUploadProductPasswordVerificationStep() {
             <button onclick="verifyPasswordAndProceed()" class="btn-blue">Verify Password Phrase</button>
         </div>
     `;
-    document.getElementById("auth-modal").classList.add("active"); 
+    
+    const authModal = document.getElementById("auth-modal");
+    if (authModal) authModal.classList.add("active");
 }
 
 /**
  * Validates Step 1 password against active system state variables and advances to Step 2
  */
 function verifyPasswordAndProceed() {
-    const enteredPassword = document.getElementById("upload-verify-password").value;
+    const passwordInput = document.getElementById("upload-verify-password");
     const errNode = document.getElementById("err-upload-reauth-msg");
     
-    errNode.classList.add("hidden-node");
+    if (!passwordInput) return;
+    const enteredPassword = passwordInput.value.trim();
     
-    if (enteredPassword !== APP_STATE.currentUser.secretKey) { 
-        errNode.innerText = "Incorrect Password"; 
-        errNode.classList.remove("hidden-node"); 
+    if (errNode) errNode.classList.add("hidden-node");
+    
+    if (!APP_STATE || !APP_STATE.currentUser) {
+        showTopRightToast("User session invalid.", "error");
+        return;
+    }
+
+    // Dynamic password resolution for standard accounts and admins
+    const activePassword = APP_STATE.currentUser.secretKey || APP_STATE.currentUser.password;
+
+    if (!activePassword || enteredPassword !== activePassword) { 
+        if (errNode) {
+            errNode.innerText = "Incorrect Password"; 
+            errNode.classList.remove("hidden-node"); 
+        } else {
+            showTopRightToast("Incorrect Password", "error");
+        }
         return;
     }
     
@@ -2504,9 +2579,14 @@ function verifyPasswordAndProceed() {
  */
 function launchUploadProductInventoryModalFormLayoutShell() {
     const modalContentTargetNode = document.getElementById("auth-modal-content");
+    if (!modalContentTargetNode) return;
+
+    const userCountry = (APP_STATE && APP_STATE.currentUser && APP_STATE.currentUser.country) ? APP_STATE.currentUser.country : 'Global';
+    const currencySymbol = userCountry === 'Nigeria' ? '₦' : '$';
+
     modalContentTargetNode.innerHTML = `
         <h3>Product Upload - Step 2 of 2</h3>
-        <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Products created are localized and viewable exclusively within corresponding matching legal registration domain regions [Country Scope: <strong>${APP_STATE.currentUser.country}</strong>]</p>
+        <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Products created are localized and viewable exclusively within corresponding matching legal registration domain regions [Country Scope: <strong>${userCountry}</strong>]</p>
         
         <div class="form-input-container margin-top-sm">
             <label>Product Name</label>
@@ -2544,43 +2624,53 @@ function launchUploadProductInventoryModalFormLayoutShell() {
             <textarea id="newprod-aiinfo" class="form-field-control rounded-rect" style="height:60px;" placeholder="A more detailed explanation of product. (Optional but recommended)"></textarea>
         </div>
         <div class="form-input-container">
-            <label>Unit Commercial Pricing Valuation Baseline Quote Amount Number (${APP_STATE.currentUser.country === 'Nigeria' ? '₦' : '$'}):</label>
+            <label>Unit Commercial Pricing Valuation Baseline Quote Amount Number (${currencySymbol}):</label>
             <input type="number" id="newprod-price" class="form-field-control" placeholder="Enter numeric base rate configuration">
         </div>
         
         <div class="btn-group margin-top-md">
             <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel Form</button>
-            <button onclick="executePipelineCommitNewInventoryPostRecord()" class="btn-blue">Publish Active Post</button>
+            <button id="btn-publish-post" onclick="executePipelineCommitNewInventoryPostRecord()" class="btn-blue">Publish Active Post</button>
         </div>
     `;
 
-    // Visual Bug Fix: Close matching tags and attach file listener
     setupImagePreviewListener();
-    document.getElementById("auth-modal").classList.add("active");
+    const authModal = document.getElementById("auth-modal");
+    if (authModal) authModal.classList.add("active");
 }
 
 /**
- * Logic Addition: Handles live preview display
+ * Handles live preview display
  */
 function setupImagePreviewListener() {
     const imageInput = document.getElementById("imageInput");
     const imagePreview = document.getElementById("imagePreview");
     const placeholderText = document.getElementById("placeholderTextimg");
 
+    if (!imageInput) return;
+
     imageInput.addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = "block";
-                placeholderText.style.display = "none";
-            }
+                if (imagePreview) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = "block";
+                }
+                if (placeholderText) {
+                    placeholderText.style.display = "none";
+                }
+            };
             reader.readAsDataURL(file);
         } else {
-            imagePreview.src = "";
-            imagePreview.style.display = "none";
-            placeholderText.style.display = "block";
+            if (imagePreview) {
+                imagePreview.src = "";
+                imagePreview.style.display = "none";
+            }
+            if (placeholderText) {
+                placeholderText.style.display = "block";
+            }
         }
     });
 }
@@ -2588,59 +2678,97 @@ function setupImagePreviewListener() {
 /**
  * Final Submission: Collects variables, processes files, updates databases
  */
-function executePipelineCommitNewInventoryPostRecord() {
-    const name = document.getElementById("newprod-name").value.trim();
-    const cat = document.getElementById("newprod-cat").value;
-    const info = document.getElementById("newprod-info").value.trim();
+async function executePipelineCommitNewInventoryPostRecord() {
+    const publishBtn = document.getElementById("btn-publish-post");
+    const nameInput = document.getElementById("newprod-name");
+    const catInput = document.getElementById("newprod-cat");
+    const infoInput = document.getElementById("newprod-info");
     const imageInput = document.getElementById("imageInput");
-    const imagePreview = document.getElementById("imagePreview");
-    const aiInfo = document.getElementById("newprod-aiinfo").value.trim();
-    const priceRaw = document.getElementById("newprod-price").value;
+    const aiInfoInput = document.getElementById("newprod-aiinfo");
+    const priceInput = document.getElementById("newprod-price");
 
-    // Logic Fix: Validate if an actual file was selected instead of string path
-    if(name === "" || info === "" || priceRaw === "" || !imageInput.files[0]) {
-        alert("All compulsory info must be imputed.");
+    const name = nameInput ? nameInput.value.trim() : "";
+    const cat = catInput ? catInput.value : "Others";
+    const info = infoInput ? infoInput.value.trim() : "";
+    const aiInfo = aiInfoInput ? aiInfoInput.value.trim() : "";
+    const priceRaw = priceInput ? priceInput.value : "";
+
+    // Validate core compulsory fields
+    if (!name || !info || !priceRaw || !imageInput || !imageInput.files || !imageInput.files[0]) {
+        if (typeof showTopRightToast === 'function') {
+            showTopRightToast("All compulsory info must be imputed and select an image before publishing.", "error");
+        } else {
+            alert("All compulsory info must be imputed and select an image before publishing.");
+        }
         return;
     }
-    
-    // Logic Fix: Save actual Base64 visual image string representation data 
-    const productImgDataUrl = imagePreview.src;
 
-    // Isolate owner profile data points to store on the product object
-    const ownerUid = APP_STATE.currentUser.uid;
-    const ownerName = APP_STATE.currentUser.identityName || "User Account";
-    const ownerBusinessName = APP_STATE.currentUser.businessName || ownerName;
+    try {
+        if (publishBtn) {
+            publishBtn.disabled = true;
+            publishBtn.innerText = "Publishing...";
+        }
 
-    const finalProductInstanceObjectNode = {
-        pid: "p_" + Date.now(),
-        ownerUid: ownerUid,
-        ownerName: ownerName,
-        ownerBusinessName: ownerBusinessName,
-        name: name,
-        category: cat,
-        info: info,
-        price: parseFloat(priceRaw),
-        coverPhoto: productImgDataUrl,
-        aiInfo: aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.",
-        clickCount: 0
-    };
+        // Compress and extract Base64 data URL reliably
+        const productImgDataUrl = await compressImageFile(imageInput.files[0]);
 
-    // Save to local tracked state
-    SYSTEM_DATABASE.products.push(finalProductInstanceObjectNode);
+        // Isolate owner profile data points safely
+        const ownerUid = APP_STATE.currentUser ? APP_STATE.currentUser.uid : ("user_" + Date.now());
+        const ownerName = APP_STATE.currentUser ? (APP_STATE.currentUser.identityName || APP_STATE.currentUser.username || "User Account") : "User Account";
+        const ownerBusinessName = APP_STATE.currentUser ? (APP_STATE.currentUser.businessName || ownerName) : ownerName;
 
-    // Sync live payload changes directly up to Firestore if layer configuration is present
-    if (window.FortMartFirebase) {
-        const { db, doc, setDoc } = window.FortMartFirebase;
-        setDoc(doc(db, "products", finalProductInstanceObjectNode.pid), finalProductInstanceObjectNode)
-            .catch(err => console.error("Cloud inventory post storage failure synchronization traceback:", err));
+        const finalProductInstanceObjectNode = {
+            pid: "p_" + Date.now(),
+            ownerUid: ownerUid,
+            ownerName: ownerName,
+            ownerBusinessName: ownerBusinessName,
+            name: name,
+            category: cat,
+            info: info,
+            price: parseFloat(priceRaw),
+            coverPhoto: productImgDataUrl,
+            aiInfo: aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.",
+            clickCount: 0,
+            createdAt: new Date().toISOString()
+        };
+
+        // Save to local state memory
+        if (typeof SYSTEM_DATABASE === 'undefined') window.SYSTEM_DATABASE = {};
+        if (!SYSTEM_DATABASE.products) SYSTEM_DATABASE.products = [];
+        SYSTEM_DATABASE.products.push(finalProductInstanceObjectNode);
+
+        // Safe web storage persistence (isolated so quota errors won't throw user-facing exceptions)
+        try {
+            if (typeof syncPlatformDatabaseStateToWebStorage === 'function') {
+                syncPlatformDatabaseStateToWebStorage();
+            }
+        } catch (storageErr) {
+            console.warn("Storage quota reached. Product saved in memory for active session:", storageErr);
+        }
+        
+        if (typeof closeActiveModalDirectly === 'function') {
+            closeActiveModalDirectly('auth-modal');
+        }
+        
+        if (typeof showTopRightToast === 'function') {
+            showTopRightToast("Product posted successfully!", "success");
+        }
+        
+        if (typeof renderMarketplaceProductsDisplayLoop === 'function') {
+            renderMarketplaceProductsDisplayLoop();
+        }
+
+    } catch (err) {
+        console.error("Product publishing pipeline error:", err);
+        if (typeof showTopRightToast === 'function') {
+            showTopRightToast("An error occurred while uploading your product. Please try again.", "error");
+        }
+    } finally {
+        if (publishBtn) {
+            publishBtn.disabled = false;
+            publishBtn.innerText = "Publish Active Post";
+        }
     }
-
-    syncPlatformDatabaseStateToWebStorage();
-    
-    closeActiveModalDirectly('auth-modal');
-    alert("System Pipeline Core Notification Process Switch Event Alert: Product Uploading Request Sent Succesfully.");
-    
-    renderMarketplaceProductsDisplayLoop();
 }
 
 /**
@@ -2757,8 +2885,11 @@ function switchSettingsSection(selectedSectionTabIdKey) {
     // Activate target parameters arrays tracking nodes loops elements
     event.currentTarget.classList.add("active");
     document.getElementById(`settings-node-${selectedSectionTabIdKey}`).classList.remove("hidden-node");
-    if(selectedSectionTabIdKey === 'my-products') {
-         renderAccountInventoryLedgerManagementDashboardGrid();
+    if (selectedSectionTabIdKey === 'my-products') {
+        // Safe execution guard wrapper
+        if (typeof renderAccountInventoryLedgerManagementDashboardGrid === 'function') {
+            renderAccountInventoryLedgerManagementDashboardGrid();
+        }
     }
 }
 
@@ -2798,11 +2929,6 @@ function initializeProfileDetailsAccountManagementFieldsValues() {
         bizFieldsNodeWrapper.classList.add("hidden-node");
     }
 }
-
-/**
- * Profile Edit Multi-step Wizard Management System
- * Enforces current password validation followed by a secure email OTP check before saving mutations.
- */
 
 /**
  * Profile Edit Multi-step Wizard Management System
@@ -2900,7 +3026,7 @@ async function sendProfileEditWizardEmailJsOtpWorkflow(targetFieldNameStringToke
         if (window.emailjs) {
             await window.emailjs.send(
                 "service_ejag5pe", 
-                "template_jz0s31e", 
+                "template_nzub7tk", 
                 {
                     to_email: targetEmail,
                     user_name: APP_STATE.currentUser.identityName,
@@ -3114,7 +3240,6 @@ function executeSaveProfileWizardModificationsToDatabase(targetFieldNameStringTo
             senderUid: "admin",
             text: `[Profile Edit Notification]: Security credential variables field pointer parameter "${targetFieldNameStringTokenKey}" value updated successfully.`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: "bold-double"
         };
         
         let existingSystemAdminThreadNodePointerIndex = SYSTEM_DATABASE.chats.find(c => 
@@ -3132,8 +3257,41 @@ function executeSaveProfileWizardModificationsToDatabase(targetFieldNameStringTo
             initializeProfileDetailsAccountManagementFieldsValues();
         }
 
-        alert("Changes made successfully");
+        showTopRightToast("Changes made successfully", "success");
     }
+}
+
+// Cleaned pricing matrix matching exactly 20 slots from your specifications[cite: 1]
+const LEADERBOARD_SLOT_PRICES = [
+    6000, 5500, 5000, 4750, 4500, 4250, 4000, 3750, 3500, 3250,
+    3000, 2750, 2500, 2250, 2000, 1700, 1500, 1200, 1000, 500
+];
+
+const LEADERBOARD_PAYSTACK_PLAN_CODES = [
+    "PLN_0j80to7xqksqqxx", // Plan 1
+    "PLN_f75y0jhvim7a56r", // Plan 2
+    "PLN_liyqjmp1qncjarn", // Plan 3
+    "PLN_simekhu9m69dztb", // Plan 4
+    "PLN_3c0od5kkzjo2h3s", // Plan 5
+    "PLN_lj2enl3b4pgyfor", // Plan 6
+    "PLN_ejw2l81gxvntprk", // Plan 7
+    "PLN_1e0rb2t8gpf170y", // Plan 8
+    "PLN_1pfakn5dsqsrr3h", // Plan 9
+    "PLN_eclvsaz7o38ug3f", // Plan 10
+    "PLN_i2xrie9zc0y1hn0", // Plan 11
+    "PLN_fb9x888p2v5fo0v", // Plan 12
+    "PLN_5eydk6g9n4bnfkv", // Plan 13
+    "PLN_qw2g5sbfoc7vt7d", // Plan 14
+    "PLN_s99g9sr1jk4eeez", // Plan 15
+    "PLN_0k1n2aipe4a9bpt", // Plan 16
+    "PLN_uajjx1lfqs4hrqj", // Plan 17
+    "PLN_f9wcm0p5y9jzgvq", // Plan 18
+    "PLN_chd5qbiut7lthpl", // Plan 19
+    "PLN_fs8ribiee7klbl0"  // Plan 20
+];
+
+function formatToNaira(amount) {
+    return "₦" + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function renderAccountInventoryLedgerManagementDashboardGrid() {
@@ -3141,248 +3299,426 @@ function renderAccountInventoryLedgerManagementDashboardGrid() {
     if(!listContainerNodeElement) return;
     
     listContainerNodeElement.innerHTML = "";
-    
     if(!APP_STATE.currentUser) return;
+
+    if (APP_STATE.currentUser.accountType !== 'business' && APP_STATE.currentUser.uid !== 'admin') {
+        listContainerNodeElement.innerHTML = `
+            <div class="upgrade-notice-box">
+                Upgrade to business account to post, view products and also have access to pinned products.
+            </div>
+
+            <!-- Account Upgrade Action Button -->
+            <div class="text-center margin-top-xs">
+                <button id="btn-upgrade-to-business" class="btn-blue" onclick="initiateBusinessAccountUpgradeSequence()">
+                    Upgrade Account to Business (₦2,500)
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
     const userOwnedInventoryItemsArray = SYSTEM_DATABASE.products.filter(p => p.ownerUid === APP_STATE.currentUser.uid);
     if(userOwnedInventoryItemsArray.length === 0) {
         listContainerNodeElement.innerHTML = `<div style="padding:16px; color:var(--fort-gray-slate); font-size:0.85rem;"><p>You have no posted products.</p></div>`;
-        return;
-    }
-    
-    userOwnedInventoryItemsArray.forEach(item => {
-        const itemRowRowStripContainerElementNode = document.createElement("div");
-        itemRowRowStripContainerElementNode.className = "rounded-rect";
-        itemRowRowStripContainerElementNode.style.display = "flex";
-        itemRowRowStripContainerElementNode.style.alignItems = "center";
-        itemRowRowStripContainerElementNode.style.justifyContent = "between";
-        itemRowRowStripContainerElementNode.style.padding = "12px";
-        itemRowRowStripContainerElementNode.style.border = "1px solid var(--fort-gray-border)";
-        itemRowRowStripContainerElementNode.style.marginBottom = "10px";
-        itemRowRowStripContainerElementNode.style.backgroundColor = "var(--fort-white-snow)";
-        
-        itemRowRowStripContainerElementNode.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; flex:1;">
-                <img src="${item.coverPhoto}" style="width:40px; height:40px; object-fit:cover;" class="rounded-rect" alt="Thumb">
-                <div>
-                    <h5 style="font-weight:700; color:var(--fort-blue-dark);">${item.name}</h5>
-                    <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Category: ${item.category} | Analytics Metrics Hits Counter Value: ${item.clickCount || 0} hits</span>
-                </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button class="btn-blue" style="padding:4px 10px; font-size:0.75rem;" onclick="launchEditProductInventoryModalFormLayoutShell('${item.pid}')">Edit Details</button>
-                <button class="btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="executeDeletePlatformInventoryItemListingPostRecord('${item.pid}')">Delete Inventory Post</button>
-            </div>
-        `;
-        listContainerNodeElement.appendChild(itemRowRowStripContainerElementNode);
-    });
-}
-
-/**
- * Step 1: Launches password confirmation field layout tracking validation checks
- */
-function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueString) {
-    const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
-    if (!targetProduct) {
-        alert("Product record could not be found.");
-        return;
-    }
-
-    const modalContentTargetNode = document.getElementById("auth-modal-content");
-    modalContentTargetNode.innerHTML = `
-        <h3>Enter Current Password (Step 1 of 2)</h3>
-
-        <div class="form-input-container margin-top-sm">
-            <label>Active Password:</label>
-            <input type="password" id="edit-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
-            
-            <div id="err-edit-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
-        </div>
-
-        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
-            <input type="checkbox" id="chk-edit-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'edit-verify-password')">
-            <label for="chk-edit-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
-        </div>
-
-        <div class="text-center margin-top-xs">
-            <span style="color:var(--fort-blue-light); cursor:pointer; font-size:0.9rem;" onclick="renderForgotPasswordModalWorkflow()">Forgot Password?</span>
-        </div>
-        <br>
-        
-        <div class="btn-group">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
-            <button onclick="verifyEditPasswordAndProceedNonFirebase('${targetProductIdKeyValueString}')" class="btn-blue">Verify Password Phrase</button>
-        </div>
-    `;
-    document.getElementById("auth-modal").classList.add("active");
-}
-
-/**
- * Validates the password inline and proceeds to Step 2 form view
- */
-function verifyEditPasswordAndProceedNonFirebase(targetProductIdKeyValueString) {
-    const enteredPassword = document.getElementById("edit-verify-password").value;
-    const errNode = document.getElementById("err-edit-reauth-msg");
-    
-    errNode.classList.add("hidden-node");
-    
-    if (enteredPassword !== APP_STATE.currentUser.secretKey) {
-        errNode.innerText = "Incorrect Password"; 
-        errNode.classList.remove("hidden-node"); 
-        return;
-    }
-    
-    // Proceed to Step 2 Form Presentation
-    renderActualEditProductFormNonFirebase(targetProductIdKeyValueString);
-}
-
-/**
- * Step 2: Displays information inputs for the specified asset post
- */
-function renderActualEditProductFormNonFirebase(targetProductIdKeyValueString) {
-    const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
-    if (!targetProduct) return;
-
-    const modalContentTargetNode = document.getElementById("auth-modal-content");
-    modalContentTargetNode.innerHTML = `
-        <h3>Edit Product Details (Step 2 of 2)</h3>
-        <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Updating information for your listed commercial asset.</p>
-        
-        <div class="form-input-container margin-top-sm">
-            <label>Product Name</label>
-            <input type="text" id="editprod-name" class="form-field-control" placeholder="Enter concise commercial inventory title text" value="${targetProduct.name}">
-        </div>
-        
-        <div class="form-input-container">
-            <label>Select Logistics Catalog Classification Category:</label>
-            <select id="editprod-cat" class="form-field-control">
-                <option value="Electrical Appliances" ${targetProduct.category === 'Electrical Appliances' ? 'selected' : ''}>Electrical Appliances</option>
-                <option value="Mobile Devices & Computers" ${targetProduct.category === 'Mobile Devices & Computers' ? 'selected' : ''}>Mobile Devices & Computers</option>
-                <option value="Home Furniture" ${targetProduct.category === 'Home Furniture' ? 'selected' : ''}>Home Furniture</option>
-                <option value="Fashion Clothing Apparel" ${targetProduct.category === 'Fashion Clothing Apparel' ? 'selected' : ''}>Fashion Clothing Apparel</option>
-                <option value="Beauty & Personal Care" ${targetProduct.category === 'Beauty & Personal Care' ? 'selected' : ''}>Beauty & Personal Care</option>
-                <option value="Sports, Fitness and Outdoors" ${targetProduct.category === 'Sports, Fitness and Outdoors' ? 'selected' : ''}>Sports, Fitness and Outdoors</option>
-                <option value="Groceries & Essentials" ${targetProduct.category === 'Groceries & Essentials' ? 'selected' : ''}>Groceries & Essentials</option>
-                <option value="Others" ${targetProduct.category === 'Others' ? 'selected' : ''}>Others</option>
-            </select>
-        </div>
-        
-        <div class="form-input-container">
-            <label>Primary Short Public Marketing Overview Description (Max 100 Chars):</label>
-            <input type="text" id="editprod-info" class="form-field-control" maxlength="100" placeholder="Max 100 text characters" value="${targetProduct.info}">
-        </div>
-        
-        <div class="form-input-container-image">
-            <label>Update Product Image</label>
-            <div class="preview-box" style="min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-bottom: 10px;">
-                <span id="placeholderTextimg" style="display: none;">No image selected</span>
-                <img id="imagePreview" src="${targetProduct.coverPhoto}" alt="Image Preview" style="max-width: 100%; max-height: 200px; display: block;">
-            </div>
-            <input type="file" id="imageInput" accept="image/*">
-        </div>
-        <br>
-        
-        <div class="form-input-container">
-            <label>More Info and Specifications</label>
-            <textarea id="editprod-aiinfo" class="form-field-control rounded-rect" style="height:60px;" placeholder="A more detailed explanation of product.">${targetProduct.aiInfo}</textarea>
-        </div>
-        
-        <div class="form-input-container">
-            <label>Unit Commercial Pricing Valuation Baseline Quote Amount Number (${APP_STATE.currentUser.country === 'Nigeria' ? '₦' : '$'}):</label>
-            <input type="number" id="editprod-price" class="form-field-control" placeholder="Enter numeric base rate" value="${targetProduct.price}">
-        </div>
-        
-        <div class="btn-group margin-top-md">
-            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel Changes</button>
-            <button onclick="executePipelineCommitUpdatedInventoryPostRecord('${targetProduct.pid}')" class="btn-blue">Save Changes</button>
-        </div>
-    `;
-    setupImagePreviewListener();
-}
-
-function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValueString) {
-    const name = document.getElementById("editprod-name").value.trim();
-    const cat = document.getElementById("editprod-cat").value;
-    const info = document.getElementById("editprod-info").value.trim();
-    const imagePreview = document.getElementById("imagePreview");
-    const aiInfo = document.getElementById("editprod-aiinfo").value.trim();
-    const priceRaw = document.getElementById("editprod-price").value;
-    
-    if(name === "" || info === "" || priceRaw === "" || !imagePreview.src || imagePreview.src === "") {
-        alert("All compulsory info must be imputed.");
-        return;
-    }
-    
-    const productStructuralIndexMatchId = SYSTEM_DATABASE.products.findIndex(p => p.pid === targetProductIdKeyValueString);
-    if(productStructuralIndexMatchId !== -1) {
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].name = name;
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].category = cat;
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].info = info;
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].price = parseFloat(priceRaw);
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].coverPhoto = imagePreview.src;
-        SYSTEM_DATABASE.products[productStructuralIndexMatchId].aiInfo = aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.";
-        
-        syncPlatformDatabaseStateToWebStorage();
-        
-        closeActiveModalDirectly('auth-modal');
-        alert("Product Details Updated Successfully.");
-        
-        renderAccountInventoryLedgerManagementDashboardGrid();
-        renderMarketplaceProductsDisplayLoop();
     } else {
-        alert("Error mapping product tracking instance registry.");
+        userOwnedInventoryItemsArray.forEach(item => {
+            const itemRowRowStripContainerElementNode = document.createElement("div");
+            itemRowRowStripContainerElementNode.className = "rounded-rect";
+            itemRowRowStripContainerElementNode.style.cssText = "display:flex; align-items:center; justify-content:space-between; padding:12px; border:1px solid var(--fort-gray-border); margin-bottom:10px; background-color:var(--fort-white-snow);";
+            
+            itemRowRowStripContainerElementNode.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                    <img src="${item.coverPhoto}" style="width:40px; height:40px; object-fit:cover;" class="rounded-rect" alt="Thumb">
+                    <div>
+                        <h5 style="font-weight:700; color:var(--fort-blue-dark);">${item.name}</h5>
+                        <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Category: ${item.category} | Analytics Metrics Hits Counter Value: ${item.clickCount || 0} hits</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-blue" style="padding:4px 10px; font-size:0.75rem;" onclick="launchEditProductInventoryModalFormLayoutShell('${item.pid}')">Edit Details</button>
+                    <button class="btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="executeDeletePlatformInventoryItemListingPostRecord('${item.pid}')">Delete Inventory Post</button>
+                </div>
+            `;
+            listContainerNodeElement.appendChild(itemRowRowStripContainerElementNode);
+        });
     }
+
+    renderLeaderboardInterfaceSectionInSettings(listContainerNodeElement.parentNode);
 }
 
-/**
- * Purges a product listing completely using ONLY local SYSTEM_DATABASE memory.
- * Requires user password confirmation directly inside the overlay modal prompt.
- */
-function executeDeletePlatformInventoryItemListingPostRecord(targetProductIdKeyValueString) {
-    const confirmationPromptMessage = "Are you sure you want to delete this product?";
+// Global variable structure setups
+if (!SYSTEM_DATABASE.pinnedLeaderboard) {
+    SYSTEM_DATABASE.pinnedLeaderboard = Array(20).fill(null);
+}
+if (!SYSTEM_DATABASE.slotMetadata) {
+    SYSTEM_DATABASE.slotMetadata = Array(20).fill(null).map(() => ({
+        expirationTime: null,
+        autoRenew: true,
+        previousOwnerUid: null
+    }));
+}
+
+function renderLeaderboardInterfaceSectionInSettings(parentElementContainer) {
+    let existingSubSection = document.getElementById("settings-leaderboard-sub-container");
+    if (existingSubSection) existingSubSection.remove();
+
+    const subSectionNode = document.createElement("div");
+    subSectionNode.id = "settings-leaderboard-sub-container";
+    subSectionNode.className = "leaderboard-settings-section";
     
-    displayConfirmationModalOverlayAction(confirmationPromptMessage, () => {
-        // Splice and remove from local application memory arrays safely
-        const structuralIndexMatchPointerId = SYSTEM_DATABASE.products.findIndex(p => p.pid === targetProductIdKeyValueString);
-        if (structuralIndexMatchPointerId !== -1) {
-            SYSTEM_DATABASE.products.splice(structuralIndexMatchPointerId, 1);
+    subSectionNode.innerHTML = `
+        <h3 style="margin-bottom: 4px; color: var(--fort-blue-dark);">🏆 Global Leaderboard Subscription Slots</h3>
+        <p style="font-size: 0.8rem; color: var(--fort-gray-slate); margin-bottom: 12px;">Review positioning slots, check real-time availability states or manage active subscriptions.</p>
+        <div id="settings-slots-stack-target" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    `;
+    parentElementContainer.appendChild(subSectionNode);
+
+    const targetStackGrid = document.getElementById("settings-slots-stack-target");
+    const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard;
+    const metadata = SYSTEM_DATABASE.slotMetadata;
+    const currentUserId = APP_STATE.currentUser.uid;
+    const isAdmin = (currentUserId === 'admin');
+    const now = Date.now();
+
+    for (let idx = 0; idx < 20; idx++) {
+        const productPid = leaderboard[idx];
+        const linkedProduct = productPid ? SYSTEM_DATABASE.products.find(p => p.pid === productPid) : null;
+        const slotMeta = metadata[idx];
+        const slotPrice = LEADERBOARD_SLOT_PRICES[idx];
+
+        let inlineColorStyle = "background: #f4f6f9; border-left: 5px solid #ccc;"; 
+        let slotStatusLabelText = `Available Vacant Slot — ${formatToNaira(slotPrice)}`;
+        let operationalActionButtonHTML = `<button class="btn-blue" style="padding: 6px 12px; font-size:0.75rem;" onclick="initiateSlotSubscriptionPurchaseSequence(${idx})">Buy Slot</button>`;
+
+        const isExpired = slotMeta.expirationTime && now > slotMeta.expirationTime;
+        const gracePeriodEnd = slotMeta.expirationTime ? slotMeta.expirationTime + (24 * 60 * 60 * 1000) : null;
+        const isInGracePeriod = isExpired && gracePeriodEnd && now <= gracePeriodEnd;
+
+        // Check ownership context safely via metadata tracking or the pinned items mapping setup
+        const isActuallyOwned = linkedProduct || (slotMeta.expirationTime && !isExpired);
+        const ownerUid = linkedProduct ? linkedProduct.ownerUid : slotMeta.previousOwnerUid;
+        const isUserOwner = (ownerUid === currentUserId);
+
+        if (isActuallyOwned && !isExpired) {
+            const ownerAccount = SYSTEM_DATABASE.users.find(u => u.uid === ownerUid);
+            const ownerDisplayName = ownerAccount ? (ownerAccount.businessName || ownerAccount.identityName) : "Unknown Vendor";
             
-            // Sync mutated array down to local persistent web storage
-            syncPlatformDatabaseStateToWebStorage();
-            
-            alert("Product successfully purged from system inventory storage registers.");
-            
-            // Trigger user interface lifecycle rendering view loops to instantly refresh screens
-            if (typeof renderAccountInventoryLedgerManagementDashboardGrid === "function") {
-                renderAccountInventoryLedgerManagementDashboardGrid();
+            if (isUserOwner) {
+                inlineColorStyle = "background: #e3f2fd; border-left: 5px solid var(--fort-blue-primary);";
+                slotStatusLabelText = `Occupied by You (Expires: ${new Date(slotMeta.expirationTime).toLocaleDateString()})`;
+                operationalActionButtonHTML = `
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-blue" style="padding: 6px 12px; font-size:0.75rem;" onclick="launchManageSlotModal(${idx})">Manage Slot</button>
+                        <button class="btn-danger" style="padding: 6px 12px; font-size:0.75rem; background:crimson; color:white; border:none; border-radius:4px;" onclick="cancelActiveSlotSubscription(${idx})">Cancel</button>
+                    </div>`;
+            } else {
+                // RULE: If a slot is owned by a user and another user views it, the slot should be grey and show no buttons, just unavailable[cite: 1]
+                inlineColorStyle = "background: #e0e0e0; border-left: 5px solid #9e9e9e; opacity: 0.75; color: #616161;";
+                slotStatusLabelText = `Occupied by: ${ownerDisplayName} — Unavailable`;
+                operationalActionButtonHTML = isAdmin ? `<button class="btn-gray" style="padding: 6px 12px; font-size:0.75rem; color: red;" onclick="cancelActiveSlotSubscription(${idx})">Force Evict</button>` : '';
             }
-            if (typeof renderMarketplaceProductsDisplayLoop === "function") {
-                renderMarketplaceProductsDisplayLoop();
+        } else if (isInGracePeriod) {
+            // RULE: Grace period of 24 hours logic if auto-renew is not on and user didn't renew[cite: 1]
+            if (isUserOwner) {
+                // Showing red on the user's list[cite: 1]
+                inlineColorStyle = "background: #ffebee; border-left: 5px solid #ef5350; color: #c62828;";
+                slotStatusLabelText = `Your subscription expired! 24h Grace Period Active — ${formatToNaira(slotPrice)}`;
+                operationalActionButtonHTML = `<button class="btn-danger" style="background:#d32f2f; color:white; padding: 6px 12px; font-size:0.75rem;" onclick="initiateSlotSubscriptionPurchaseSequence(${idx})">Renew Now</button>`;
+            } else {
+                // Still unavailable color and indicator for others[cite: 1]
+                inlineColorStyle = "background: #e0e0e0; border-left: 5px solid #9e9e9e; opacity: 0.6; color: #616161;";
+                slotStatusLabelText = `Unavailable (In Grace Period Renewal window)`;
+                operationalActionButtonHTML = '';
             }
         } else {
-            alert("Error: Target product identifier mapping reference could not be found.");
+            if (isExpired && !isInGracePeriod && slotMeta.previousOwnerUid) {
+                // Cleanup out of bounds records automatically
+                leaderboard[idx] = null;
+                const oldOwner = slotMeta.previousOwnerUid;
+                slotMeta.previousOwnerUid = null;
+                slotMeta.expirationTime = null;
+                sendFortMartAdminSystemNotification(oldOwner, "Your 24-hour grace renewal period has expired. The slot is now publicly available.");
+            }
         }
+
+        const slotCardElement = document.createElement("div");
+        slotCardElement.style.cssText = `${inlineColorStyle} display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 6px; margin-bottom: 4px; box-sizing: border-box;`;
+        slotCardElement.innerHTML = `
+            <div>
+                <strong style="font-size: 0.9rem;">Slot Position #${idx + 1}</strong>
+                <div style="font-size: 0.78rem; margin-top: 2px;">${slotStatusLabelText} ${linkedProduct && !isExpired ? `(${linkedProduct.name})` : ''}</div>
+            </div>
+            <div>${operationalActionButtonHTML}</div>
+        `;
+        targetStackGrid.appendChild(slotCardElement);
+    }
+}
+
+function initiateSlotSubscriptionPurchaseSequence(slotIndexPositionId) {
+    const userProducts = SYSTEM_DATABASE.products.filter(p => p.ownerUid === APP_STATE.currentUser.uid);
+    if (userProducts.length === 0) {
+        showTopRightToast("Action Required: You must list at least one standard product before buying a leaderboard ranking slot.", "info");
+        return;
+    }
+
+    displayConfirmationModalOverlayAction("Verify account credentials before initializing the third-party Paystack processing node interface stream:", () => {
+        // Enforce absolute timeline order sequence: close verification popup modal windows fully first
+        const confirmModalNode = document.getElementById("confirm-modal");
+        if (confirmModalNode) confirmModalNode.classList.remove("active");
+        
+        // RULE: Show the user's custom modal first before taking them to the default paystack modal[cite: 1]
+        setTimeout(() => {
+            launchPaystackPaymentCheckoutModalView(slotIndexPositionId);
+        }, 150);
     });
 }
 
-/**
- * Enhanced Confirmation Modal Overlay Action incorporating inline security password verification.
- * Injects the password fields directly into 'confirm-modal-text' safely.
- */
+function launchPaystackPaymentCheckoutModalView(slotIndex) {
+    let existingModal = document.getElementById("paystack-checkout-modal");
+    if (existingModal) existingModal.remove();
+
+    const checkoutModalContainer = document.createElement("div");
+    checkoutModalContainer.id = "paystack-checkout-modal";
+    // Force direct styling configurations so that it displays perfectly inline on top of screens
+    checkoutModalContainer.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;";
+
+    const targetPrice = LEADERBOARD_SLOT_PRICES[slotIndex];
+    const initialAutoRenewState = SYSTEM_DATABASE.slotMetadata[slotIndex].autoRenew;
+
+    checkoutModalContainer.innerHTML = `
+        <div class="paystack-modal-box" style="background: white; border-radius: 8px; max-width: 420px; width: 100%; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--fort-gray-border);">
+            <div class="paystack-header-brand" style="background-color: #09a5db; color: white; padding: 20px; text-align: center;">
+                <h3 style="margin:0; color:white;">Fort Mart Gateway</h3>
+                <span style="font-size:0.75rem; opacity:0.9;">Securing payments for Fort Mart Pinned Products Slots</span>
+            </div>
+            <div class="paystack-body-content" style="padding: 24px;">
+                <p style="font-size:0.85rem; color:var(--fort-blue-dark); margin-bottom:12px;">You are authorizing a payment subscription setup for <strong>Leaderboard Slot Position #${slotIndex + 1}</strong>.</p>
+                <div class="form-input-container" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Email Address</label>
+                    <input type="text" id="paystack-email-field" class="form-field-control" value="${APP_STATE.currentUser.identifierText || 'user@fortmart.com'}" disabled style="width:100%; padding:8px; box-sizing:border-box;">
+                </div>
+                <div class="form-input-container" style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Price</label>
+                    <input type="text" class="form-field-control" value="${formatToNaira(targetPrice)}" disabled style="width:100%; padding:8px; box-sizing:border-box;">
+                </div>
+                
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <input type="checkbox" id="paystack-autorenew-toggle" ${initialAutoRenewState ? 'checked' : ''}>
+                    <label for="paystack-autorenew-toggle" style="font-size: 0.85rem; font-weight: 600; cursor: pointer; user-select:none;">Enable Auto-Renew Subscription billing</label>
+                </div>
+            </div>
+            <div class="paystack-footer-row" style="padding: 16px 24px; background: #f9f9f9; border-top: 1px solid #eee; display: flex; justify-content: space-between;">
+                <button class="btn-gray" onclick="document.getElementById('paystack-checkout-modal').remove()">Cancel</button>
+                <button class="btn-blue" style="background-color:#3bb75e; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:700;" onclick="executeActualPaystackIframePopRuntime(${slotIndex})">Proceed to Payment Method</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(checkoutModalContainer);
+}
+
+function executeActualPaystackIframePopRuntime(slotIndex) {
+    console.log("--> Starting Paystack execution for slot:", slotIndex);
+
+    // 1. Verify Paystack script is loaded in HTML
+    if (typeof PaystackPop === 'undefined') {
+        showTopRightToast("Paystack SDK not loaded! Make sure <script src=\"https://js.paystack.co/v1/inline.js\"></script> is in your HTML <head>.", "error");
+        return;
+    }
+
+    // 2. Validate email input element
+    const emailField = document.getElementById("paystack-email-field");
+    const userEmail = emailField ? emailField.value : null;
+
+    if (!userEmail) {
+        showTopRightToast("Please enter a valid email address before proceeding.", "info");
+        return;
+    }
+
+    // 3. Safe fallback for APP_STATE user_uid
+    const userUid = (typeof APP_STATE !== 'undefined' && APP_STATE.currentUser) 
+        ? APP_STATE.currentUser.uid 
+        : 'GUEST_USER';
+
+    const targetPrice = LEADERBOARD_SLOT_PRICES[slotIndex];
+    const autoRenewToggle = document.getElementById("paystack-autorenew-toggle");
+    const isAutoRenewChecked = autoRenewToggle ? autoRenewToggle.checked : false;
+
+    if (typeof SYSTEM_DATABASE !== 'undefined' && SYSTEM_DATABASE.slotMetadata) {
+        SYSTEM_DATABASE.slotMetadata[slotIndex].autoRenew = isAutoRenewChecked;
+    }
+
+    // Close modal safely if it exists
+    const modal = document.getElementById('paystack-checkout-modal');
+    if (modal) modal.remove();
+
+    // 4. Build Paystack configuration
+    let paymentConfig = {
+        key: 'pk_test_8e350f62114983f1cd23b0944668d435a6e74214', 
+        email: userEmail,
+        amount: targetPrice * 100, 
+        currency: "NGN",
+        ref: 'FT-LEADERBOARD-' + slotIndex + '-' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+            slot_index: slotIndex,
+            user_uid: userUid
+        },
+        callback: function(response) {
+            console.log("Payment successful response:", response);
+            processPaystackPaymentSuccess(slotIndex);
+        },
+        onClose: function() {
+            showTopRightToast('Payment window closed by customer session.', "info");
+        }
+    };
+
+    if (isAutoRenewChecked) {
+        paymentConfig.plan = LEADERBOARD_PAYSTACK_PLAN_CODES[slotIndex];
+    }
+
+    console.log("--> Triggering Paystack Pop setup with config:", paymentConfig);
+
+    try {
+        let handler = PaystackPop.setup(paymentConfig);
+        handler.openIframe();
+    } catch (error) {
+        console.error("Paystack Execution Error:", error);
+        showTopRightToast("Error launching Paystack modal: " + error.message, "error");
+    }
+}
+
+function processPaystackPaymentSuccess(slotIndex) {
+    const now = Date.now();
+    const oneMonthDurationMs = 30 * 24 * 60 * 60 * 1000; // RULE: Valid for only one month[cite: 1]
+    
+    SYSTEM_DATABASE.slotMetadata[slotIndex].expirationTime = now + oneMonthDurationMs;
+    SYSTEM_DATABASE.slotMetadata[slotIndex].previousOwnerUid = APP_STATE.currentUser.uid;
+    
+    // RULE: Anytime successful payment is made, send message by admin indicating purchase was successful[cite: 1]
+    sendFortMartAdminSystemNotification(
+        APP_STATE.currentUser.uid, 
+        `Payment Successful! You have successfully acquired Leaderboard Slot Position #${slotIndex + 1}. Subscription valid for 1 month.`
+    );
+
+    showTopRightToast("Transaction authenticated cleanly by Paystack! Opening product allocation tools...", "success");
+    launchManageSlotModal(slotIndex);
+}
+
+// RULE: The manage slot should prompt a modal where you can toggle auto-renew and change the product linked to the slot[cite: 1]
+function launchManageSlotModal(slotIndex) {
+    let existingModal = document.getElementById("manage-slot-allocation-modal");
+    if (existingModal) existingModal.remove();
+
+    const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard;
+    const activeProductId = leaderboard[slotIndex];
+    const slotMeta = SYSTEM_DATABASE.slotMetadata[slotIndex];
+
+    const userOwnedProducts = SYSTEM_DATABASE.products.filter(p => p.ownerUid === APP_STATE.currentUser.uid);
+    const unpinnedAvailableProducts = userOwnedProducts.filter(p => !leaderboard.includes(p.pid) || p.pid === activeProductId);
+
+    const managementModalContainer = document.createElement("div");
+    managementModalContainer.id = "manage-slot-allocation-modal";
+    managementModalContainer.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;";
+
+    let dropdownSelectionHTML = `<option value="">-- No Product Assigned (Vacant) --</option>`;
+    if (unpinnedAvailableProducts.length > 0) {
+        dropdownSelectionHTML += unpinnedAvailableProducts.map(p => 
+            `<option value="${p.pid}" ${p.pid === activeProductId ? 'selected' : ''}>${p.name} [ID: ${p.pid}]</option>`
+        ).join("");
+    }
+
+    managementModalContainer.innerHTML = `
+        <div class="modal-box rounded-rect" style="padding: 24px; max-width: 450px; width: 100%; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <h3>⚙️ Manage Leaderboard Slot #${slotIndex + 1}</h3>
+            <p style="margin-bottom:14px; font-size:0.85rem; color:var(--fort-gray-slate);">Assign an item post entry directly to this slot, or change assignments[cite: 1].</p>
+            
+            <div class="form-input-container" style="margin-bottom:16px;">
+                <label style="font-weight: 600; display:block; margin-bottom:4px;">Active Associated Product</label>
+                <select id="slot-product-mapping-dropdown" class="form-field-control" style="width:100%; padding:8px;">
+                    ${dropdownSelectionHTML}
+                </select>
+            </div>
+
+            <!-- RULE: There should be an autorenew checkbox that can be toggled on and off in the modal where a user manages his/her slot[cite: 1] -->
+            <div style="margin: 14px 0px; display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee;">
+                <input type="checkbox" id="manage-autorenew-checkbox" ${slotMeta.autoRenew ? 'checked' : ''}>
+                <label for="manage-autorenew-checkbox" style="font-size:0.85rem; font-weight:700; cursor:pointer; user-select:none;">Auto-renew subscription at end of billing cycle</label>
+            </div>
+
+            <div style="margin-top:12px; font-size:0.8rem; color:var(--fort-gray-slate);">
+                * Note: A product can occupy exactly one slot context at any given time[cite: 1].
+            </div>
+
+            <div class="btn-group" style="justify-content: flex-end; margin-top:20px; display:flex; gap:10px;">
+                <button class="btn-gray" onclick="document.getElementById('manage-slot-allocation-modal').remove()">Close Window</button>
+                <button class="btn-blue" onclick="saveSlotAllocationSettingsMapping(${slotIndex})">Save Allocation Settings</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(managementModalContainer);
+}
+
+function saveSlotAllocationSettingsMapping(slotIndex) {
+    const selectedProductId = document.getElementById("slot-product-mapping-dropdown").value;
+    const autoRenewChecked = document.getElementById("manage-autorenew-checkbox").checked;
+    
+    SYSTEM_DATABASE.slotMetadata[slotIndex].autoRenew = autoRenewChecked;
+
+    if (selectedProductId === "") {
+        SYSTEM_DATABASE.pinnedLeaderboard[slotIndex] = null;
+        showTopRightToast("Product unlinked successfully. Slot remains owned but is currently vacant.", "success");
+    } else {
+        const existingSlotIndex = SYSTEM_DATABASE.pinnedLeaderboard.indexOf(selectedProductId);
+        if (existingSlotIndex !== -1 && existingSlotIndex !== slotIndex) {
+            showTopRightToast("Error Constraint: This item is already pinned inside another leaderboard tracking container slot node!", "error");
+            return;
+        }
+        SYSTEM_DATABASE.pinnedLeaderboard[slotIndex] = selectedProductId;
+        showTopRightToast("Leaderboard slot mapping criteria update applied successfully!", "success");
+    }
+
+    document.getElementById("manage-slot-allocation-modal").remove();
+    administrativeSaveAndRefreshDisplay();
+    renderAccountInventoryLedgerManagementDashboardGrid();
+}
+
+function cancelActiveSlotSubscription(slotIndexPositionId) {
+    if (!SYSTEM_DATABASE.pinnedLeaderboard) return;
+    
+    displayConfirmationModalOverlayAction("Are you sure you want to cancel this slot positioning subscription setup?", () => {
+        SYSTEM_DATABASE.pinnedLeaderboard[slotIndexPositionId] = null;
+        SYSTEM_DATABASE.slotMetadata[slotIndexPositionId].expirationTime = null;
+        SYSTEM_DATABASE.slotMetadata[slotIndexPositionId].previousOwnerUid = null;
+        
+        administrativeSaveAndRefreshDisplay();
+        renderAccountInventoryLedgerManagementDashboardGrid();
+        showTopRightToast("Subscription terminated successfully.", "success");
+    });
+}
+
+function sendFortMartAdminSystemNotification(userId, messageContentText) {
+    if (!SYSTEM_DATABASE.adminMessages) {
+        SYSTEM_DATABASE.adminMessages = [];
+    }
+    SYSTEM_DATABASE.adminMessages.push({
+        recipientUid: userId,
+        sender: "Fort Mart Admin",
+        timestamp: Date.now(),
+        message: messageContentText
+    });
+    console.log(`[Notification Sent to User: ${userId}] From: Admin -> "${messageContentText}"`);
+}
+
 function displayConfirmationModalOverlayAction(messageStringText, callbackFunctionReference) {
     const confirmModalNode = document.getElementById("confirm-modal");
     if (!confirmModalNode) return;
 
-    // Clear and build the text block payload to include custom form text fields directly
     document.getElementById("confirm-modal-text").innerHTML = `
         <p style="margin-bottom: 12px; font-weight: 500;">${messageStringText}</p>
-        
         <div class="form-input-container" style="text-align: left; margin-top: 14px;">
-            <label style="font-weight: 700; font-size: 0.85rem; color: var(--fort-blue-dark);">Confirm Password:</label>
-            <input type="password" id="delete-verify-password" class="form-field-control" placeholder="Enter password to authorize permanent deletion" style="margin-top: 6px; width: 100%; box-sizing: border-box; padding: 6px;">
-            
-            <div id="err-delete-reauth-msg" class="text-danger-alert" style="color: red; font-size: 0.8rem; margin-top: 6px; display: none;">Incorrect Password Phrase</div>
+            <label style="font-weight: 700; font-size: 0.85rem; color: var(--fort-blue-dark);">Confirm Security Password Phrase:</label>
+            <input type="password" id="delete-verify-password" class="form-field-control" placeholder="Enter secret key to authenticate operation" style="margin-top: 6px; width: 100%; box-sizing: border-box; padding: 6px;">
+            <div id="err-delete-reauth-msg" class="text-danger-alert" style="color: red; font-size: 0.8rem; margin-top: 6px; display: none;">Incorrect Authentication Key Pattern Entry</div>
         </div>
-
         <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
             <input type="checkbox" id="chk-delete-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'delete-verify-password')">
             <label for="chk-delete-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
@@ -3393,8 +3729,8 @@ function displayConfirmationModalOverlayAction(messageStringText, callbackFuncti
     
     const yesButtonNode = document.getElementById("confirm-yes-btn");
     const noButtonNode = document.getElementById("confirm-no-btn");
+    yesButtonNode.innerText = "Confirm Action";
     
-    // Clear and duplicate prior event listeners safely to block multiple click event triggers
     const cleanYesNode = yesButtonNode.cloneNode(true);
     const cleanNoNode = noButtonNode.cloneNode(true);
     yesButtonNode.parentNode.replaceChild(cleanYesNode, yesButtonNode);
@@ -3404,15 +3740,14 @@ function displayConfirmationModalOverlayAction(messageStringText, callbackFuncti
         const enteredPassword = document.getElementById("delete-verify-password").value;
         const errNode = document.getElementById("err-delete-reauth-msg");
         
-        // Authenticate password directly against active current user state properties
         if (enteredPassword !== APP_STATE.currentUser.secretKey) {
             errNode.style.display = "block";
             return;
         }
         
         errNode.style.display = "none";
-        confirmModalNode.classList.remove("active");
         callbackFunctionReference();
+        confirmModalNode.classList.remove("active");
     });
 
     cleanNoNode.addEventListener("click", () => {
@@ -3565,12 +3900,13 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
 
     // --- ADMINISTRATIVE CONTROL LAYER LINKED TO EXECUTEINLINEADMINSAVE ---
     let administrativeControlsInlineHTML = "";
-    if (APP_STATE.currentUser && (APP_STATE.currentUser.uid === 'admin' || APP_STATE.currentUser.id === 'admin')) {
+    if (APP_STATE.currentUser && (APP_STATE.currentUser.uid === 'admin' || APP_STATE.currentUser.id === 'admin' )) {
         const rawVerificationCode = targetUserObjMatchRecord.UserAccountAuthenticationVerificationCode || targetUserObjMatchRecord.verificationCode || 'N/A';
         const currentGovernanceStatus = targetUserObjMatchRecord.verificationStatus || targetUserObjMatchRecord.status || 'unverified';
         const currentAccountType = targetUserObjMatchRecord.accountType || targetUserObjMatchRecord.type || 'personal';
         const registrationContactIdentifier = targetUserObjMatchRecord.identifierText || '';
         const securityAccessPassword = targetUserObjMatchRecord.secretKey || targetUserObjMatchRecord.password || '';
+        const uid = targetUserObjMatchRecord.uid || targetUserObjMatchRecord.id || '';
         
         administrativeControlsInlineHTML = `
             <div style="margin-top:12px; margin-bottom:12px; padding:14px; background:#f7fafc; border:1px solid #cbd5e0; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
@@ -3590,6 +3926,11 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
                 <div>
                     <span style="font-size:0.82rem; color:var(--fort-gray-slate); font-weight:700;">Account Signup Authentication Verification Code:</span>
                     <input type="text" id="UserAccountAuthenticationVerificationCode" class="form-field-control" style="margin-top:4px;" value="${rawVerificationCode}">
+                </div>
+
+                <div>
+                    <span style="font-size:0.82rem; color:var(--fort-gray-slate); font-weight:700;">User ID:</span>
+                    <input type="text" id="UserIdAdminSeen" class="form-field-control" style="margin-top:4px;" value="${uid}" disabled >
                 </div>
 
                 <div>
@@ -3629,7 +3970,7 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
             sellerProducts.forEach(product => {
                 const imgUrl = product.coverPhoto || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e0'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>";
                 productsGridItemsHTML += `
-                    <div class="profile-product-item-row" style="display:flex; align-items:center; gap:12px; padding:8px; background:var(--fort-white-snow); border:1px solid var(--fort-gray-border); border-radius:6px; cursor:pointer; transition:background 0.2s;" onclick="launchComprehensiveProductSpecificationsExpandedModalView('${product.pid}')" onmouseover="this.style.background='#f0f4f8'" onmouseout="this.style.background='var(--fort-white-snow)'">
+                    <div class="profile-product-item-row" style="display:flex; align-items:center; gap:12px; padding:8px; background:var(--fort-white-snow); border:1px solid var(--fort-gray-border); border-radius:6px; cursor:pointer; transition:background 0.2s;" onclick="closeActiveModalDirectly('product-detail-modal'); launchComprehensiveProductSpecificationsExpandedModalView('${product.pid}')" onmouseover="this.style.background='#f0f4f8'" onmouseout="this.style.background='var(--fort-white-snow)'">
                         <img src="${imgUrl}" style="width:50px; height:50px; object-fit:contain; border-radius:4px; background:#fcfcfc; border:1px solid #e2e8f0;" alt="${product.name}">
                         <div style="flex:1; min-width:0;">
                             <h4 style="margin:0; font-size:0.9rem; color:var(--fort-blue-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${product.name}</h4>
@@ -3758,7 +4099,7 @@ function executeInlineAdminSave(userId) {
     if (typeof showAlertModal === "function") {
         showAlertModal("Overwrites Saved", "Target credentials variables, account type matrices, and identity parameters permanently written to the registry.");
     } else {
-        alert("Overwrites Saved successfully.");
+        showTopRightToast("Overwrites Saved successfully.", "success");
     }
 }
 
@@ -3998,3 +4339,794 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, intervalTime);
 });
+
+function executeSystemicSubscriptionExpirationLifecycleCheck() {
+    // Safety Guard: Force arrays to exist natively if WebStorage didn't have them yet
+    if (!SYSTEM_DATABASE.pinnedLeaderboard) {
+        SYSTEM_DATABASE.pinnedLeaderboard = Array(20).fill(null);
+    }
+    if (!SYSTEM_DATABASE.slotMetadata) {
+        SYSTEM_DATABASE.slotMetadata = Array(20).fill(null).map(() => ({
+            expirationTime: null,
+            autoRenew: true,
+            previousOwnerUid: null
+        }));
+    }
+
+    const now = Date.now();
+    const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard;
+    const metadata = SYSTEM_DATABASE.slotMetadata;
+    const oneMonthDurationMs = 30 * 24 * 60 * 60 * 1000;
+
+    for (let idx = 0; idx < 20; idx++) {
+        const slotMeta = metadata[idx];
+        if (!slotMeta || !slotMeta.expirationTime) continue;
+
+        if (now > slotMeta.expirationTime) {
+            const ownerUid = slotMeta.previousOwnerUid;
+
+            if (slotMeta.autoRenew) {
+                slotMeta.expirationTime = now + oneMonthDurationMs;
+                sendFortMartAdminSystemNotification(
+                    ownerUid, 
+                    `Auto-Renew Successful! Your subscription for Leaderboard Slot Position #${idx + 1} has been automatically extended for 1 month.`
+                );
+            } else {
+                const gracePeriodEnd = slotMeta.expirationTime + (24 * 60 * 60 * 1000);
+
+                if (leaderboard[idx] !== null) {
+                    leaderboard[idx] = null; 
+                    sendFortMartAdminSystemNotification(
+                        ownerUid, 
+                        `Your slot ownership period has expired! Please renew within 24 hours or the slot will become available for other users to purchase.`
+                    );
+                }
+
+                if (now > gracePeriodEnd) {
+                    slotMeta.previousOwnerUid = null;
+                    slotMeta.expirationTime = null;
+                    sendFortMartAdminSystemNotification(ownerUid, `Your 24-hour grace renewal period has lapsed. Slot Position #${idx + 1} is now public.`);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Step 1: Launches password confirmation field layout tracking validation checks
+ */
+function launchEditProductInventoryModalFormLayoutShell(targetProductIdKeyValueString) {
+    const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
+    if (!targetProduct) {
+        showTopRightToast("Product record could not be found.", "error");
+        return;
+    }
+
+    const modalContentTargetNode = document.getElementById("auth-modal-content");
+    modalContentTargetNode.innerHTML = `
+        <h3>Enter Current Password (Step 1 of 2)</h3>
+
+        <div class="form-input-container margin-top-sm">
+            <label>Active Password:</label>
+            <input type="password" id="edit-verify-password" class="form-field-control" placeholder="Enter password to verify ownership context">
+            
+            <div id="err-edit-reauth-msg" class="text-danger-alert hidden-node">Incorrect Password</div>
+        </div>
+
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chk-edit-showpass" onchange="toggleFormPasswordFieldVisibility(this, 'edit-verify-password')">
+            <label for="chk-edit-showpass" style="font-size: 0.8rem; font-weight: 400; cursor: pointer; user-select: none;">Show Password</label>            
+        </div>
+
+        <div class="text-center margin-top-xs">
+            <span style="color:var(--fort-blue-light); cursor:pointer; font-size:0.9rem;" onclick="renderForgotPasswordModalWorkflow()">Forgot Password?</span>
+        </div>
+        <br>
+        
+        <div class="btn-group">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel</button> 
+            <button onclick="verifyEditPasswordAndProceedNonFirebase('${targetProductIdKeyValueString}')" class="btn-blue">Verify Password Phrase</button>
+        </div>
+    `;
+    document.getElementById("auth-modal").classList.add("active");
+}
+
+/**
+ * Validates the password inline and proceeds to Step 2 form view
+ */
+function verifyEditPasswordAndProceedNonFirebase(targetProductIdKeyValueString) {
+    const enteredPassword = document.getElementById("edit-verify-password").value;
+    const errNode = document.getElementById("err-edit-reauth-msg");
+    
+    errNode.classList.add("hidden-node");
+    
+    if (enteredPassword !== APP_STATE.currentUser.secretKey) {
+        errNode.innerText = "Incorrect Password"; 
+        errNode.classList.remove("hidden-node"); 
+        return;
+    }
+    
+    // Proceed to Step 2 Form Presentation
+    renderActualEditProductFormNonFirebase(targetProductIdKeyValueString);
+}
+
+/**
+ * Step 2: Displays information inputs for the specified asset post
+ */
+function renderActualEditProductFormNonFirebase(targetProductIdKeyValueString) {
+    const targetProduct = SYSTEM_DATABASE.products.find(p => p.pid === targetProductIdKeyValueString);
+    if (!targetProduct) return;
+
+    const modalContentTargetNode = document.getElementById("auth-modal-content");
+    modalContentTargetNode.innerHTML = `
+        <h3>Edit Product Details (Step 2 of 2)</h3>
+        <p style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">Updating information for your listed commercial asset.</p>
+        
+        <div class="form-input-container margin-top-sm">
+            <label>Product Name</label>
+            <input type="text" id="editprod-name" class="form-field-control" placeholder="Enter concise commercial inventory title text" value="${targetProduct.name}">
+        </div>
+        
+        <div class="form-input-container">
+            <label>Select Logistics Catalog Classification Category:</label>
+            <select id="editprod-cat" class="form-field-control">
+                <option value="Electrical Appliances" ${targetProduct.category === 'Electrical Appliances' ? 'selected' : ''}>Electrical Appliances</option>
+                <option value="Mobile Devices & Computers" ${targetProduct.category === 'Mobile Devices & Computers' ? 'selected' : ''}>Mobile Devices & Computers</option>
+                <option value="Home Furniture" ${targetProduct.category === 'Home Furniture' ? 'selected' : ''}>Home Furniture</option>
+                <option value="Fashion Clothing Apparel" ${targetProduct.category === 'Fashion Clothing Apparel' ? 'selected' : ''}>Fashion Clothing Apparel</option>
+                <option value="Beauty & Personal Care" ${targetProduct.category === 'Beauty & Personal Care' ? 'selected' : ''}>Beauty & Personal Care</option>
+                <option value="Sports, Fitness and Outdoors" ${targetProduct.category === 'Sports, Fitness and Outdoors' ? 'selected' : ''}>Sports, Fitness and Outdoors</option>
+                <option value="Groceries & Essentials" ${targetProduct.category === 'Groceries & Essentials' ? 'selected' : ''}>Groceries & Essentials</option>
+                <option value="Others" ${targetProduct.category === 'Others' ? 'selected' : ''}>Others</option>
+            </select>
+        </div>
+        
+        <div class="form-input-container">
+            <label>Primary Short Public Marketing Overview Description (Max 100 Chars):</label>
+            <input type="text" id="editprod-info" class="form-field-control" maxlength="100" placeholder="Max 100 text characters" value="${targetProduct.info}">
+        </div>
+        
+        <div class="form-input-container-image">
+            <label>Update Product Image</label>
+            <div class="preview-box" style="min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-bottom: 10px;">
+                <span id="placeholderTextimg" style="display: none;">No image selected</span>
+                <img id="imagePreview" src="${targetProduct.coverPhoto}" alt="Image Preview" style="max-width: 100%; max-height: 200px; display: block;">
+            </div>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        <br>
+        
+        <div class="form-input-container">
+            <label>More Info and Specifications</label>
+            <textarea id="editprod-aiinfo" class="form-field-control rounded-rect" style="height:60px;" placeholder="A more detailed explanation of product.">${targetProduct.aiInfo}</textarea>
+        </div>
+        
+        <div class="form-input-container">
+            <label>Unit Commercial Pricing Valuation Baseline Quote Amount Number (${APP_STATE.currentUser.country === 'Nigeria' ? '₦' : '$'}):</label>
+            <input type="number" id="editprod-price" class="form-field-control" placeholder="Enter numeric base rate" value="${targetProduct.price}">
+        </div>
+        
+        <div class="btn-group margin-top-md">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Cancel Changes</button>
+            <button onclick="executePipelineCommitUpdatedInventoryPostRecord('${targetProduct.pid}')" class="btn-blue">Save Changes</button>
+        </div>
+    `;
+    setupImagePreviewListener();
+}
+
+function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValueString) {
+    const name = document.getElementById("editprod-name").value.trim();
+    const cat = document.getElementById("editprod-cat").value;
+    const info = document.getElementById("editprod-info").value.trim();
+    const imagePreview = document.getElementById("imagePreview");
+    const aiInfo = document.getElementById("editprod-aiinfo").value.trim();
+    const priceRaw = document.getElementById("editprod-price").value;
+    
+    if(name === "" || info === "" || priceRaw === "" || !imagePreview.src || imagePreview.src === "") {
+        showTopRightToast("All compulsory info must be imputed.", "info");
+        return;
+    }
+    
+    const productStructuralIndexMatchId = SYSTEM_DATABASE.products.findIndex(p => p.pid === targetProductIdKeyValueString);
+    if(productStructuralIndexMatchId !== -1) {
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].name = name;
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].category = cat;
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].info = info;
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].price = parseFloat(priceRaw);
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].coverPhoto = imagePreview.src;
+        SYSTEM_DATABASE.products[productStructuralIndexMatchId].aiInfo = aiInfo || "Standard platform baseline listed trading stock profile object reference specifications tracking structure model elements values data parameters.";
+        
+        syncPlatformDatabaseStateToWebStorage();
+        
+        closeActiveModalDirectly('auth-modal');
+        showTopRightToast("Product Details Updated Successfully", "success");
+        
+        renderAccountInventoryLedgerManagementDashboardGrid();
+        renderMarketplaceProductsDisplayLoop();
+    } else {
+        showTopRightToast("Error mapping product tracking instance registry.", "error");
+    }
+}
+
+/**
+ * Purges a product listing completely using ONLY local SYSTEM_DATABASE memory.
+ * Requires user password confirmation directly inside the overlay modal prompt.
+ */
+function executeDeletePlatformInventoryItemListingPostRecord(targetProductIdKeyValueString) {
+    const confirmationPromptMessage = "Are you sure you want to delete this product?";
+    
+    displayConfirmationModalOverlayAction(confirmationPromptMessage, () => {
+        // Splice and remove from local application memory arrays safely
+        const structuralIndexMatchPointerId = SYSTEM_DATABASE.products.findIndex(p => p.pid === targetProductIdKeyValueString);
+        
+        if (structuralIndexMatchPointerId !== -1) {
+            SYSTEM_DATABASE.products.splice(structuralIndexMatchPointerId, 1);
+            
+            // Sync mutated array down to local persistent web storage
+            syncPlatformDatabaseStateToWebStorage();
+
+            // REPLACED ALERT: Custom animated success toast
+            showTopRightToast("Product successfully purged from system inventory storage registers.", "success");
+            
+            
+            // Trigger user interface lifecycle rendering view loops to instantly refresh screens
+            if (typeof renderAccountInventoryLedgerManagementDashboardGrid === "function") {
+                renderAccountInventoryLedgerManagementDashboardGrid();
+            }
+            if (typeof renderMarketplaceProductsDisplayLoop === "function") {
+                renderMarketplaceProductsDisplayLoop();
+            }
+        } else {
+            // REPLACED ALERT: Custom animated error toast
+            showTopRightToast("Error: Target product identifier mapping reference could not be found.", "error");
+        }
+    });
+}
+
+/**
+ * Displays a custom animated toast notification from top-right.
+ * @param {string} message - Text content of the alert.
+ * @param {'success'|'error'|'info'} type - Theme flavor (default: 'success').
+ * @param {number} durationMs - Display duration before sliding out (default: 3500ms).
+ */
+function showTopRightToast(message, type = 'success', durationMs = 3500) {
+    // 1. Ensure the global container exists on the DOM
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // 2. Create the toast element
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    
+    // Add text message + manual close button
+    toast.innerHTML = `
+        <span>${message}</span>
+        <button class="toast-close-btn" aria-label="Close notification">&times;</button>
+    `;
+
+    container.appendChild(toast);
+
+    // 3. Trigger entry animation in next animation frame
+    requestAnimationFrame(() => {
+        toast.classList.add('toast-show');
+    });
+
+    // Helper for graceful exit removal
+    const dismissToast = () => {
+        toast.classList.remove('toast-show');
+        toast.addEventListener('transitionend', () => {
+            toast.remove();
+        }, { once: true });
+    };
+
+    // Manual close trigger on button click
+    toast.querySelector('.toast-close-btn').addEventListener('click', dismissToast);
+
+    // Auto dismiss timer
+    if (durationMs > 0) {
+        setTimeout(dismissToast, durationMs);
+    }
+}
+
+// Global state object for managing account upgrades
+let BUSINESS_UPGRADE_WIZARD = {
+    otpCode: null,
+    cooldownInterval: null,
+    cooldownSeconds: 0
+};
+
+/**
+ * Step 1: Initiate Account Upgrade Workflow - Password Verification Modal
+ */
+function initiateBusinessAccountUpgradeSequence() {
+    if (!APP_STATE.currentUser) {
+        showTopRightToast("Please log in to upgrade your account.", "info");
+        return;
+    }
+
+    const currentAccountType = APP_STATE.currentUser.accountType || APP_STATE.currentUser.type || 'personal';
+    if (currentAccountType === 'business') {
+        showTopRightToast("Your account is already registered as a Business Account.", "info");
+        return;
+    }
+
+    // Reuse existing confirm modal or build password verification modal inline
+    let pwdModal = document.getElementById("upgrade-password-modal");
+    if (pwdModal) pwdModal.remove();
+
+    pwdModal = document.createElement("div");
+    pwdModal.id = "upgrade-password-modal";
+    pwdModal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;";
+
+    pwdModal.innerHTML = `
+        <div style="background: white; border-radius: 8px; max-width: 400px; width: 90%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <h3 style="margin-top:0; color:var(--fort-blue-dark, #0d233a);">Confirm Password</h3>
+            <p style="font-size:0.88rem; color:#555; margin-bottom:16px;">Verify your account credentials before upgrading your account to a Business Account (₦2,500 fee):</p>
+            
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:600;">Account Password</label>
+                <input type="password" id="upgrade-pwd-input" class="form-field-control" placeholder="Enter your password" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+                <div id="upgrade-pwd-error" style="color:red; font-size:0.8rem; margin-top:4px; display:none;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn-gray" style="padding:8px 16px; border:none; border-radius:4px; cursor:pointer;" onclick="document.getElementById('upgrade-password-modal').remove()">Cancel</button>
+                <button class="btn-blue" style="background:#09a5db; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:600; cursor:pointer;" onclick="validateUpgradePasswordAndProceed()">Verify Password</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(pwdModal);
+}
+
+/**
+ * Validates password input against APP_STATE user records.
+ */
+function validateUpgradePasswordAndProceed() {
+    const pwdInput = document.getElementById("upgrade-pwd-input");
+    const errFeedback = document.getElementById("upgrade-pwd-error");
+    const enteredPassword = pwdInput ? pwdInput.value.trim() : "";
+
+    const actualSecret = APP_STATE.currentUser.secretKey || APP_STATE.currentUser.password || "";
+
+    if (!enteredPassword || enteredPassword !== actualSecret) {
+        if (errFeedback) {
+            errFeedback.innerText = "Invalid password. Please check your password and try again.";
+            errFeedback.style.display = "block";
+        }
+        return;
+    }
+
+    // Close password modal
+    document.getElementById("upgrade-password-modal").remove();
+
+    // Trigger Step 2: Send OTP and launch OTP Modal
+    sendBusinessUpgradeEmailOtpWorkflow(true);
+}
+
+/**
+ * Step 2: OTP Generation & EmailJS Sending Logic (Fixed)
+ */
+async function sendBusinessUpgradeEmailOtpWorkflow(isInitialLaunch = false) {
+    const userObj = (typeof APP_STATE !== 'undefined' && APP_STATE.currentUser) ? APP_STATE.currentUser : {};
+    
+    // Fallback email retrieval
+    const targetEmail = userObj.identifierText || userObj.email || "";
+    
+    if (!targetEmail || !targetEmail.includes("@")) {
+        const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+        if (feedbackElement) {
+            feedbackElement.innerText = "No valid email associated with this account.";
+            feedbackElement.style.color = "red";
+            feedbackElement.style.display = "block";
+        } else {
+            alert("No valid email address found for this account.");
+        }
+        return;
+    }
+
+    const todayKeyStr = "otp_limit_" + new Date().toISOString().split('T')[0] + "_" + targetEmail.toLowerCase();
+    
+    let dailyAttemptsCount = parseInt(localStorage.getItem(todayKeyStr) || "0", 10);
+    if (dailyAttemptsCount >= 5) {
+        if (!isInitialLaunch) {
+            const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+            if (feedbackElement) {
+                feedbackElement.innerText = "Maximum daily limit reached (5 OTPs per day).";
+                feedbackElement.style.color = "red";
+                feedbackElement.style.display = "block";
+            }
+        } else {
+            renderBusinessUpgradeOtpModal();
+            setTimeout(() => {
+                const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+                if (feedbackElement) {
+                    feedbackElement.innerText = "Maximum daily limit reached (5 OTPs per day).";
+                    feedbackElement.style.color = "red";
+                    feedbackElement.style.display = "block";
+                }
+            }, 50);
+        }
+        return;
+    }
+
+    // Generate 4-digit code
+    const freshOtpCode = Math.floor(1000 + Math.random() * 9000);
+    BUSINESS_UPGRADE_WIZARD.otpCode = freshOtpCode;
+
+    if (!isInitialLaunch) {
+        const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+        if (feedbackElement) {
+            feedbackElement.innerText = "Sending fresh code...";
+            feedbackElement.style.color = "blue";
+            feedbackElement.style.display = "block";
+        }
+    } else {
+        renderBusinessUpgradeOtpModal();
+    }
+
+    // Check if EmailJS SDK is attached to window
+    if (!window.emailjs) {
+        console.error("EmailJS SDK not loaded on window.");
+        const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+        if (feedbackElement) {
+            feedbackElement.innerText = "Email service unavailable. Please refresh and try again.";
+            feedbackElement.style.color = "red";
+            feedbackElement.style.display = "block";
+        }
+        return;
+    }
+
+    try {
+        // Start resend cooldown only when send is attempted
+        initiateUpgradeOtpResendCooldown();
+
+        const templateParams = {
+            to_email: targetEmail,
+            email: targetEmail, // Fallback alias
+            user_name: userObj.identityName || userObj.username || "Valued Customer",
+            to_name: userObj.identityName || userObj.username || "Valued Customer", // Fallback alias
+            otp_code: freshOtpCode,
+            code: freshOtpCode // Fallback alias
+        };
+
+        // Send via EmailJS
+        const response = await window.emailjs.send(
+            "service_ejag5pe", 
+            "template_nzub7tk", 
+            templateParams
+        );
+
+        console.log("EmailJS Success:", response.status, response.text);
+
+        // Increment attempts count only after successful API call
+        dailyAttemptsCount++;
+        localStorage.setItem(todayKeyStr, dailyAttemptsCount.toString());
+
+        const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+        if (feedbackElement) {
+            feedbackElement.innerText = `Verification code sent to ${targetEmail}`;
+            feedbackElement.style.color = "green";
+            feedbackElement.style.display = "block";
+        }
+    } catch (sendErr) {
+        console.error("EmailJS dispatch failed:", sendErr);
+        const feedbackElement = document.getElementById("err-upgrade-otp-feedback");
+        if (feedbackElement) {
+            feedbackElement.innerText = "Failed to send code. Verify connection or email setup.";
+            feedbackElement.style.color = "red";
+            feedbackElement.style.display = "block";
+        }
+    }
+}
+
+/**
+ * Handles 30-second resend timer cooldown for Upgrade OTP
+ */
+function initiateUpgradeOtpResendCooldown() {
+    if (BUSINESS_UPGRADE_WIZARD.cooldownInterval) {
+        clearInterval(BUSINESS_UPGRADE_WIZARD.cooldownInterval);
+    }
+
+    BUSINESS_UPGRADE_WIZARD.cooldownSeconds = 30;
+
+    BUSINESS_UPGRADE_WIZARD.cooldownInterval = setInterval(() => {
+        BUSINESS_UPGRADE_WIZARD.cooldownSeconds--;
+        
+        const resendLinkNode = document.getElementById("upgrade-otp-resend-link");
+        if (resendLinkNode) {
+            if (BUSINESS_UPGRADE_WIZARD.cooldownSeconds > 0) {
+                resendLinkNode.innerText = `Resend in ${BUSINESS_UPGRADE_WIZARD.cooldownSeconds}s`;
+                resendLinkNode.style.opacity = "0.5";
+                resendLinkNode.style.fontWeight = "400";
+                resendLinkNode.style.pointerEvents = "none";
+            } else {
+                resendLinkNode.innerText = "Resend";
+                resendLinkNode.style.opacity = "1";
+                resendLinkNode.style.fontWeight = "600";
+                resendLinkNode.style.pointerEvents = "auto";
+                clearInterval(BUSINESS_UPGRADE_WIZARD.cooldownInterval);
+                BUSINESS_UPGRADE_WIZARD.cooldownInterval = null;
+            }
+        } else if (BUSINESS_UPGRADE_WIZARD.cooldownSeconds <= 0) {
+            clearInterval(BUSINESS_UPGRADE_WIZARD.cooldownInterval);
+            BUSINESS_UPGRADE_WIZARD.cooldownInterval = null;
+        }
+    }, 1000);
+}
+
+/**
+ * Renders Step 2 Modal UI for OTP Input
+ */
+function renderBusinessUpgradeOtpModal() {
+    let otpModal = document.getElementById("upgrade-otp-modal");
+    if (otpModal) otpModal.remove();
+
+    const maskedTargetEmail = APP_STATE.currentUser.identifierText || "user@fortmart.com";
+    const secondsLeft = BUSINESS_UPGRADE_WIZARD.cooldownSeconds || 0;
+    const textLabel = secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "Resend";
+    const opacityStyle = secondsLeft > 0 ? "0.5" : "1";
+    const weightStyle = secondsLeft > 0 ? "400" : "600";
+    const pointerEventsStyle = secondsLeft > 0 ? "none" : "auto";
+
+    otpModal = document.createElement("div");
+    otpModal.id = "upgrade-otp-modal";
+    otpModal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;";
+
+    otpModal.innerHTML = `
+        <div style="background: white; border-radius: 8px; max-width: 420px; width: 90%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <h3 style="margin-top:0; color:var(--fort-blue-dark, #0d233a);">Verify Email Identity</h3>
+            <p style="font-size:0.92rem; color:var(--fort-blue-dark); line-height: 1.5; margin-top:12px; font-weight: 500;">
+                Enter the OTP sent to <strong>${maskedTargetEmail}</strong>
+            </p>
+            
+            <div style="margin-top:15px;">
+                <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:600;">Input 4-Digit OTP Code:</label>
+                <input type="text" id="upgrade-otp-input" class="form-field-control" placeholder="X X X X" maxlength="4" style="text-align:center; font-size:1.25rem; letter-spacing:8px; width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+                <div id="err-upgrade-otp-feedback" style="color: red; font-size: 0.8rem; margin-top: 4px; display:none;"></div>
+            </div>
+
+            <div style="margin-top: 10px; font-size: 0.85rem;">
+                <span>Didn't receive message? </span>
+                <a href="javascript:void(0)" 
+                   id="upgrade-otp-resend-link"
+                   onclick="if(BUSINESS_UPGRADE_WIZARD.cooldownSeconds <= 0) sendBusinessUpgradeEmailOtpWorkflow(false);" 
+                   style="color: #007bff; font-weight: ${weightStyle}; opacity: ${opacityStyle}; pointer-events: ${pointerEventsStyle}; text-decoration: none;">${textLabel}</a>
+            </div>
+
+            <p style="font-size:0.85rem; color:#666; line-height: 1.4; margin-top:12px;">
+                Note: Check your spam folder if the code isn't in your primary inbox and tagged the message "not spam".
+            </p>
+            
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top: 20px;">
+                <button class="btn-gray" style="padding:8px 16px; border:none; border-radius:4px; cursor:pointer;" onclick="closeUpgradeOtpModal()">Cancel</button>
+                <button class="btn-blue" style="background:#09a5db; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:600; cursor:pointer;" onclick="executeVerifyUpgradeOtpSubmission()">Verify OTP</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(otpModal);
+}
+
+function closeUpgradeOtpModal() {
+    if (BUSINESS_UPGRADE_WIZARD.cooldownInterval) {
+        clearInterval(BUSINESS_UPGRADE_WIZARD.cooldownInterval);
+        BUSINESS_UPGRADE_WIZARD.cooldownInterval = null;
+    }
+    const modal = document.getElementById("upgrade-otp-modal");
+    if (modal) modal.remove();
+}
+
+/**
+ * Validates typed OTP input against BUSINESS_UPGRADE_WIZARD.otpCode
+ */
+function executeVerifyUpgradeOtpSubmission() {
+    const inputField = document.getElementById("upgrade-otp-input");
+    const feedback = document.getElementById("err-upgrade-otp-feedback");
+
+    const enteredOtp = inputField ? inputField.value.trim() : "";
+    const expectedOtp = String(BUSINESS_UPGRADE_WIZARD.otpCode || "");
+
+    if (!enteredOtp || enteredOtp !== expectedOtp) {
+        if (feedback) {
+            feedback.innerText = "Invalid verification token. Please verify entry values.";
+            feedback.style.color = "red";
+            feedback.style.display = "block";
+        }
+        return;
+    }
+
+    // Clear timers and close modal
+    closeUpgradeOtpModal();
+
+    // Trigger Step 3: Launch Fort Mart Final Paystack Confirmation Modal
+    launchBusinessUpgradePaystackConfirmationModal();
+}
+
+/**
+ * Step 3: Final Fort Mart Confirmation Modal prior to Paystack Checkout launch
+ */
+function launchBusinessUpgradePaystackConfirmationModal() {
+    let checkoutModal = document.getElementById("upgrade-paystack-checkout-modal");
+    if (checkoutModal) checkoutModal.remove();
+
+    checkoutModal = document.createElement("div");
+    checkoutModal.id = "upgrade-paystack-checkout-modal";
+    checkoutModal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;";
+
+    const userEmail = APP_STATE.currentUser.identifierText || 'user@fortmart.com';
+    const upgradePrice = 2500; // 2,500 Naira
+
+    checkoutModal.innerHTML = `
+        <div class="paystack-modal-box" style="background: white; border-radius: 8px; max-width: 420px; width: 100%; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--fort-gray-border, #ccc);">
+            <div class="paystack-header-brand" style="background-color: #09a5db; color: white; padding: 20px; text-align: center;">
+                <h3 style="margin:0; color:white;">Fort Mart Gateway</h3>
+                <span style="font-size:0.75rem; opacity:0.9;">Account Plan Upgrade to Business Account</span>
+            </div>
+            <div class="paystack-body-content" style="padding: 24px;">
+                <p style="font-size:0.85rem; color:var(--fort-blue-dark, #0d233a); margin-bottom:12px;">You are authorizing a one-time payment to upgrade your account to a <strong>Business (Commercial) Account</strong>.</p>
+                <div class="form-input-container" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Email Address</label>
+                    <input type="text" id="upgrade-paystack-email-field" class="form-field-control" value="${userEmail}" disabled style="width:100%; padding:8px; box-sizing:border-box;">
+                </div>
+                <div class="form-input-container" style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Fee Amount</label>
+                    <input type="text" class="form-field-control" value="₦${upgradePrice.toLocaleString()}" disabled style="width:100%; padding:8px; box-sizing:border-box;">
+                </div>
+            </div>
+            <div class="paystack-footer-row" style="padding: 16px 24px; background: #f9f9f9; border-top: 1px solid #eee; display: flex; justify-content: space-between;">
+                <button class="btn-gray" style="padding:8px 16px; border:none; border-radius:4px; cursor:pointer;" onclick="document.getElementById('upgrade-paystack-checkout-modal').remove()">Cancel</button>
+                <button class="btn-blue" style="background-color:#3bb75e; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:700; cursor:pointer;" onclick="executeBusinessUpgradePaystackIframePopRuntime()">Proceed to Payment Method</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(checkoutModal);
+}
+
+/**
+ * Step 4: Paystack Runtime Initialization Execution
+ */
+function executeBusinessUpgradePaystackIframePopRuntime() {
+    if (typeof PaystackPop === 'undefined') {
+        showTopRightToast("Paystack SDK not loaded! Make sure <script src=\"https://js.paystack.co/v1/inline.js\"></script> is in your HTML <head>.", "info");
+        return;
+    }
+
+    const emailField = document.getElementById("upgrade-paystack-email-field");
+    const userEmail = emailField ? emailField.value : APP_STATE.currentUser.identifierText;
+
+    const userUid = APP_STATE.currentUser ? APP_STATE.currentUser.uid : 'GUEST_USER';
+    const upgradePrice = 2500; // 2500 NGN
+
+    // Close preview modal
+    const modal = document.getElementById('upgrade-paystack-checkout-modal');
+    if (modal) modal.remove();
+
+    let paymentConfig = {
+        key: 'pk_test_8e350f62114983f1cd23b0944668d435a6e74214',
+        email: userEmail,
+        amount: upgradePrice * 100, // Amount in kobo (250,000 kobo = 2,500 NGN)
+        currency: "NGN",
+        ref: 'FT-BUS-UPGRADE-' + userUid + '-' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+            upgrade_type: "business_account",
+            user_uid: userUid
+        },
+        callback: function(response) {
+            console.log("Business Upgrade Payment successful response:", response);
+            processBusinessUpgradePaymentSuccess();
+        },
+        onClose: function() {
+            showTopRightToast('Payment window closed by customer session.', "info");
+        }
+    };
+
+    try {
+        let handler = PaystackPop.setup(paymentConfig);
+        handler.openIframe();
+    } catch (error) {
+        console.error("Paystack Execution Error:", error);
+        showTopRightToast("Error launching Paystack modal: " + error.message, "error");
+    }
+}
+
+/**
+ * Step 5: Post-Payment Business Account Transition and Admin Notification
+ */
+function processBusinessUpgradePaymentSuccess() {
+    const userUid = APP_STATE.currentUser.uid || APP_STATE.currentUser.id;
+
+    // 1. Update matching user record in SYSTEM_DATABASE.users
+    const targetUserRecord = SYSTEM_DATABASE.users.find(u => u.uid === userUid || u.id === userUid);
+    if (targetUserRecord) {
+        targetUserRecord.accountType = 'business';
+        targetUserRecord.type = 'business';
+
+        if (!targetUserRecord.businessName) {
+            targetUserRecord.businessName = targetUserRecord.identityName || targetUserRecord.username || "Corporate Entity";
+        }
+        if (!targetUserRecord.businessInfo) {
+            targetUserRecord.businessInfo = "Commercial business distribution account profile workspace.";
+        }
+    }
+
+    // 2. Synchronize current active runtime state
+    APP_STATE.currentUser.accountType = 'business';
+    APP_STATE.currentUser.type = 'business';
+    if (!APP_STATE.currentUser.businessName) {
+        APP_STATE.currentUser.businessName = APP_STATE.currentUser.identityName || APP_STATE.currentUser.username || "Corporate Entity";
+    }
+    if (!APP_STATE.currentUser.businessInfo) {
+        APP_STATE.currentUser.businessInfo = "Commercial business distribution account profile workspace.";
+    }
+
+    // 3. Automated Message sent by Fort Mart Admin to User
+    const adminMessageText = "Congratulations! Your account has been successfully upgraded to a Business Account. You now have full access to business features on Fort Mart.";
+    const targetChatId = "chat_admin_" + userUid;
+
+    let adminChatThread = SYSTEM_DATABASE.chats.find(c => c.chatId === targetChatId);
+
+    if (adminChatThread) {
+        adminChatThread.messageLog.push({
+            mid: "msg_" + Date.now(),
+            senderUid: "admin",
+            text: adminMessageText,
+            timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        });
+    } else {
+        // Create chat thread if non-existent
+        adminChatThread = {
+            chatId: targetChatId,
+            dynamicParticipants: ["admin", userUid],
+            messageLog: [
+                {
+                    mid: "msg_" + Date.now(),
+                    senderUid: "admin",
+                    text: adminMessageText,
+                    timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                }
+            ]
+        };
+        SYSTEM_DATABASE.chats.push(adminChatThread);
+    }
+
+    // 4. Commit and sync modifications to local web storage
+    if (typeof syncPlatformDatabaseStateToWebStorage === "function") {
+        syncPlatformDatabaseStateToWebStorage();
+    } else if (typeof commitDatabasesStateToLocalStorage === "function") {
+        commitDatabasesStateToLocalStorage();
+    }
+
+    showTopRightToast("Payment successful! Your account has been upgraded to a Business Account.", "success");
+
+    // Refresh UI/view rendering if applicable
+    if (typeof renderMarketplaceProductsDisplayLoop === "function") {
+        renderMarketplaceProductsDisplayLoop();
+    }
+}
+
+function launchadvertismentofBusinessUpgrade() {
+    const modalContentTargetNode = document.getElementById("auth-modal-content");
+    modalContentTargetNode.innerHTML = `
+        <h3>Upgrade Account To Business To Publish Products</h3>
+    
+        <div style="margin-top: 14px; padding: 12px; background: #eef9ff; border: 1px solid #bbeeef; border-radius: 6px; text-align: center;">
+            <p style="font-size: 0.85rem; color: #0d233a; margin-bottom: 8px;">
+                Want to list products and unlock commercial tools?
+            </p>
+            <button class="btn-blue" style="background-color: #09a5db; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 700; cursor: pointer;" onclick="closeActiveModalDirectly('auth-modal'); initiateBusinessAccountUpgradeSequence()">
+                Upgrade Account to Business (₦2,500)
+            </button>
+        </div>        
+        <div class="btn-group">
+            <button onclick="closeActiveModalDirectly('auth-modal')" class="btn-gray">Close</button> 
+        </div>
+    `;
+    document.getElementById("auth-modal").classList.add("active"); 
+}
+
