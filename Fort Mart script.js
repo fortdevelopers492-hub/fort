@@ -26,8 +26,10 @@ let APP_STATE = {
 let SYSTEM_DATABASE = {
     users: [
         { uid: "admin", identityName: "Fort Mart Admin", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "Fort Mart", secretKey: "Fortmart492#", avatar: "fort mart logo.png", businessName: "Fort Mart Core Operations", businessInfo: "Primary global system marketplace monitoring profile." },
-        { uid: "user_sarah", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "08143329903", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
-        { uid: "user_john", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+234", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" }
+        { uid: "user_sarah", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
+        { uid: "user_john", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+234", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" },
+        { uid: "user_sarah_ghana", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+233", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
+        { uid: "user_john_ghana", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+233", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" }
     ],
     products: [
         { pid: "p1", ownerUid: "user_sarah", name: "Premium Noise-Cancelling Headphones", category: "Electrical Appliances", info: "High fidelity wireless noise isolating audio headphones with dynamic surround drivers.", price: 45000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M12 2c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z'/></svg>", aiInfo: "Features 40hr battery life, ANC processing chipsets, and Bluetooth 5.2 architecture components.", clickCount: 142 },
@@ -208,8 +210,9 @@ function navigateToPage(targetPageId) {
         initializeProfileDetailsAccountManagementFieldsValues();
     } else if(targetPageId === 'fort-ai') {
         initializeFortAiChatWindowWorkspace();
-    } else if (targetPageId === 'admin-nav-item') 
-        renderAdminUsersManagementList();
+    } else if (targetPageId === 'admin-dashboard') 
+        searchBarPlaceholder.placeholder = "Search Users....."
+        renderAdminUsersManagementList();  
     
 }
 
@@ -351,12 +354,13 @@ function renderSignInModalStepContentLayout() {
             <label>Select Preferred Location:</label>
             <select id="auth-signin-country" class="form-field-control">
                 <option value="Nigeria|+234">Nigeria (+234)</option>
+                <option value="Ghana|+233">Ghana (+233)</option>
             </select>
         </div>
       
         <div class="form-input-container">
             <label>Input Registered Email Address:</label>
-            <input type="text" id="auth-signin-identifier" class="form-field-control" placeholder="Input registered email address:">
+            <input type="text" name="email" id="auth-signin-identifier" class="form-field-control" placeholder="Input registered email address:">
             <div id="err-signin-identifier" class="text-danger-alert hidden-node"></div>
         </div>
         <div class="form-input-container">
@@ -504,12 +508,13 @@ function renderSignUpModalWizardStepOne() {
             <label>Select Preferred Location:</label>
             <select id="reg-country" class="form-field-control" onchange="evaluateSignUpStepOneFormCompletenessStateValidation()">
                 <option value="Nigeria|+234" selected>Nigeria (+234)</option>
+                <option value="Ghana|+233">Ghana (+233)</option>
             </select>
         </div>
     
         <div class="form-input-container">
             <label>Input Email Address:</label>
-            <input type="text" id="reg-identifier" class="form-field-control" placeholder="Input email address:" oninput="evaluateSignUpStepOneFormCompletenessStateValidation()">
+            <input type="text" name:="email" id="reg-identifier" class="form-field-control" placeholder="Input email address:" oninput="evaluateSignUpStepOneFormCompletenessStateValidation()">
             <div id="err-reg-step1-feedback" class="text-danger-alert hidden-node">Input all information properly</div>
         </div>
         
@@ -579,7 +584,7 @@ function renderSignUpModalWizardStepTwo() {
         <div id="signup-dynamic-fields-wrapper">
             <div class="form-input-container">
                 <label>Input Personal Full Name:</label>
-                <input type="text" id="reg-personal-name" class="form-field-control" placeholder="Enter personal name" oninput="validateSignUpStepTwoDataFormCompleteness()">
+                <input type="text" name="name" id="reg-personal-name" class="form-field-control" placeholder="Enter personal name" oninput="validateSignUpStepTwoDataFormCompleteness()">
             </div>
             <div class="form-input-container">
                 <label>Upload Profile Picture (Optional):</label>
@@ -610,7 +615,7 @@ function toggleSignUpStepTwoClassificationFormsLayout(selectedClassificationType
         fieldsWrapper.innerHTML = `
             <div class="form-input-container">
                 <label>Input Personal Full Name:</label>
-                <input type="text" id="reg-personal-name" class="form-field-control" placeholder="Enter personal name" oninput="validateSignUpStepTwoDataFormCompleteness()">
+                <input type="text" name="name" id="reg-personal-name" class="form-field-control" placeholder="Enter personal name" oninput="validateSignUpStepTwoDataFormCompleteness()">
             </div>
             <div class="form-input-container">
                 <label>Upload Profile Picture (Optional):</label>
@@ -636,7 +641,7 @@ function toggleSignUpStepTwoClassificationFormsLayout(selectedClassificationType
             </div>
             <div class="form-input-container">
                 <label>Input Personal Full Name:</label>
-                <input type="text" id="reg-personal-name" class="form-field-control" placeholder="Enter operational manager name" oninput="validateSignUpStepTwoDataFormCompleteness()">
+                <input type="text" name="name" id="reg-personal-name" class="form-field-control" placeholder="Enter operational manager name" oninput="validateSignUpStepTwoDataFormCompleteness()">
             </div>
             <div class="form-input-container">
                 <label>Inventory Specification:</label>
@@ -1073,12 +1078,13 @@ function renderForgotPasswordModalWorkflow() {
             <label style="font-size:0.82rem; font-weight:700; color:var(--fort-gray-slate);">Country Code:</label>
             <select id="forgot-country" class="form-field-control">
                 <option value="+234" selected>+234 (Nigeria)</option>
+                <option value="+233">+233 (Ghana)</option>
             </select>
         </div>
 
         <div class="form-input-container margin-top-xs">
             <label style="font-size:0.82rem; font-weight:700; color:var(--fort-gray-slate);">Registration Contact (Email Address):</label>
-            <input type="text" id="forgot-id" class="form-field-control" placeholder="example@domain.com">
+            <input type="text" name="email" id="forgot-id" class="form-field-control" placeholder="example@domain.com">
             <div id="err-forgot-step1-feedback" class="text-danger-alert hidden-node" style="color: red; font-size: 0.8rem; margin-top: 4px;"></div>
         </div>
 
@@ -1678,7 +1684,7 @@ function executeToggleProductPinState(productIdKey) {
         SYSTEM_DATABASE.pinnedLeaderboard = [];
     }
     
-    const indexLocation = SYSTEM_DATABASE.pinnedLeaderboard.indexOf(productIdKey);
+    const indexLocation = SYSTEM_rendDATABASE.pinnedLeaderboard.indexOf(productIdKey);
     
     if (indexLocation > -1) {
         // Product is pinned: unpin it by removing it from leaderboard
@@ -3261,7 +3267,7 @@ function executeSaveProfileWizardModificationsToDatabase(targetFieldNameStringTo
     }
 }
 
-// Cleaned pricing matrix matching exactly 20 slots from your specifications[cite: 1]
+// Cleaned pricing matrix matching exactly 20 slots from your specifications
 const LEADERBOARD_SLOT_PRICES = [
     6000, 5500, 5000, 4750, 4500, 4250, 4000, 3750, 3500, 3250,
     3000, 2750, 2500, 2250, 2000, 1700, 1500, 1200, 1000, 500
@@ -3521,7 +3527,7 @@ function executeActualPaystackIframePopRuntime(slotIndex) {
 
     // 1. Verify Paystack script is loaded in HTML
     if (typeof PaystackPop === 'undefined') {
-        showTopRightToast("Paystack SDK not loaded! Make sure <script src=\"https://js.paystack.co/v1/inline.js\"></script> is in your HTML <head>.", "error");
+        showTopRightToast("Paystack SDK not loaded! Check your internet connection.", "error");
         return;
     }
 
@@ -4993,7 +4999,7 @@ function launchBusinessUpgradePaystackConfirmationModal() {
  */
 function executeBusinessUpgradePaystackIframePopRuntime() {
     if (typeof PaystackPop === 'undefined') {
-        showTopRightToast("Paystack SDK not loaded! Make sure <script src=\"https://js.paystack.co/v1/inline.js\"></script> is in your HTML <head>.", "info");
+        showTopRightToast("Paystack SDK not loaded! Check your internet connection.", "info");
         return;
     }
 
@@ -5130,3 +5136,72 @@ function launchadvertismentofBusinessUpgrade() {
     document.getElementById("auth-modal").classList.add("active"); 
 }
 
+/**
+ * Admin User List Rendering Engine
+ * Filters and displays accounts sorted by creation date (newest first).
+ */
+function renderAdminUsersManagementList() {
+    const listContainer = document.getElementById("admin-users-list-container");
+    const searchInput = document.getElementById("admin-user-search-bar");
+    if (!listContainer) return;
+
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
+    // 1. Filter out admin self-account and apply search query matching
+    let filteredUsers = SYSTEM_DATABASE.users.filter(u => {
+        if (u.uid === 'admin' || u.id === 'admin') return false;
+        
+        const nameMatch = (u.identityName || u.username || '').toLowerCase().includes(searchTerm);
+        const emailMatch = (u.identifierText || '').toLowerCase().includes(searchTerm);
+        const statusMatch = (u.verificationStatus || u.status || '').toLowerCase().includes(searchTerm);
+        const typeMatch = (u.accountType || u.type || '').toLowerCase().includes(searchTerm);
+        
+        return nameMatch || emailMatch || statusMatch || typeMatch;
+    });
+
+    // 2. Sort accounts from most recently created to least recently created
+    filteredUsers.sort((a, b) => {
+        const timeA = parseInt(String(a.uid || a.id).replace('user_', ''), 10) || 0;
+        const timeB = parseInt(String(b.uid || b.id).replace('user_', ''), 10) || 0;
+        return timeB - timeA;
+    });
+
+    // 3. Render account listing DOM nodes
+    if (filteredUsers.length === 0) {
+        listContainer.innerHTML = `<div style="padding:12px; color:var(--fort-gray-slate); text-align:center; font-style:italic;">No user accounts found matching criteria.</div>`;
+        return;
+    }
+
+    let listHTML = "";
+    filteredUsers.forEach(user => {
+        const userId = user.uid || user.id;
+        const displayName = user.identityName || user.username || "Unnamed User";
+        const email = user.identifierText || "No Contact";
+        const accountType = user.accountType || user.type || "personal";
+        const status = user.verificationStatus || user.status || "unverified";
+        const avatar = user.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a0aec0'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+
+        const isVerified = status === "verified";
+        const badgeBg = isVerified ? "#e6fffa" : "#fff5f5";
+        const badgeColor = isVerified ? "#234e52" : "#9b2c2c";
+        const badgeBorder = isVerified ? "#b2f5ea" : "#feb2b2";
+
+        listHTML += `
+            <div class="admin-user-card-item" onclick="launchDetailedUserProfileContextOverlaySummaryModal('${userId}')" style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#cbd5e0'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
+                <img src="${avatar}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:1px solid #cbd5e0;" alt="Avatar">
+                <div style="flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <h4 style="margin:0; font-size:0.92rem; color:var(--fort-blue-dark); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${displayName}</h4>
+                        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:4px; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder};">${status}</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--fort-gray-slate); margin-top:2px;">
+                        Email: <strong>${email}</strong> | Type: <span style="text-transform:capitalize;">${accountType}</span>
+                    </div>
+                </div>
+                <button class="btn-blue" style="padding:4px 10px; font-size:0.75rem;" onclick="event.stopPropagation(); launchDetailedUserProfileContextOverlaySummaryModal('${userId}')">Manage</button>
+            </div>
+        `;
+    });
+
+    listContainer.innerHTML = listHTML;
+}
