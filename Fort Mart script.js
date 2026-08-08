@@ -28,8 +28,8 @@ let SYSTEM_DATABASE = {
         { uid: "admin", identityName: "Fort Mart Admin", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "Fort Mart", secretKey: "Fortmart492#", avatar: "fort mart logo.png", businessName: "Fort Mart Core Operations", businessInfo: "Primary global system marketplace monitoring profile." },
         { uid: "user_sarah", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
         { uid: "user_john", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+234", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" },
-        { uid: "user_sarah_ghana", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+233", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
-        { uid: "user_john_ghana", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+233", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" }
+        { uid: "user_sarah_ghana", identityName: "Ghanian Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+233", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
+        { uid: "user_john_ghana", identityName: "Ghanian John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+233", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" }
     ],
     products: [
         { pid: "p1", ownerUid: "user_sarah", name: "Premium Noise-Cancelling Headphones", category: "Electrical Appliances", info: "High fidelity wireless noise isolating audio headphones with dynamic surround drivers.", price: 45000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M12 2c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z'/></svg>", aiInfo: "Features 40hr battery life, ANC processing chipsets, and Bluetooth 5.2 architecture components.", clickCount: 142 },
@@ -1557,112 +1557,155 @@ function recordProductHitCount(productIdTokenKey) {
     }
 }
 
-function launchComprehensiveProductSpecificationsExpandedModalView(productIdTokenKey) {
-    if(!APP_STATE.currentUser) {
+/**
+ * Utility: Converts strings to URL-friendly slugs
+ */
+function createProductSlug(name) {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9 -]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+function launchComprehensiveProductSpecificationsExpandedModalView(productIdTokenKey, pushHistory = true) {
+    if (!APP_STATE.currentUser) {
         triggerAuthenticationModalSequence();
         return;
     }
-    
-    // Increment hit counter and persist to storage
+
     recordProductHitCount(productIdTokenKey);
-    
+
     let targetedProductItemMatch = SYSTEM_DATABASE.products.find(p => p.pid === productIdTokenKey);
-    if(!targetedProductItemMatch) {
+    if (!targetedProductItemMatch) {
         targetedProductItemMatch = {
-            pid: productIdTokenKey, ownerUid: "admin", name: "Synchronized Affiliate System Feed Record", category: "General Ledger", info: "Fallback inventory trace mapping record placeholder data structural component metrics analysis logs references.", price: 12500, coverPhoto: "", aiInfo: "External baseline mapping tracking references model arrays values.", clickCount: 1
+            pid: productIdTokenKey, 
+            ownerUid: "admin", 
+            name: "Synchronized Affiliate System Feed Record", 
+            category: "General Ledger", 
+            info: "Fallback inventory trace mapping record placeholder data structural component metrics analysis logs references.", 
+            price: 12500, 
+            coverPhoto: "", 
+            aiInfo: "External baseline mapping tracking references model arrays values.", 
+            clickCount: 1
         };
     }
-    
+
+    // 1. Dynamic Page Title Update
+    document.title = `${targetedProductItemMatch.name} - Fort Mart`;
+
+    // 2. Dynamic URL Update
+    if (pushHistory) {
+        const productSlug = createProductSlug(targetedProductItemMatch.name);
+        const newUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${targetedProductItemMatch.pid}`;
+        window.history.pushState({ pid: targetedProductItemMatch.pid }, "", newUrl);
+    }
+
+    // 3. Render Product Info
     const operationalTargetProfileOwnerRecord = SYSTEM_DATABASE.users.find(u => u.uid === targetedProductItemMatch.ownerUid);
     const detailOverlayBodyNode = document.getElementById("product-detail-modal-body");
-    let baselineCurrencySymbolSign = (APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
-    
+    const baselineCurrencySymbolSign = (APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
+
     let operationalActionControlsLayoutStringHTML = "";
-    if(APP_STATE.currentUser && APP_STATE.currentUser.uid === targetedProductItemMatch.ownerUid) {
+    if (APP_STATE.currentUser && APP_STATE.currentUser.uid === targetedProductItemMatch.ownerUid) {
         operationalActionControlsLayoutStringHTML = `
-            <button class="btn-gray" onclick="closeActiveModalDirectly('product-detail-modal'); switchSettingsSection('my-products'); navigateToPage('my-account');">⚙️ Manage Details & Inventory Post Structure</button>
+            <button class="btn-gray full-width" onclick="switchSettingsSection('my-products'); navigateToPage('my-account'); closeProductSpecificationOverlay();">⚙️ Manage Details & Inventory Post Structure</button>
         `;
     } else {
         operationalActionControlsLayoutStringHTML = `
-            <button class="btn-blue" onclick="closeActiveModalDirectly('product-detail-modal'); initialDirectMessageCommunicationPipelineSetup('${targetedProductItemMatch.ownerUid}')">💬 Message Seller</button>
+            <button class="btn-blue full-width" onclick="initialDirectMessageCommunicationPipelineSetup('${targetedProductItemMatch.ownerUid}'); closeProductSpecificationOverlay();">💬 Message Seller</button>
         `;
     }
 
-    // --- ADMIN PANEL CONTROLS ---
+    // Admin Controls Block
     let adminPinControlHTML = "";
     const isUserAdmin = (APP_STATE.currentUser.uid === 'admin' || APP_STATE.currentUser.id === 'admin');
-    
     if (isUserAdmin) {
         const leaderboard = SYSTEM_DATABASE.pinnedLeaderboard || [];
         const isCurrentPinned = leaderboard.includes(targetedProductItemMatch.pid);
         const isAdminSlotOccupant = (SYSTEM_DATABASE.adminSlot === targetedProductItemMatch.pid);
-        
+
         adminPinControlHTML = `
-            <div style="background: #edf2f7; border: 1px dashed var(--fort-blue-primary); padding: 12px; border-radius: 6px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-                <span style="font-size: 0.85rem; font-weight: bold; color: var(--fort-blue-dark);">🛡️ Admin Controls Hub</span>
-                <div style="display: flex; gap: 8px;">
-                    <button class="${isCurrentPinned ? 'btn-gray' : 'btn-blue'}" style="flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold;"
-                        onclick="executeToggleProductPinState('${targetedProductItemMatch.pid}')">
+            <div class="admin-controls-hub-box">
+                <span class="admin-controls-title">🛡️ Admin Controls Hub</span>
+                <div class="admin-controls-btn-row">
+                    <button class="${isCurrentPinned ? 'btn-gray' : 'btn-blue'} admin-btn" onclick="executeToggleProductPinState('${targetedProductItemMatch.pid}')">
                         ${isCurrentPinned ? '🛑 Unpin Standard Slot' : '📌 Pin to Standard'}
                     </button>
-                    <button class="${isAdminSlotOccupant ? 'btn-danger' : 'btn-success'}" style="flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold; background: ${isAdminSlotOccupant ? 'crimson':'green'}; color: white; border:none; border-radius:4px; cursor:pointer;"
-                        onclick="toggleAdminExclusiveSlotState('${targetedProductItemMatch.pid}')">
+                    <button class="${isAdminSlotOccupant ? 'btn-danger' : 'btn-success'} admin-btn admin-btn-slot" style="background: ${isAdminSlotOccupant ? 'crimson':'green'};" onclick="toggleAdminExclusiveSlotState('${targetedProductItemMatch.pid}')">
                         ${isAdminSlotOccupant ? '❌ Unassign Admin Slot' : '👑 Assign Admin Slot'}
                     </button>
                 </div>
-                <button class="btn-blue" style="width: 100%; padding: 6px; font-size: 0.8rem; font-weight: bold; margin-top: 4px;" 
-                    onclick="launchPinnedProductsLeaderboardModal()">
-                    🏆 Open Pinned Products Leaderboard
-                </button>
             </div>
         `;
     }
-    
-    const productDisplayImage = targetedProductItemMatch.coverPhoto ||
-        `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e0'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>`;
-        
+
+    const coverPhotoSrc = targetedProductItemMatch.coverPhoto || 'assets/placeholder-product.png';
+
+    // 4. Exact HTML layout matching Expected.PNG
     detailOverlayBodyNode.innerHTML = `
-        <div class="modal-expanded-header-row" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--fort-gray-border); padding-bottom:14px;">
-            <h3>Product Detailed Specifications</h3>
-            <button onclick="closeActiveModalDirectly('product-detail-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+        <div class="modal-expanded-header-row">
+            <h3 class="modal-title">Product Detailed Specifications</h3>
+            <button class="modal-close-icon-btn" onclick="closeProductSpecificationOverlay()">✕</button>
         </div>
-        <div class="modal-expanded-content-split-grid margin-top-md" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+        <div class="modal-expanded-content-split-grid margin-top-md">
             <div class="expanded-left-visuals-column">
-               <div class="expanded-master-image-box rounded-rect" style="width:100%; height:320px; background-color:#fcfcfc; overflow:hidden; border:1px solid var(--fort-gray-border); display:flex; align-items:center; justify-content:center;">
-                    <img src="${productDisplayImage}" style="width:100%; height:100%; object-fit:contain;" alt="Master Expanded Product Frame">
+                <div class="expanded-master-image-box rounded-rect">
+                    <img src="${coverPhotoSrc}" alt="${targetedProductItemMatch.name}">
                 </div>
             </div>
-            <div class="expanded-right-details-column" style="display:flex; flex-direction:column; gap:12px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${(operationalTargetProfileOwnerRecord && operationalTargetProfileOwnerRecord.avatar) ? operationalTargetProfileOwnerRecord.avatar : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a0aec0\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'}" style="width:44px; height:44px;" class="circle-container" alt="Vendor Big Profile Photo">
+            <div class="expanded-right-details-column">
+                <div class="vendor-profile-summary-row">
+                    <img src="${(operationalTargetProfileOwnerRecord && operationalTargetProfileOwnerRecord.avatar) ? operationalTargetProfileOwnerRecord.avatar : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a0aec0\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'}" class="circle-container vendor-avatar-img" alt="Vendor Profile">
                     <div>
-                        <h4 style="color:var(--fort-blue-primary);">${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.businessName : 'External Distribution Entity Framework Node Line'}</h4>
-                        <span style="font-size:0.75rem; color:var(--fort-gray-slate);">Country: ${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.country : 'Global Matrix Platform Partner Network'}</span>
+                        <h4 class="vendor-business-name">${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.businessName : 'Sarah Logistics & Supply'}</h4>
+                        <span class="vendor-country-tag">Country: ${operationalTargetProfileOwnerRecord ? operationalTargetProfileOwnerRecord.country : 'Nigeria'}</span>
                     </div>
                 </div>
-                
-                <h2 style="color:var(--fort-blue-dark); font-weight:800; margin-top:8px;">${targetedProductItemMatch.name}</h2>
-                <div style="font-size:1.6rem; font-weight:900; color:var(--fort-blue-light);">${baselineCurrencySymbolSign}${targetedProductItemMatch.price.toLocaleString()}</div>
-                
+
+                <h2 class="product-title-text">${targetedProductItemMatch.name}</h2>
+                <div class="product-price-tag">${baselineCurrencySymbolSign}${targetedProductItemMatch.price.toLocaleString()}</div>
+
                 <div class="spec-note-paragraph-block">
-                    <h5 style="text-transform:uppercase; font-size:0.75rem; letter-spacing:1px; color:var(--fort-gray-slate);">Primary Descriptive Summary Logs</h5>
-                    <p style="font-size:0.95rem; line-height:1.4; color:var(--fort-blue-dark); margin-top:4px;">${targetedProductItemMatch.info}</p>
+                    <h5 class="spec-section-label">PRIMARY DESCRIPTIVE SUMMARY LOGS</h5>
+                    <p class="spec-section-body">${targetedProductItemMatch.info}</p>
                 </div>
 
                 <div class="spec-note-paragraph-block">
-                    <h5 style="text-transform:uppercase; font-size:0.75rem; letter-spacing:1px; color:var(--fort-gray-slate);">More Info and Specifications</h5>
-                    <p style="font-size:0.9rem; line-height:1.4; font-style:italic; color:var(--fort-blue-primary); margin-top:4px;">${targetedProductItemMatch.aiInfo || 'No foundational metadata parameters declared for cognitive tracking processing arrays models.'}</p>
+                    <h5 class="spec-section-label">MORE INFO AND SPECIFICATIONS</h5>
+                    <p class="spec-section-body spec-ai-info">${targetedProductItemMatch.aiInfo || 'No details specified.'}</p>
                 </div>
-                
+
                 ${adminPinControlHTML}
 
-                <div class="modal-expanded-actions-footer-row btn-group" style="margin-top:auto; padding-top:16px; border-top:1px solid #f0f0f0;">
+                <div class="modal-expanded-actions-footer-row">
                     ${operationalActionControlsLayoutStringHTML}
                 </div>
             </div>
         </div>
     `;
-    document.getElementById("product-detail-modal").classList.add("active");
+
+    // 5. Display Modal
+    const productModal = document.getElementById("product-detail-modal");
+    if (productModal) {
+        productModal.classList.add("active");
+    }
+}
+
+/**
+ * Helper to close the product detail overlay and clean up URL history if needed
+ */
+function closeProductSpecificationOverlay() {
+    closeActiveModalDirectly("product-detail-modal");
+    
+    // Reset title back to default
+    document.title = "Fort Mart - Marketplace & Chat";
+    
+    // Clean query params from the URL bar
+    if (window.location.search) {
+        const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+        window.history.pushState({}, "", cleanUrl);
+    }
 }
 
 function toggleAdminExclusiveSlotState(pid) {
@@ -3880,12 +3923,28 @@ function executeFilteringSettingsContentPaneRowsNodesDisplay(searchQueryStringTe
  * Detailed Profile Presentation Context Overlay Summary Modal Processing Architecture Engine
  * Renders extended data layouts, business certificates, metrics parameters, and product lists for a given user profile.
  */
-function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParameterValue) {
+function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParameterValue, pushHistory = true) {
     const targetUserObjMatchRecord = SYSTEM_DATABASE.users.find(u => u.uid === userIdTokenKeyParameterValue || u.id === userIdTokenKeyParameterValue);
     if(!targetUserObjMatchRecord) return;
     const standardModalBodyElementNode = document.getElementById("product-detail-modal-body");
     if (!standardModalBodyElementNode) return;
     
+    // 1. Dynamic Page Title Update
+    const displayName = targetUserObjMatchRecord.businessName || targetUserObjMatchRecord.identityName || targetUserObjMatchRecord.username || 'User Profile';
+    document.title = `${displayName} - Fort Mart`;
+
+    // 2. Dynamic URL Update
+    if (pushHistory) {
+        const userSlug = typeof createUserSlug === 'function' 
+            ? createUserSlug(displayName) 
+            : typeof createProductSlug === 'function' 
+                ? createProductSlug(displayName) 
+                : displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        const targetUid = targetUserObjMatchRecord.uid || targetUserObjMatchRecord.id;
+        const newUrl = `${window.location.origin}${window.location.pathname}?user=${userSlug}&uid=${targetUid}`;
+        window.history.pushState({ uid: targetUid }, "", newUrl);
+    }
+
     let subAccountClassificationMetadataDetailsBlockHTML = "";
     if(targetUserObjMatchRecord.accountType === 'business' || targetUserObjMatchRecord.type === 'business') {
          subAccountClassificationMetadataDetailsBlockHTML = `
@@ -3967,7 +4026,6 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
     // --- USER'S PRODUCTS GRID VIEW LOOP LAYER ---
     let userProductsListHTML = "";
     if (targetUserObjMatchRecord.accountType === 'business' || targetUserObjMatchRecord.type === 'business') {
-        // Defaults to '₦' if no user is logged in, or if the logged-in user's country is Nigeria
         let currencySymbol = (!APP_STATE.currentUser || APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
         const sellerProducts = SYSTEM_DATABASE.products.filter(p => p.ownerUid === targetUserObjMatchRecord.uid || p.ownerUid === targetUserObjMatchRecord.id);
         
@@ -4005,7 +4063,7 @@ function launchDetailedUserProfileContextOverlaySummaryModal(userIdTokenKeyParam
     standardModalBodyElementNode.innerHTML = `
         <div class="modal-expanded-header-row" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--fort-gray-border); padding-bottom:14px;">
             <h3>User Profile Identity Summary Context</h3>
-            <button onclick="closeActiveModalDirectly('product-detail-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+            <button onclick="closeProductSpecificationOverlay('product-detail-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
         
         <div class="modal-expanded-content-split-grid margin-top-md" style="display:grid; grid-template-columns: 100px 1fr; gap:20px; align-items:start;">
@@ -5205,3 +5263,29 @@ function renderAdminUsersManagementList() {
 
     listContainer.innerHTML = listHTML;
 }
+
+
+
+/**
+ * Handle initial URL loading and browser back/forward buttons
+ */
+function handleProductUrlRouting() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pid = urlParams.get('pid');
+
+    if (pid) {
+        launchComprehensiveProductSpecificationsExpandedModalView(pid, false);
+    } else {
+        closeProductSpecificationOverlay(false);
+    }
+}
+
+// Browser navigation listener
+window.addEventListener("popstate", () => {
+    handleProductUrlRouting();
+});
+
+// Run routing check on application load
+window.addEventListener("DOMContentLoaded", () => {
+    handleProductUrlRouting();
+});

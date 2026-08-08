@@ -318,9 +318,6 @@ body {
 }
 .floating-action-plus-button-node:hover { transform: scale(1.05); background-color: #0277bd; }
 
-.suite-extensions-vertical-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
-.suite-extension-row-card { display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--fort-gray-border); background-color: var(--fort-white-snow); }
-
 /* Base message bubble relative positioning */
 .message-bubble {
     position: relative;
@@ -1367,4 +1364,240 @@ body {
 
 .toast-close-btn:hover {
   opacity: 1;
+}
+
+/* Modal Structural Base Styles (Desktop First) */
+.modal-expanded-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--fort-gray-border);
+    padding-bottom: 14px;
+}
+
+.modal-close-icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-expanded-content-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.expanded-master-image-box {
+    width: 100%;
+    height: 320px;
+    background-color: #fcfcfc;
+    overflow: hidden;
+    border: 1px solid var(--fort-gray-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expanded-master-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.expanded-right-details-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vendor-profile-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vendor-avatar-img {
+    width: 44px;
+    height: 44px;
+}
+
+.vendor-business-name {
+    color: var(--fort-blue-primary);
+}
+
+.vendor-country-tag {
+    font-size: 0.75rem;
+    color: var(--fort-gray-slate);
+}
+
+.product-title-text {
+    color: var(--fort-blue-dark);
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.product-price-tag {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--fort-blue-light);
+}
+
+.spec-section-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: var(--fort-gray-slate);
+}
+
+.spec-section-body {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--fort-blue-dark);
+    margin-top: 4px;
+}
+
+.spec-ai-info {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--fort-blue-primary);
+}
+
+.admin-controls-hub-box {
+    background: #edf2f7;
+    border: 1px dashed var(--fort-blue-primary);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-controls-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--fort-blue-dark);
+}
+
+.admin-controls-btn-row {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-btn {
+    flex: 1;
+    padding: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.admin-btn-slot {
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.admin-btn-full {
+    width: 100%;
+    padding: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.modal-expanded-actions-footer-row {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Mobile Media Queries Override */
+@media (max-width: 768px) {
+    .modal-expanded-content-split-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .expanded-master-image-box {
+        height: 220px;
+    }
+}
+
+.suite-extensions-vertical-stack { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    margin-top: 12px; 
+}
+
+.suite-extension-row-card { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 15px; 
+    padding: 15px; 
+    border: 1px solid var(--fort-gray-border); 
+    background-color: var(--fort-white-snow, #fdfdfd); 
+}
+
+/* Icon & Text Container */
+.card-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* FontAwesome Icon Sizing */
+.card-icon {
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Image Logo Sizing (if using Option 2) */
+.card-logo-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Buttons */
+.card-btn-link {
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+/* Responsive Styles for Mobile */
+@media (max-width: 768px) {
+    .suite-extension-row-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-btn-link {
+        width: 100%;
+    }
+
+    .card-btn-link .btn-blue {
+        width: 100%;
+    }
+}
+
+/* Stack picture/logo above text on mobile screens only */
+@media (max-width: 768px) {
+    .website-meta-side {
+        flex-direction: column;
+        align-items: center; /* Center-aligns image and text block */
+        gap: 16px;
+    }
+
+    .website-info-block {
+        text-align: center; /* Center-aligns title and paragraph */
+        width: 100%;
+    }
 }
