@@ -51,12 +51,20 @@
         </div>
     </div>
 
-    <div id="welcome-modal" class="modal-overlay">
-        <div class="modal-box rounded-rect text-center">
-            <h2>Welcome to Fort Mart!</h2>
-            <p><strong>Your one-stop shop for everything.</strong></p>
+    <div id="ad-modal" class="modal-overlay-ad">
+        <div class="modal-box-ad rounded-rect text-center">
+            <!-- Dynamically injected ad header -->
+            <h2 id="ad-header"></h2>
+            
+            <!-- Dynamically injected ad text -->
+            <p id="ad-text"></p>
+            
+            <!-- Dynamically injected ad media (image or video) -->
+            <div id="ad-media-container" class="media-container-ad"></div>
+            
             <br>
-            <button onclick="closeActiveModalDirectly('welcome-modal')" class="btn-blue">Start Exploring</button>
+            <!-- Continue / Close button -->
+            <button id="ad-continue-btn" onclick="closeActiveModalDirectlyAd('ad-modal')" class="btn-blue-ad">Continue</button>
         </div>
     </div>
 
@@ -361,6 +369,25 @@
                                                 </div>                    
                                             </div>
                                         </div>
+                                        <br>
+                                        <div id="dynamic-websites-container-fortdev">
+                                            <div class="section-content-wrapper-fortdev website-section-layout">
+                                                <div class="website-meta-side">
+                                                    <div class="large-avatar-frame-fortdev rounded-rect">
+                                                        <img src="Fort Logo Circle Cropped.png" alt="Fort Logo">
+                                                    </div>
+                                                    <div class="website-info-block-fortdev">
+                                                        <div class="header-inline-edit-row-fortdev">
+                                                            <h3 id="fm-title-text">Fort Graphics Marketplace</h3>
+                                                        </div>
+                                                        <p id="fm-info-text" class="margin-top-xs">A website where you can request graphic design like image editing, e-flyer design etc.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="margin-top-md">
+                                                    <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fortgraphicsmarkteplace/', '_blank')">Visit Website</button>
+                                                </div>                    
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -378,7 +405,7 @@
                         </div>
                         <div class="metric-card-box rounded-rect">
                             <h4>Active Catalog Product Nodes</h4>
-                            <p class="metric-numeric-callout" id="lbl-metric-total-products-count">0 Items</p>
+                            <p class="metric-numeric-callout" id="lbl-metric-total-products-count">0 Products</p>
                         </div>
                         <div class="metric-card-box rounded-rect">
                             <h4>Authorized Account Manager Tier Token</h4>

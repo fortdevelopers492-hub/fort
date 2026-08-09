@@ -6,6 +6,7 @@
     <link rel="icon" href="Fort Logo No Background.png" type="image/png">
     <title>Fort Developers</title>
     <link rel="stylesheet" href="fort dev styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
@@ -18,6 +19,23 @@
         
         <div id="preloader-percentage-text" class="preloader-text">Loading 0%</div>
     </div>
+
+    <div id="ad-modal" class="modal-overlay-ad">
+        <div class="modal-box-ad rounded-rect text-center">
+            <!-- Dynamically injected ad header -->
+            <h2 id="ad-header"></h2>
+            
+            <!-- Dynamically injected ad text -->
+            <p id="ad-text"></p>
+            
+            <!-- Dynamically injected ad media (image or video) -->
+            <div id="ad-media-container" class="media-container-ad"></div>
+            
+            <br>
+            <!-- Continue / Close button -->
+            <button id="ad-continue-btn" onclick="closeActiveModalDirectlyAd('ad-modal')" class="btn-blue-ad">Continue</button>
+        </div>
+    </div>    
 
     <div class="app-container scrollable-container">
         
@@ -42,7 +60,7 @@
                 <ul class="drawer-links margin-top-md" id="toc-list">
                     <li><a href="#intro-section">Intro Section</a></li>
                     <li><a href="#table-of-contents">Table of Contents</a></li>
-                    <li><a href="#customer-care">Customer Care Info</a></li>
+                    <li><a href="#customer-care">Contact Portals & Social Media Pages</a></li>
                     <li><a href="#more-from-fort">More from Fort</a></li>
                     <li><a href="#fort-mart-section">Fort Mart – Marketplace and Chat</a></li>
                     <li><a href="#fort-createawebsite-section">Fort – Website Builder</a></li>
@@ -53,34 +71,54 @@
         <section id="customer-care" class="view-page bg-white-pure">
             <div class="section-content-wrapper">
                 <div class="header-inline-edit-row">
-                    <h2>Customer Care Info</h2>
+                    <h2>Contact Portals & Social Media Pages</h2>
                 </div>
-                <p class="margin-top-xs text-muted">For complaints, ratings, reviews, feedback, simple website creation and account verification process and much more contact us through the portals below</p>
+                <p class="margin-top-xs text-muted">For complaints, ratings, reviews, feedback, website creation and account verification process and much more contact us through the portals below</p>
                 
                 <div class="suite-extensions-vertical-stack margin-top-md">
-                    <div class="editable-field-row" id="whatsapp-row">
-                        <div class="detail-row-item">
-                            <label>WhatsApp</label>
-                            <span id="cc-whatsapp-val" class="bold-text">+2348028241162</span>
+                    <div class="suite-extensions-vertical-stack" style="margin-bottom:25px;">
+                        
+                        <!-- WhatsApp Card -->
+                        <div class="suite-extension-row-card rounded-rect">
+                            <div class="card-info">
+                                <span class="card-icon" style="color: #25D366;"><i class="fa-brands fa-whatsapp"></i></span>
+                                <div>
+                                    <strong>WhatsApp Corporate Node:</strong><br>
+                                    <a href="https://wa.me/2348028241162" target="_blank" style="color:var(--fort-blue-light); text-decoration:none; font-weight:700;">+2348028241162</a>
+                                </div>
+                            </div>
+                            <a href="https://wa.me/2348028241162" target="_blank" class="card-btn-link">
+                                <button class="btn-blue"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</button>
+                            </a>
                         </div>
-                    </div>
-                    <div>
-                        <a href="https://wa.me/2348028241162" target="_blank" style="text-decoration: none;">
-                            <button class="btn-blue">  💬 Chat on WhatsApp</button>
-                        </a>
-                        <button class="btn-sm-pencil hidden" id="edit-whatsapp-btn" onclick="openCcEditModal('WhatsApp', '+2348028241162', 'cc-whatsapp-val')">✏️ Edit</button>
-                    </div>
-                    <div class="editable-field-row" id="email-row">
-                        <div class="detail-row-item">
-                            <label>Email</label>
-                            <span id="cc-email-val" class="bold-text">fortdevelopers492@gmail.com</span>
+
+                        <!-- Gmail Card -->
+                        <div class="suite-extension-row-card rounded-rect">
+                            <div class="card-info">
+                                <span class="card-icon" style="color: #EA4335;"><i class="fa-solid fa-envelope"></i></span>
+                                <div>
+                                    <strong>E-Mail Support Gateway:</strong><br>
+                                    <a href="mailto:fortdevelopers492@gmail.com" style="color:var(--fort-blue-light); text-decoration:none; font-weight:700;">fortdevelopers492@gmail.com</a>
+                                </div>
+                            </div>
+                            <a href="mailto:fortdevelopers492@gmail.com" class="card-btn-link">
+                                <button class="btn-blue"><i class="fa-solid fa-envelope"></i> Email Us</button>
+                            </a>
                         </div>
-                    </div>
-                    <div>
-                        <a href="mailto:fortdevelopers492@gmail.com" style="text-decoration: none;">
-                            <button class="btn-blue">📩 Email Us</button>
-                        </a>
-                        <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
+
+                        <!-- Facebook Card -->
+                        <div class="suite-extension-row-card rounded-rect">
+                            <div class="card-info">
+                                <span class="card-icon" style="color: #1877F2;"><i class="fa-brands fa-facebook"></i></span>
+                                <div>
+                                    <strong>Facebook Page:</strong><br>
+                                    <a href="https://facebook.com/fortdevelopers492" target="_blank" style="color:var(--fort-blue-light); text-decoration:none; font-weight:700;">Fort Developers</a>
+                                </div>
+                            </div>
+                            <a href="https://facebook.com/fortdevelopers492" target="_blank" class="card-btn-link">
+                                <button class="btn-blue"><i class="fa-brands fa-facebook"></i> View and Follow Our Facebook Page</button>
+                            </a>
+                        </div>
                     </div>
 
                     <div class="editable-field-row" id="email-row">
@@ -99,18 +137,34 @@
                 <div class="header-inline-edit-row">
                     <h2>Custom Website Creation</h2>
                 </div>
-                <div>
-                    <p class="margin-top-xs text-muted"></p>
-                </div>
-                <div class="editable-field-row" id="email-row">
+                
+                <div class="editable-field-row margin-top-xs" id="email-row">
                     <div class="detail-row-item">
                         <label>Need a Simple Business Website?</label>
                         <span id="cc-email-val" class="bold-text">Just follow the procedures on the fort (create a website) page.</span> 
                     </div>
                     <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
                 </div>
-                <br>
-                <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Website Creation</button>
+
+                <!-- Advert Display Container -->
+                <div class="ad-media-container margin-top-md rounded-rect">
+                    <!-- Dynamic Responsive Image Advert (Default/Fallback) -->
+                    <picture id="ad-image-wrapper">
+                        <source media="(min-width: 769px)" srcset="flyer fort - landscape.png">
+                        <source media="(max-width: 768px)" srcset="flyer fort - potrait.png">
+                        <img id="ad-image" src="flyer fort - landscape.png" alt="Custom Website Creation Advert" class="ad-media-content">
+                    </picture>
+
+                    <!-- Video Advert (Initially Hidden) -->
+                    <video id="ad-video" class="ad-media-content hidden" autoplay loop muted playsinline>
+                        <source src="fort advert.mp4" type="video/mp4">
+                        Your browser does not support video playback.
+                    </video>
+                </div>
+
+                <div class="margin-top-md text-center">
+                    <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Get Started</button>
+                </div>
             </div>
         </section>
 
@@ -134,6 +188,16 @@
                         </div>
                         <div class="product-card-details-block text-center">
                             <span class="product-card-title">Fort || Website Builder Wizard</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
+                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-cgraphicsmarketplace-section'">
+                        <div class="product-card-image-box">
+                            <img src="Fort Logo.png" alt="Fort Graphics Marketplace">
+                        </div>
+                        <div class="product-card-details-block text-center">
+                            <span class="product-card-title">Fort Graphics Marketplace</span>
                         </div>
                     </div>
                 </div>
@@ -180,6 +244,28 @@
                     </div>
                     <div class="margin-top-md">
                         <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Visit Website</button>
+                    </div>                    
+                </div>
+            </section>
+        </div>
+
+        <div id="dynamic-websites-container">
+            <section id="fort-cgraphicsmarketplace-section" class="view-page bg-white-pure border-top-divider">
+                <div class="section-content-wrapper website-section-layout">
+                    <div class="website-meta-side">
+                        <div class="large-avatar-frame rounded-rect">
+                            <img src="fort logo.png" alt="Fort Logo">
+                        </div>
+                        <div class="website-info-block">
+                            <div class="header-inline-edit-row">
+                                <h3 id="fm-title-text">Fort Graphics Marketplace</h3>
+                                <button class="btn-sm-pencil hidden" onclick="openWebsiteEditModal('fort-mart-section', 'fm-title-text', 'fm-info-text')">✏️ Edit</button>
+                            </div>
+                            <p id="fm-info-text" class="margin-top-xs">A website where you can request graphic design like image editing, e-flyer design etc.</p>
+                        </div>
+                    </div>
+                    <div class="margin-top-md">
+                        <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fort/fort%20mart%20index.html', '_blank')">Visit Website</button>
                     </div>                    
                 </div>
             </section>

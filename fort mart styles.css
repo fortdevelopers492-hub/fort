@@ -56,7 +56,7 @@ body {
 .border-top-divider { border-top: 1px solid var(--fort-gray-border); }
 
 /* Unified Structural Button Control Elements Styles */
-.btn-blue, .btn-gray, .btn-danger, .btn-sm-pencil {
+.btn-blue, .btn-gray, .btn-danger, .btn-sm-pencil, .btn-green {
     padding: 10px 20px;
     border-radius: 6px;
     font-weight: 600;
@@ -78,6 +78,10 @@ body {
 .btn-danger:hover { background-color: #c53030; }
 .btn-sm-pencil { padding: 4px 8px; font-size: 0.8rem; background-color: #edf2f7; border: 1px solid #cbd5e0; }
 .btn-group { display: flex; gap: 12px; margin-top: 14px; }
+.btn-green { background-color: #13d841; color: var(--fort-white-pure); }
+.btn-green:hover { background-color: #099b2b; }
+.btn-green:disabled { background-color: #b3e5fc !important; color: #81d4fa !important; cursor: not-allowed; }
+
 
 /* Modal Infrastructure Overlays Layer Stacks Layouts */
 .modal-overlay {
@@ -1600,4 +1604,73 @@ body {
         text-align: center; /* Center-aligns title and paragraph */
         width: 100%;
     }
+
+    
+}
+
+/* Overlay styling */
+.modal-overlay-ad {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal box container */
+.modal-box-ad {
+    background-color: #ffffff;
+    padding: 24px;
+    max-width: 450px;
+    width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Media wrapper & elements */
+.media-container-ad {
+    margin: 15px 0;
+    width: 100%;
+    max-height: 250px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.media-container-ad img, 
+.media-container-ad video {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* Button & disabled state styling */
+.btn-blue-ad {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-blue-ad:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.btn-blue-ad:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
 }

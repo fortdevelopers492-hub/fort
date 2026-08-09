@@ -1609,7 +1609,7 @@ function launchComprehensiveProductSpecificationsExpandedModalView(productIdToke
     let operationalActionControlsLayoutStringHTML = "";
     if (APP_STATE.currentUser && APP_STATE.currentUser.uid === targetedProductItemMatch.ownerUid) {
         operationalActionControlsLayoutStringHTML = `
-            <button class="btn-gray full-width" onclick="switchSettingsSection('my-products'); navigateToPage('my-account'); closeProductSpecificationOverlay();">⚙️ Manage Details & Inventory Post Structure</button>
+            <button class="btn-gray full-width" onclick="switchSettingsSection('my-products'); navigateToPage('my-account'); closeProductSpecificationOverlay();">⚙️ Manage Products</button>
         `;
     } else {
         operationalActionControlsLayoutStringHTML = `
@@ -3550,11 +3550,6 @@ function launchPaystackPaymentCheckoutModalView(slotIndex) {
                     <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Price</label>
                     <input type="text" class="form-field-control" value="${formatToNaira(targetPrice)}" disabled style="width:100%; padding:8px; box-sizing:border-box;">
                 </div>
-                
-                <div style="margin-top: 10px; display: flex; align-items: center; gap: 6px;">
-                    <input type="checkbox" id="paystack-autorenew-toggle" ${initialAutoRenewState ? 'checked' : ''}>
-                    <label for="paystack-autorenew-toggle" style="font-size: 0.85rem; font-weight: 600; cursor: pointer; user-select:none;">Enable Auto-Renew Subscription billing</label>
-                </div>
             </div>
             <div class="paystack-footer-row" style="padding: 16px 24px; background: #f9f9f9; border-top: 1px solid #eee; display: flex; justify-content: space-between;">
                 <button class="btn-gray" onclick="document.getElementById('paystack-checkout-modal').remove()">Cancel</button>
@@ -3685,12 +3680,6 @@ function launchManageSlotModal(slotIndex) {
                 <select id="slot-product-mapping-dropdown" class="form-field-control" style="width:100%; padding:8px;">
                     ${dropdownSelectionHTML}
                 </select>
-            </div>
-
-            <!-- RULE: There should be an autorenew checkbox that can be toggled on and off in the modal where a user manages his/her slot[cite: 1] -->
-            <div style="margin: 14px 0px; display: flex; align-items: center; gap: 8px; padding: 10px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee;">
-                <input type="checkbox" id="manage-autorenew-checkbox" ${slotMeta.autoRenew ? 'checked' : ''}>
-                <label for="manage-autorenew-checkbox" style="font-size:0.85rem; font-weight:700; cursor:pointer; user-select:none;">Auto-renew subscription at end of billing cycle</label>
             </div>
 
             <div style="margin-top:12px; font-size:0.8rem; color:var(--fort-gray-slate);">
@@ -5289,3 +5278,85 @@ window.addEventListener("popstate", () => {
 window.addEventListener("DOMContentLoaded", () => {
     handleProductUrlRouting();
 });
+
+// Define the two ad contents
+const ad1 = {
+    type: 'video',
+    header: 'Check Out Fort Advert!',
+    text: 'Watch our latest feature video to explore what is new.',
+    src: 'fort advert.mp4'
+};
+
+const ad2 = {
+    type: 'image',
+    header: 'Welcome to Fort Mart!',
+    text: 'Your one-stop shop for everything you need.',
+    src: 'flyer fort - landscape.png'
+};
+
+const ads = [ad1, ad2];
+
+// Function to initialize and inject a random ad
+function setupAdModal() {
+    // Select a random ad
+    const randomAd = ads[Math.floor(Math.random() * ads.length)];
+
+    const headerEl = document.getElementById('ad-header');
+    const textEl = document.getElementById('ad-text');
+    const mediaContainer = document.getElementById('ad-media-container');
+    const continueBtn = document.getElementById('ad-continue-btn');
+
+    // Populate header and text
+    headerEl.innerText = randomAd.header;
+    textEl.innerHTML = `<strong>${randomAd.text}</strong>`;
+    mediaContainer.innerHTML = ''; // Clear existing media
+
+    if (randomAd.type === 'video') {
+        // Render video element
+        const video = document.createElement('video');
+        video.src = randomAd.src;
+        video.autoplay = true;
+        video.muted = true; // Autoplay requires muted in most browsers
+        video.playsInline = true;
+        video.controls = true;
+        mediaContainer.appendChild(video);
+
+        // Lock button for 5 seconds
+        continueBtn.disabled = true;
+        let countdown = 5;
+        continueBtn.innerText = `Continue in ${countdown}s`;
+
+        const timer = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                continueBtn.innerText = `Continue in ${countdown}s`;
+            } else {
+                clearInterval(timer);
+                continueBtn.disabled = false;
+                continueBtn.innerText = 'Continue';
+            }
+        }, 1000);
+
+    } else {
+        // Render image element
+        const img = document.createElement('img');
+        img.src = randomAd.src;
+        img.alt = randomAd.header;
+        mediaContainer.appendChild(img);
+
+        // Ensure button is enabled immediately for image ads
+        continueBtn.disabled = false;
+        continueBtn.innerText = 'Continue';
+    }
+}
+
+// Optional placeholder if not defined elsewhere in your project
+function closeActiveModalDirectlyAd(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Run ad selection on window load
+window.addEventListener('DOMContentLoaded', setupAdModal);

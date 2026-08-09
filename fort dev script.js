@@ -338,3 +338,143 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, intervalTime);
 });
+
+/**
+ * Advert Display Controller Loop
+ * Tracks visits via localStorage, shuffles to show the video every 3rd visit,
+ * and automatically switches back to the dynamic image advert after the video plays twice.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const adImageWrapper = document.getElementById("ad-image-wrapper");
+    const adVideo = document.getElementById("ad-video");
+
+    if (!adImageWrapper || !adVideo) return;
+
+    // Function to safely show the responsive image and hide the video
+    function switchToImageAd() {
+        adVideo.pause();
+        adVideo.classList.add("hidden");
+        adImageWrapper.classList.remove("hidden");
+    }
+
+    // Retrieve or initialize total website visit count in localStorage
+    let visitCount = parseInt(localStorage.getItem("fort_website_visit_count") || "0", 10);
+    visitCount += 1;
+    localStorage.setItem("fort_website_visit_count", visitCount.toString());
+
+    // Check if it is every 3rd opening (3, 6, 9, 12, etc.)
+    if (visitCount % 3 === 0) {
+        // Remove 'loop' so the 'ended' event triggers after each playback
+        adVideo.removeAttribute("loop");
+
+        // Show video advert and hide responsive image advert
+        adImageWrapper.classList.add("hidden");
+        adVideo.classList.remove("hidden");
+
+        let playCounter = 0;
+
+        // Listen for when the video reaches the end
+        adVideo.addEventListener("ended", () => {
+            playCounter += 1;
+
+            if (playCounter < 2) {
+                // Replay the video for its second loop
+                adVideo.play();
+            } else {
+                // After playing twice, switch to the image advert
+                switchToImageAd();
+            }
+        });
+
+        // Start video playback
+        adVideo.play().catch(() => {
+            // Fallback to image if browser blocks autoplay
+            switchToImageAd();
+        });
+    } else {
+        // Show responsive image advert and hide video advert
+        switchToImageAd();
+    }
+});
+
+// Define the two ad contents
+const ad1 = {
+    type: 'video',
+    header: 'Check Out Fort Advert!',
+    text: 'Watch our latest feature video to explore what is new.',
+    src: 'fort advert.mp4'
+};
+
+const ad2 = {
+    type: 'image',
+    header: 'Welcome to Fort Developers!',
+    text: 'Made to give you the best on the web.',
+    src: 'flyer fort - landscape.png'
+};
+
+const ads = [ad1, ad2];
+
+// Function to initialize and inject a random ad
+function setupAdModal() {
+    // Select a random ad
+    const randomAd = ads[Math.floor(Math.random() * ads.length)];
+
+    const headerEl = document.getElementById('ad-header');
+    const textEl = document.getElementById('ad-text');
+    const mediaContainer = document.getElementById('ad-media-container');
+    const continueBtn = document.getElementById('ad-continue-btn');
+
+    // Populate header and text
+    headerEl.innerText = randomAd.header;
+    textEl.innerHTML = `<strong>${randomAd.text}</strong>`;
+    mediaContainer.innerHTML = ''; // Clear existing media
+
+    if (randomAd.type === 'video') {
+        // Render video element
+        const video = document.createElement('video');
+        video.src = randomAd.src;
+        video.autoplay = true;
+        video.muted = true; // Autoplay requires muted in most browsers
+        video.playsInline = true;
+        video.controls = true;
+        mediaContainer.appendChild(video);
+
+        // Lock button for 5 seconds
+        continueBtn.disabled = true;
+        let countdown = 5;
+        continueBtn.innerText = `Continue in ${countdown}s`;
+
+        const timer = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                continueBtn.innerText = `Continue in ${countdown}s`;
+            } else {
+                clearInterval(timer);
+                continueBtn.disabled = false;
+                continueBtn.innerText = 'Continue';
+            }
+        }, 1000);
+
+    } else {
+        // Render image element
+        const img = document.createElement('img');
+        img.src = randomAd.src;
+        img.alt = randomAd.header;
+        mediaContainer.appendChild(img);
+
+        // Ensure button is enabled immediately for image ads
+        continueBtn.disabled = false;
+        continueBtn.innerText = 'Continue';
+    }
+}
+
+// Optional placeholder if not defined elsewhere in your project
+function closeActiveModalDirectlyAd(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Run ad selection on window load
+window.addEventListener('DOMContentLoaded', setupAdModal);

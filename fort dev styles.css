@@ -328,3 +328,234 @@ body {
     color: #718096;
     font-weight: 500;
 }
+
+.suite-extensions-vertical-stack { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    margin-top: 12px; 
+}
+
+.suite-extension-row-card { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 15px; 
+    padding: 15px; 
+    border: 1px solid var(--fort-gray-border); 
+    background-color: var(--fort-white-snow, #fdfdfd); 
+}
+
+/* Icon & Text Container */
+.card-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* FontAwesome Icon Sizing */
+.card-icon {
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Image Logo Sizing (if using Option 2) */
+.card-logo-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Buttons */
+.card-btn-link {
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+/* Responsive Styles for Mobile */
+@media (max-width: 768px) {
+    .suite-extension-row-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-btn-link {
+        width: 100%;
+    }
+
+    .card-btn-link .btn-blue {
+        width: 100%;
+    }
+}
+
+/* Main Workspace Container Layout */
+header {
+    background: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ========================================================================= */
+/* MOBILE RESPONSIVE LAYOUT (PHONE CSS)                                      */
+/* ========================================================================= */
+@media screen and (max-width: 768px) {
+    /* Moves the buttons below the "Fort Workspace" title */
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+    }
+
+    header h2 {
+        margin-bottom: 15px;
+    }
+
+    /* Force header action buttons onto a single horizontal line with scrolling */
+    .header-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        gap: 8px;
+        
+        /* Enable horizontal scrolling */
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        
+        /* Optional padding space so focus styles or shadows aren't clipped */
+        padding-bottom: 6px; 
+    }
+
+    /* Keep individual buttons at their full size without shrinking or text wrapping */
+    .header-actions button,
+    .header-actions .btn {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        scroll-snap-align: start;
+    }
+
+    /* Custom horizontal scrollbar styling for Chrome, Safari, and Edge */
+    .header-actions::-webkit-scrollbar {
+        height: 5px;
+    }
+    
+    .header-actions::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+    }
+    
+    .header-actions::-webkit-scrollbar-thumb {
+        background: var(--fort-blue-light, #3182ce);
+        border-radius: 10px;
+    }
+}
+
+/* Advert Section Media Styling */
+.ad-media-container {
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--fort-gray-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.ad-media-content {
+    width: 100%;
+    height: auto;
+    /* Changed from cover to contain so nothing gets cropped */
+    object-fit: contain; 
+    max-height: 80vh; /* Scaled dynamically to fit modern laptop screens */
+    display: block;
+    margin: 0 auto;
+}
+
+/* Ensure picture element expands fully inside wrapper */
+picture#ad-image-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Overlay styling */
+.modal-overlay-ad {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal box container */
+.modal-box-ad {
+    background-color: #ffffff;
+    padding: 24px;
+    max-width: 450px;
+    width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Media wrapper & elements */
+.media-container-ad {
+    margin: 15px 0;
+    width: 100%;
+    max-height: 250px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.media-container-ad img, 
+.media-container-ad video {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* Button & disabled state styling */
+.btn-blue-ad {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-blue-ad:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.btn-blue-ad:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
