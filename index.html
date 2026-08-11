@@ -11,7 +11,7 @@
 <body>
 
     <div id="preloader-container">
-        <img src="Fort Logo No Background.png" alt="Fort Logo" class="preloader-logo">
+        <img src="Fort Logo.png" alt="Fort Logo" class="preloader-logo">
         
         <div class="progress-meter-container">
             <div id="preloader-progress-bar" class="progress-meter-bar"></div>
@@ -32,14 +32,32 @@
             <div id="ad-media-container" class="media-container-ad"></div>
             
             <br>
-            <!-- Continue / Close button -->
-            <button id="ad-continue-btn" onclick="closeActiveModalDirectlyAd('ad-modal')" class="btn-blue-ad">Continue</button>
+            <!-- Modal Action Buttons -->
+            <div class="ad-actions">
+                <!-- Visit / External link button -->
+                <a class="btn-blue" style="text-decoration: none !important;" id="ad-visit-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-green-ad">Visit Site</a>
+                
+                <!-- Continue / Close button -->
+                <button id="ad-continue-btn" onclick="closeActiveModalDirectlyAd('ad-modal')" class="btn-blue-ad">Continue</button>
+            </div>
         </div>
-    </div>    
-
+    </div>
+    
     <div class="app-container scrollable-container">
+
+    <header class="main-site-header">
+        <div class="header-brand">
+            <a href="#intro-section" class="brand-logo-link">
+                <img src="Fort Logo No Background.png" alt="Fort Logo" class="header-logo">
+                <span class="brand-name">Fort Developers</span>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <a href="about us.html" class="nav-link">About Us</a>
+        </nav>
+    </header>        
         
-        <section id="intro-secti/on" class="view-page bg-white-pure">
+        <section id="intro-section" class="view-page bg-white-pure">
             <div class="intro-header-block">
                 <div class="intro-logo-frame">
                     <img src="fort logo.png" alt="Fort Logo" id="main-fort-logo">
@@ -64,6 +82,7 @@
                     <li><a href="#more-from-fort">More from Fort</a></li>
                     <li><a href="#fort-mart-section">Fort Mart – Marketplace and Chat</a></li>
                     <li><a href="#fort-createawebsite-section">Fort – Website Builder</a></li>
+                    <li><a href="#fort-graphicsmarketplace-section">Fort Graphics Marketplace</a></li>
                 </ul>
             </div>
         </section>
@@ -120,14 +139,6 @@
                             </a>
                         </div>
                     </div>
-
-                    <div class="editable-field-row" id="email-row">
-                        <div class="detail-row-item">
-                            <label>About Us</label>
-                            <span id="cc-email-val" class="bold-text">Read our <a href="about us.html" target="_blank">About Us</a> legal document</span>
-                        </div>
-                        <button class="btn-sm-pencil hidden" id="edit-email-btn" onclick="openCcEditModal('Email', 'fortdevelopers492@gmail.com', 'cc-email-val')">✏️ Edit</button>
-                    </div>
                 </div>
             </div>
         </section>
@@ -163,46 +174,50 @@
                 </div>
 
                 <div class="margin-top-md text-center">
-                    <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Get Started</button>
+                    <button class="btn-blue" onclick="window.open('https://createawebsite.fort.com', '_blank')">Get Started</button>
                 </div>
             </div>
         </section>
 
-        <section id="more-from-fort" class="view-page bg-blue-section">
-            <div class="section-content-wrapper">
-                <h2>More from Fort</h2>
-                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
-                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-mart-section'">
-                        <div class="product-card-image-box">
-                            <img src="fort mart logo.png" alt="Fort Mart">
+        <div id="dynamic-websites-container">
+            <section id="more-from-fort" class="view-page bg-blue-section">
+                <div class="section-content-wrapper">
+                    <h2>More from Fort</h2>
+                    
+                    <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
+                        <!-- Card 1 -->
+                        <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-mart-section'">
+                            <div class="product-card-image-box">
+                                <img src="fort mart logo.png" alt="Fort Mart">
+                            </div>
+                            <div class="product-card-details-block text-center">
+                                <span class="product-card-title">Fort Mart</span>
+                            </div>
                         </div>
-                        <div class="product-card-details-block text-center">
-                            <span class="product-card-title">Fort Mart</span>
+
+                        <!-- Card 2 -->
+                        <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-createawebsite-section'">
+                            <div class="product-card-image-box">
+                                <img src="Fort Website Builder Logo.png" alt="Fort Create A Website">
+                            </div>
+                            <div class="product-card-details-block text-center">
+                                <span class="product-card-title">Fort || Website Builder Wizard</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-graphicsmarketplace-section'">
+                            <div class="product-card-image-box">
+                                <img src="Fort Graphics Logo.png" alt="Fort Graphics Marketplace">
+                            </div>
+                            <div class="product-card-details-block text-center">
+                                <span class="product-card-title">Fort Graphics Marketplace</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
-                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-createawebsite-section'">
-                        <div class="product-card-image-box">
-                            <img src="Fort Website Builder Logo.png" alt="Fort Create A Website">
-                        </div>
-                        <div class="product-card-details-block text-center">
-                            <span class="product-card-title">Fort || Website Builder Wizard</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="products-master-grid margin-top-md" id="more-from-fort-grid">
-                    <div class="product-item-card-container rounded-rect" onclick="window.location.hash='#fort-cgraphicsmarketplace-section'">
-                        <div class="product-card-image-box">
-                            <img src="Fort Logo.png" alt="Fort Graphics Marketplace">
-                        </div>
-                        <div class="product-card-details-block text-center">
-                            <span class="product-card-title">Fort Graphics Marketplace</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
         <div id="dynamic-websites-container">
             <section id="fort-mart-section" class="view-page bg-white-pure border-top-divider">
@@ -220,7 +235,7 @@
                         </div>
                     </div>
                     <div class="margin-top-md">
-                        <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fort/fort%20mart%20index.html', '_blank')">Visit Website</button>
+                        <button class="btn-blue" onclick="window.open('https://fort.com/fort%20mart%20index.html', '_blank')">Visit Website</button>
                     </div>                    
                 </div>
             </section>
@@ -243,18 +258,18 @@
                         </div>
                     </div>
                     <div class="margin-top-md">
-                        <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/createawebsite-fort/', '_blank')">Visit Website</button>
+                        <button class="btn-blue" onclick="window.open('https://createawebsite.fort.com', '_blank')">Visit Website</button>
                     </div>                    
                 </div>
             </section>
         </div>
 
         <div id="dynamic-websites-container">
-            <section id="fort-cgraphicsmarketplace-section" class="view-page bg-white-pure border-top-divider">
+            <section id="fort-graphicsmarketplace-section" class="view-page bg-white-pure border-top-divider">
                 <div class="section-content-wrapper website-section-layout">
                     <div class="website-meta-side">
                         <div class="large-avatar-frame rounded-rect">
-                            <img src="fort logo.png" alt="Fort Logo">
+                            <img src="Fort Graphics Logo.png" alt="Fort Logo">
                         </div>
                         <div class="website-info-block">
                             <div class="header-inline-edit-row">
@@ -265,7 +280,7 @@
                         </div>
                     </div>
                     <div class="margin-top-md">
-                        <button class="btn-blue" onclick="window.open('https://fortdevelopers492-hub.github.io/fort/fort%20mart%20index.html', '_blank')">Visit Website</button>
+                        <button class="btn-blue" onclick="window.open('https://graphics.fort.com', '_blank')">Visit Website</button>
                     </div>                    
                 </div>
             </section>

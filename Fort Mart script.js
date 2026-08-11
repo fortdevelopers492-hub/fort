@@ -31,10 +31,7 @@ let SYSTEM_DATABASE = {
         { uid: "user_sarah_ghana", identityName: "Ghanian Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+233", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
         { uid: "user_john_ghana", identityName: "Ghanian John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+233", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" }
     ],
-    products: [
-        { pid: "p1", ownerUid: "user_sarah", name: "Premium Noise-Cancelling Headphones", category: "Electrical Appliances", info: "High fidelity wireless noise isolating audio headphones with dynamic surround drivers.", price: 45000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M12 2c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z'/></svg>", aiInfo: "Features 40hr battery life, ANC processing chipsets, and Bluetooth 5.2 architecture components.", clickCount: 142 },
-        { pid: "p2", ownerUid: "user_sarah", name: "Smart OLED Television Set 4K", category: "Electrical Appliances", info: "Ultra thin 55 inch high refresh gaming entertainment screen with integrated processing units.", price: 320000, coverPhoto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23003366'><path d='M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z'/></svg>", aiInfo: "HDR10+ decoding ready, 120Hz micro-dimming array setups, integrated WebOS hub.", clickCount: 98 }
-    ],
+    products: [],
     chats: [],
     platformFeedback: [],
     networkSuiteEntities: []
@@ -473,6 +470,7 @@ function finalizeSuccessfulAuthenticationSequence(accountRecordMatch) {
     if (accountRecordMatch.uid === 'admin') {
         if (adminNavItem) adminNavItem.classList.remove("hidden-admin-node");
         if (adminSuiteBtn) adminSuiteBtn.classList.remove("hidden-node");
+        renderAdminDashboardMetricsCounters();
     } else {
         if (adminNavItem) adminNavItem.classList.add("hidden-admin-node");
         if (adminSuiteBtn) adminSuiteBtn.classList.add("hidden-node");
@@ -1008,6 +1006,10 @@ function handleClearSignUpTimersAndReturnToStepThree() {
     renderSignUpModalWizardStepThree();
 }
 
+/**
+ * Finalizes account registration after OTP verification, creates initial user state,
+ * sends a welcome message, and updates the admin dashboard user metrics.
+ */
 function executeFinalizeAccountRegistrationPipelineSubmission() {
     const userInputCodeField = document.getElementById("reg-otp-input");
     const feedbackElement = document.getElementById("err-reg-step4-feedback");
@@ -1032,6 +1034,7 @@ function executeFinalizeAccountRegistrationPipelineSubmission() {
         SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpInterval = null;
     }
     SIGNUP_WIZARD_TEMPORARY_OBJECT.signUpOtpSecondsLeft = 0;
+    
     const finalNewUserRecord = {
         uid: "user_" + Date.now(),
         identityName: SIGNUP_WIZARD_TEMPORARY_OBJECT.identityName,
@@ -1048,16 +1051,26 @@ function executeFinalizeAccountRegistrationPipelineSubmission() {
     };
     
     SYSTEM_DATABASE.users.push(finalNewUserRecord);
+
+    // Update dashboard user counter (+1)
+    if (typeof updateAdminDashboardMetricCount === "function") {
+        updateAdminDashboardMetricCount("lbl-metric-total-users-count", 1, "Users");
+    }
+    if (typeof renderAdminDashboardMetricsCounters === "function") {
+        renderAdminDashboardMetricsCounters();
+    }
+
     const systemAdminWelcomeThreadNode = {
         chatId: "chat_admin_" + finalNewUserRecord.uid,
         dynamicParticipants: ["admin", finalNewUserRecord.uid],
         messageLog: [
-            { mid: "wel1", senderUid: "admin", text: "Thanks for choosing Fort Mart. We are here with an amazing web app when it comes to online shopping. We wish you best of luck as you explore the market.", timestamp: new Date().toLocaleTimeString([], { day: '2-digit',  month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }), }
+            { mid: "wel1", senderUid: "admin", text: "Thanks for choosing Fort Mart. We are here with an amazing web app when it comes to online shopping. We wish you best of luck as you explore the market.", timestamp: new Date().toLocaleTimeString([], { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }), }
         ]
     };
     SYSTEM_DATABASE.chats.push(systemAdminWelcomeThreadNode);
     
     syncPlatformDatabaseStateToWebStorage();
+    renderAdminDashboardMetricsCounters();
     
     APP_STATE.currentUser = finalNewUserRecord;
     closeActiveModalDirectly('auth-modal');
@@ -1459,7 +1472,14 @@ function renderMarketplaceProductsDisplayLoop() {
         const structuralOwnerAccountPointer = SYSTEM_DATABASE.users.find(u => u.uid === item.ownerUid);
         if(!structuralOwnerAccountPointer) return false;
         if(structuralOwnerAccountPointer.country !== locationFilteringCriteriaString) return false;
-        if(APP_STATE.currentSelectedCategory !== 'Trending' && item.category !== APP_STATE.currentSelectedCategory) return false;
+        
+        // Check if item is the assigned admin slot product
+        const isAdminSlotItem = Boolean(adminSlotPid && item.pid === adminSlotPid);
+
+        // Bypass category check if the item occupies the admin slot
+        if(!isAdminSlotItem && APP_STATE.currentSelectedCategory !== 'Trending' && item.category !== APP_STATE.currentSelectedCategory) {
+            return false;
+        }
         
         if(APP_STATE.searchQuery !== '') {
             const matchTitleFlag = item.name.toLowerCase().includes(APP_STATE.searchQuery);
@@ -2725,7 +2745,7 @@ function setupImagePreviewListener() {
 }
 
 /**
- * Final Submission: Collects variables, processes files, updates databases
+ * Final Submission: Collects variables, processes files, updates databases, and updates dashboard metrics
  */
 async function executePipelineCommitNewInventoryPostRecord() {
     const publishBtn = document.getElementById("btn-publish-post");
@@ -2785,6 +2805,14 @@ async function executePipelineCommitNewInventoryPostRecord() {
         if (typeof SYSTEM_DATABASE === 'undefined') window.SYSTEM_DATABASE = {};
         if (!SYSTEM_DATABASE.products) SYSTEM_DATABASE.products = [];
         SYSTEM_DATABASE.products.push(finalProductInstanceObjectNode);
+
+        // Update dashboard product counter (+1)
+        if (typeof updateAdminDashboardMetricCount === 'function') {
+            updateAdminDashboardMetricCount("lbl-metric-total-products-count", 1, "Products");
+        }
+        if (typeof renderAdminDashboardMetricsCounters === 'function') {
+            renderAdminDashboardMetricsCounters();
+        }
 
         // Safe web storage persistence (isolated so quota errors won't throw user-facing exceptions)
         try {
@@ -4596,6 +4624,7 @@ function executePipelineCommitUpdatedInventoryPostRecord(targetProductIdKeyValue
         
         renderAccountInventoryLedgerManagementDashboardGrid();
         renderMarketplaceProductsDisplayLoop();
+        renderAdminDashboardMetricsCounters();
     } else {
         showTopRightToast("Error mapping product tracking instance registry.", "error");
     }
@@ -4615,12 +4644,19 @@ function executeDeletePlatformInventoryItemListingPostRecord(targetProductIdKeyV
         if (structuralIndexMatchPointerId !== -1) {
             SYSTEM_DATABASE.products.splice(structuralIndexMatchPointerId, 1);
             
+            // Update dashboard product counter (-1)
+            if (typeof updateAdminDashboardMetricCount === "function") {
+                updateAdminDashboardMetricCount("lbl-metric-total-products-count", -1, "Products");
+            }
+            if (typeof renderAdminDashboardMetricsCounters === "function") {
+                renderAdminDashboardMetricsCounters();
+            }
+
             // Sync mutated array down to local persistent web storage
             syncPlatformDatabaseStateToWebStorage();
 
             // REPLACED ALERT: Custom animated success toast
             showTopRightToast("Product successfully purged from system inventory storage registers.", "success");
-            
             
             // Trigger user interface lifecycle rendering view loops to instantly refresh screens
             if (typeof renderAccountInventoryLedgerManagementDashboardGrid === "function") {
@@ -4629,6 +4665,7 @@ function executeDeletePlatformInventoryItemListingPostRecord(targetProductIdKeyV
             if (typeof renderMarketplaceProductsDisplayLoop === "function") {
                 renderMarketplaceProductsDisplayLoop();
             }
+            renderAdminDashboardMetricsCounters();
         } else {
             // REPLACED ALERT: Custom animated error toast
             showTopRightToast("Error: Target product identifier mapping reference could not be found.", "error");
@@ -5279,78 +5316,105 @@ window.addEventListener("DOMContentLoaded", () => {
     handleProductUrlRouting();
 });
 
-// Define the two ad contents
 const ad1 = {
     type: 'video',
-    header: 'Check Out Fort Advert!',
-    text: 'Watch our latest feature video to explore what is new.',
-    src: 'fort advert.mp4'
+    header: 'Need a Custom Website!',
+    text: 'Try Fort Developers (createawebsite.fort.com)',
+    src: 'fort advert.mp4',
+    url: 'https://createawebsite.fort.com'
 };
 
 const ad2 = {
     type: 'image',
-    header: 'Welcome to Fort Mart!',
-    text: 'Your one-stop shop for everything you need.',
-    src: 'flyer fort - landscape.png'
+    header: 'Need a Custom Website!',
+    text: 'Try Fort Developers (createawebsite.fort.com)',
+    src: 'flyer fort - landscape.png',
+    url: 'https://createawebsite.fort.com'
 };
 
 const ads = [ad1, ad2];
 
-// Function to initialize and inject a random ad
 function setupAdModal() {
-    // Select a random ad
-    const randomAd = ads[Math.floor(Math.random() * ads.length)];
+    // Retrieve previous index from localStorage, or default to -1 if not set
+    let lastIndex = parseInt(localStorage.getItem('lastAdIndex'), 10);
+    if (isNaN(lastIndex)) {
+        lastIndex = -1;
+    }
+
+    // Calculate next index in sequence (loops back to 0 when end is reached)
+    const nextIndex = (lastIndex + 1) % ads.length;
+    
+    // Save current index for the next run
+    localStorage.setItem('lastAdIndex', nextIndex);
+
+    const currentAd = ads[nextIndex];
 
     const headerEl = document.getElementById('ad-header');
     const textEl = document.getElementById('ad-text');
     const mediaContainer = document.getElementById('ad-media-container');
     const continueBtn = document.getElementById('ad-continue-btn');
+    const visitBtn = document.getElementById('ad-visit-btn');
 
-    // Populate header and text
-    headerEl.innerText = randomAd.header;
-    textEl.innerHTML = `<strong>${randomAd.text}</strong>`;
-    mediaContainer.innerHTML = ''; // Clear existing media
+    // Populate header, text, and visit button
+    headerEl.innerText = currentAd.header;
+    textEl.innerHTML = `<strong>${currentAd.text}</strong>`;
+    
+    if (visitBtn) {
+        visitBtn.href = currentAd.url;
+    }
 
-    if (randomAd.type === 'video') {
-        // Render video element
+    mediaContainer.innerHTML = '';
+    
+    // Open URL when clicking the container (opens in new tab)
+    mediaContainer.style.cursor = 'pointer';
+    mediaContainer.onclick = (e) => {
+        // Prevent triggering redirect if the user interacts with video controls
+        if (e.target.tagName !== 'VIDEO') {
+            window.open(currentAd.url, '_blank', 'noopener,noreferrer');
+        }
+    };
+
+    // Render appropriate media element
+    if (currentAd.type === 'video') {
         const video = document.createElement('video');
-        video.src = randomAd.src;
+        video.src = currentAd.src;
         video.autoplay = true;
-        video.muted = true; // Autoplay requires muted in most browsers
+        video.muted = true; // Required for reliable autoplay across browsers
         video.playsInline = true;
         video.controls = true;
+        
+        // Open URL when clicking video background without triggering play/pause controls conflict
+        video.addEventListener('click', (e) => {
+            // If controls area isn't being clicked directly
+            e.stopPropagation();
+            window.open(currentAd.url, '_blank', 'noopener,noreferrer');
+        });
+
         mediaContainer.appendChild(video);
-
-        // Lock button for 5 seconds
-        continueBtn.disabled = true;
-        let countdown = 5;
-        continueBtn.innerText = `Continue in ${countdown}s`;
-
-        const timer = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
-                continueBtn.innerText = `Continue in ${countdown}s`;
-            } else {
-                clearInterval(timer);
-                continueBtn.disabled = false;
-                continueBtn.innerText = 'Continue';
-            }
-        }, 1000);
-
     } else {
-        // Render image element
         const img = document.createElement('img');
-        img.src = randomAd.src;
-        img.alt = randomAd.header;
+        img.src = currentAd.src;
+        img.alt = currentAd.header;
         mediaContainer.appendChild(img);
-
-        // Ensure button is enabled immediately for image ads
-        continueBtn.disabled = false;
-        continueBtn.innerText = 'Continue';
     }
+
+    // Enforce 7-second timer for ALL ad types
+    continueBtn.disabled = true;
+    let countdown = 7;
+    continueBtn.innerText = `Continue in ${countdown}s`;
+
+    const timer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            continueBtn.innerText = `Continue in ${countdown}s`;
+        } else {
+            clearInterval(timer);
+            continueBtn.disabled = false;
+            continueBtn.innerText = 'Continue';
+        }
+    }, 1000);
 }
 
-// Optional placeholder if not defined elsewhere in your project
 function closeActiveModalDirectlyAd(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -5358,5 +5422,47 @@ function closeActiveModalDirectlyAd(modalId) {
     }
 }
 
-// Run ad selection on window load
 window.addEventListener('DOMContentLoaded', setupAdModal);
+
+
+/**
+ * Synchronizes admin dashboard counts directly from active system database state.
+ */
+function renderAdminDashboardMetricsCounters() {
+    const userCountNode = document.getElementById("lbl-metric-total-users-count");
+    const productCountNode = document.getElementById("lbl-metric-total-products-count");
+
+    // Ensure database exists
+    if (typeof SYSTEM_DATABASE === 'undefined') {
+        window.SYSTEM_DATABASE = { users: [], products: [], chats: [] };
+    }
+
+    const totalUsers = Array.isArray(SYSTEM_DATABASE.users) ? SYSTEM_DATABASE.users.length : 0;
+    const totalProducts = Array.isArray(SYSTEM_DATABASE.products) ? SYSTEM_DATABASE.products.length : 0;
+
+    if (userCountNode) {
+        userCountNode.innerText = `${totalUsers} Users`;
+    }
+
+    if (productCountNode) {
+        productCountNode.innerText = `${totalProducts} Products`;
+    }
+}
+
+/**
+ * Directly modifies an active metric counter DOM element by an incremental delta.
+ * @param {string} elementId - Target DOM ID (e.g. 'lbl-metric-total-products-count')
+ * @param {number} deltaValue - Amount to change (+1 or -1)
+ * @param {string} labelSuffix - Suffix text ('Products' or 'Users')
+ */
+function updateAdminDashboardMetricCount(elementId, deltaValue, labelSuffix) {
+    const targetNode = document.getElementById(elementId);
+    if (!targetNode) return;
+
+    // Parse the leading integer out of the text (e.g., "5 Products" -> 5)
+    let currentVal = parseInt(targetNode.innerText.replace(/\D/g, ''), 10);
+    if (isNaN(currentVal)) currentVal = 0;
+
+    const newVal = Math.max(0, currentVal + deltaValue);
+    targetNode.innerText = `${newVal} ${labelSuffix}`;
+}

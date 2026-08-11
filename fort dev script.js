@@ -397,78 +397,105 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Define the two ad contents
 const ad1 = {
     type: 'video',
-    header: 'Check Out Fort Advert!',
-    text: 'Watch our latest feature video to explore what is new.',
-    src: 'fort advert.mp4'
+    header: 'Need a Custom Website!',
+    text: 'Try Fort Developers (createawebsite.fort.com)',
+    src: 'fort advert.mp4',
+    url: 'https://createawebsite.fort.com'
 };
 
 const ad2 = {
     type: 'image',
-    header: 'Welcome to Fort Developers!',
-    text: 'Made to give you the best on the web.',
-    src: 'flyer fort - landscape.png'
+    header: 'Need a Custom Website!',
+    text: 'Try Fort Developers (createawebsite.fort.com)',
+    src: 'flyer fort - landscape.png',
+    url: 'https://createawebsite.fort.com'
 };
 
 const ads = [ad1, ad2];
 
-// Function to initialize and inject a random ad
 function setupAdModal() {
-    // Select a random ad
-    const randomAd = ads[Math.floor(Math.random() * ads.length)];
+    // Retrieve previous index from localStorage, or default to -1 if not set
+    let lastIndex = parseInt(localStorage.getItem('lastAdIndex'), 10);
+    if (isNaN(lastIndex)) {
+        lastIndex = -1;
+    }
+
+    // Calculate next index in sequence (loops back to 0 when end is reached)
+    const nextIndex = (lastIndex + 1) % ads.length;
+    
+    // Save current index for the next run
+    localStorage.setItem('lastAdIndex', nextIndex);
+
+    const currentAd = ads[nextIndex];
 
     const headerEl = document.getElementById('ad-header');
     const textEl = document.getElementById('ad-text');
     const mediaContainer = document.getElementById('ad-media-container');
     const continueBtn = document.getElementById('ad-continue-btn');
+    const visitBtn = document.getElementById('ad-visit-btn');
 
-    // Populate header and text
-    headerEl.innerText = randomAd.header;
-    textEl.innerHTML = `<strong>${randomAd.text}</strong>`;
-    mediaContainer.innerHTML = ''; // Clear existing media
+    // Populate header, text, and visit button
+    headerEl.innerText = currentAd.header;
+    textEl.innerHTML = `<strong>${currentAd.text}</strong>`;
+    
+    if (visitBtn) {
+        visitBtn.href = currentAd.url;
+    }
 
-    if (randomAd.type === 'video') {
-        // Render video element
+    mediaContainer.innerHTML = '';
+    
+    // Open URL when clicking the container (opens in new tab)
+    mediaContainer.style.cursor = 'pointer';
+    mediaContainer.onclick = (e) => {
+        // Prevent triggering redirect if the user interacts with video controls
+        if (e.target.tagName !== 'VIDEO') {
+            window.open(currentAd.url, '_blank', 'noopener,noreferrer');
+        }
+    };
+
+    // Render appropriate media element
+    if (currentAd.type === 'video') {
         const video = document.createElement('video');
-        video.src = randomAd.src;
+        video.src = currentAd.src;
         video.autoplay = true;
-        video.muted = true; // Autoplay requires muted in most browsers
+        video.muted = true; // Required for reliable autoplay across browsers
         video.playsInline = true;
         video.controls = true;
+        
+        // Open URL when clicking video background without triggering play/pause controls conflict
+        video.addEventListener('click', (e) => {
+            // If controls area isn't being clicked directly
+            e.stopPropagation();
+            window.open(currentAd.url, '_blank', 'noopener,noreferrer');
+        });
+
         mediaContainer.appendChild(video);
-
-        // Lock button for 5 seconds
-        continueBtn.disabled = true;
-        let countdown = 5;
-        continueBtn.innerText = `Continue in ${countdown}s`;
-
-        const timer = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
-                continueBtn.innerText = `Continue in ${countdown}s`;
-            } else {
-                clearInterval(timer);
-                continueBtn.disabled = false;
-                continueBtn.innerText = 'Continue';
-            }
-        }, 1000);
-
     } else {
-        // Render image element
         const img = document.createElement('img');
-        img.src = randomAd.src;
-        img.alt = randomAd.header;
+        img.src = currentAd.src;
+        img.alt = currentAd.header;
         mediaContainer.appendChild(img);
-
-        // Ensure button is enabled immediately for image ads
-        continueBtn.disabled = false;
-        continueBtn.innerText = 'Continue';
     }
+
+    // Enforce 7-second timer for ALL ad types
+    continueBtn.disabled = true;
+    let countdown = 7;
+    continueBtn.innerText = `Continue in ${countdown}s`;
+
+    const timer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            continueBtn.innerText = `Continue in ${countdown}s`;
+        } else {
+            clearInterval(timer);
+            continueBtn.disabled = false;
+            continueBtn.innerText = 'Continue';
+        }
+    }, 1000);
 }
 
-// Optional placeholder if not defined elsewhere in your project
 function closeActiveModalDirectlyAd(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -476,5 +503,4 @@ function closeActiveModalDirectlyAd(modalId) {
     }
 }
 
-// Run ad selection on window load
 window.addEventListener('DOMContentLoaded', setupAdModal);

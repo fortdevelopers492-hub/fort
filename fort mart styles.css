@@ -1674,3 +1674,55 @@ body {
     cursor: not-allowed;
     opacity: 0.65;
 }
+
+/* ==========================================================================
+   Mobile Centering for Dynamic Website Cards
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Stack the card contents vertically and center all alignment */
+    .section-content-wrapper-fortdev.website-section-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    /* 2. Stack the logo icon and text block vertically */
+    .website-meta-side {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 12px !important;
+    }
+
+    /* 3. Center header title and text descriptions */
+    .website-info-block-fortdev {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .header-inline-edit-row-fortdev {
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .website-info-block-fortdev h3,
+    .website-info-block-fortdev p {
+        text-align: center !important;
+    }
+
+    /* 4. Center the button container and set button to responsive width */
+    .section-content-wrapper-fortdev .margin-top-md {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        margin-top: 14px !important;
+    }
+
+    .section-content-wrapper-fortdev .btn-blue {
+        margin: 0 auto !important;
+        min-width: 160px; /* Optional: gives a comfortable tap target on phones */
+    }
+}

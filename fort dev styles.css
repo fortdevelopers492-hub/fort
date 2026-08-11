@@ -559,3 +559,80 @@ picture#ad-image-wrapper {
     cursor: not-allowed;
     opacity: 0.65;
 }
+
+/* ==========================================
+   MAIN SITE HEADER STYLING
+   ========================================== */
+.main-site-header {
+    background-color: var(--fort-white-pure);
+    border-bottom: 1px solid var(--fort-gray-border);
+    padding: 14px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand-logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.header-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--fort-blue-dark);
+    letter-spacing: -0.3px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--fort-blue-dark);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--fort-blue-light);
+    background-color: var(--fort-gray-bg);
+}
+
+/* Header Mobile Responsive Overrides */
+@media screen and (max-width: 640px) {
+    .main-site-header {
+        padding: 12px 20px;
+    }
+
+    .brand-name {
+        font-size: 1.1rem;
+    }
+
+    .nav-link {
+        padding: 6px 12px;
+        font-size: 0.88rem;
+    }
+}
