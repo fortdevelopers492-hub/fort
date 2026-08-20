@@ -1,6 +1,6 @@
 let SYSTEM_DATABASE = {
     users: [
-        { uid: "admin", identityName: "Fort Mart Admin", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "Fort Mart", secretKey: "Fortmart492#", avatar: "fort mart logo.png", businessName: "Fort Mart Core Operations", businessInfo: "Primary global system marketplace monitoring profile." },
+        { uid: "admin", identityName: "Fort Mart Admin", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "Fort Mart", secretKey: "Fortmart492#", avatar: "fort-mart-logo.png", businessName: "Fort Mart Core Operations", businessInfo: "Primary global system marketplace monitoring profile." },
         { uid: "user_sarah", identityName: "Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+234", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
         { uid: "user_john", identityName: "John Mark", accountType: "personal", country: "Nigeria", dialingCode: "+234", identifierText: "john@gmail.com", secretKey: "John456!", avatar: "" },
         { uid: "user_sarah_ghana", identityName: "Ghanian Sarah Enterprise Hub", accountType: "business", country: "Nigeria", dialingCode: "+233", identifierText: "sarah@gmail.com", secretKey: "Sarah123!", avatar: "", businessName: "Sarah Logistics & Supply", businessInfo: "Top tier importer of premium consumer electronics products."  },
