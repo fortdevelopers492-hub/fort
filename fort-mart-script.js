@@ -174,6 +174,7 @@ if (window.innerWidth <= 1024) {
 const PAGE_TITLES = {
     'home': 'Home | Fort Mart',
     'messages': 'Messages | Fort Mart',
+    'prompt-workspace-aipage': 'Fort AI Assitant | Fort Mart',
     'my-account': 'My Account | Fort Mart',
     'admin-dashboard': 'Admin Dashboard | Fort Mart'
 };
@@ -217,8 +218,8 @@ function navigateToPage(targetPageId) {
     } else if(targetPageId === 'my-account') {
         searchBarPlaceholder.placeholder = "Search Settings……";
         initializeProfileDetailsAccountManagementFieldsValues();
-    } else if(targetPageId === 'fort-ai') {
-        initializeFortAiChatWindowWorkspace();
+    } else if(targetPageId === 'prompt-workspace-aipage') {
+        initPromptWorkspacePage();
     } else if (targetPageId === 'admin-dashboard') 
         searchBarPlaceholder.placeholder = "Search Users....."
         renderAdminUsersManagementList();  
@@ -1717,12 +1718,15 @@ async function shareProductModalDetails(productId) {
     const targetModal = document.getElementById("product-detail-modal-body");
     if (!targetModal) return;
 
-    // 1. Create a clone to generate the exact specs image without altering active UI
+// 1. Create a clone to generate the exact specs image in Desktop view
     const clone = targetModal.cloneNode(true);
     clone.style.position = "absolute";
     clone.style.top = "-9999px";
     clone.style.left = "-9999px";
-    clone.style.width = targetModal.offsetWidth + "px";
+    
+    // Force fixed desktop dimensions
+    const DESKTOP_WIDTH = 1000;
+    clone.style.width = `${DESKTOP_WIDTH}px`;
     clone.style.backgroundColor = "#ffffff";
     clone.style.padding = "20px";
     clone.style.borderRadius = "8px";
@@ -1768,7 +1772,13 @@ async function shareProductModalDetails(productId) {
             });
         }
 
-        const canvas = await html2canvas(clone, { useCORS: true, logging: false });
+        // Render canvas using desktop width and window viewport emulation
+        const canvas = await html2canvas(clone, { 
+            useCORS: true, 
+            logging: false,
+            width: DESKTOP_WIDTH,
+            windowWidth: 1200
+        });
         document.body.removeChild(clone);
 
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -5738,3 +5748,115 @@ function handleInitialUrlRouting() {
 
 // Attach listener
 window.addEventListener('DOMContentLoaded', handleInitialUrlRouting);
+
+
+// JavaScript
+
+// Database of related sub-prompts mapped by category or keywords
+const subPromptPresets = {
+    'Marketing': [
+        "Generate email copy for this campaign",
+        "What are key performance metrics to track?",
+        "Create a 7-day social media schedule"
+    ],
+    'Development': [
+        "Add error handling to this solution",
+        "How do I write unit tests for this?",
+        "Explain the time complexity (Big O)"
+    ],
+    'UI/UX': [
+        "How do I make this responsive on mobile?",
+        "Suggest a color palette for this dashboard",
+        "Add a dark mode CSS override"
+    ],
+    'General': [
+        "Can you elaborate on that?",
+        "Give me a bulleted summary",
+        "Provide a concrete example"
+    ]
+};
+
+// Main function to trigger when opening or entering the Prompt Page
+function initPromptWorkspacePage() {
+    const pageEl = document.getElementById('page-prompt-workspace-aipage');
+    if (pageEl) {
+        pageEl.classList.remove('hidden-view-aipage');
+    }
+    // Ensure state opens clean on default search view
+    closePromptChatOverlay();
+}
+
+function submitMainPrompt() {
+    const input = document.getElementById('main-prompt-input-aipage');
+    const promptText = input.value.trim();
+    if (!promptText) return;
+    
+    launchPromptChatOverlay("Custom Search", promptText, 'General');
+    input.value = '';
+}
+
+function triggerPresetPrompt(category, text) {
+    launchPromptChatOverlay(category, text, category);
+}
+
+function launchPromptChatOverlay(title, initialPromptText, category) {
+    document.getElementById('active-prompt-title-aipage').innerText = title;
+    document.getElementById('active-prompt-category-aipage').innerText = category;
+    
+    const stream = document.getElementById('prompt-chat-stream-aipage');
+    stream.innerHTML = ''; // Clear prior chat history
+    
+    // Reveal overlay
+    document.getElementById('prompt-chat-overlay-aipage').classList.remove('hidden-node-aipage');
+    
+    // Inject initial prompt & generate response
+    appendMessage(initialPromptText, 'user-aipage');
+    renderSubPrompts(category);
+    
+    // Simulated system response
+    setTimeout(() => {
+        appendMessage(`Here is the solution regarding "${initialPromptText}". You can use the suggested sub-prompts below to refine this output.`, 'system-aipage');
+    }, 600);
+}
+
+function sendOverlayFollowUp(customText = null) {
+    const input = document.getElementById('overlay-chat-input-aipage');
+    const text = customText || input.value.trim();
+    if (!text) return;
+
+    appendMessage(text, 'user-aipage');
+    if (!customText) input.value = '';
+
+    // Simulated reply
+    setTimeout(() => {
+        appendMessage(`Processed follow-up request: "${text}".`, 'system-aipage');
+    }, 600);
+}
+
+function appendMessage(text, senderClass) {
+    const stream = document.getElementById('prompt-chat-stream-aipage');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg-aipage ${senderClass}`;
+    msgDiv.innerText = text;
+    stream.appendChild(msgDiv);
+    stream.scrollTop = stream.scrollHeight;
+}
+
+function renderSubPrompts(category) {
+    const container = document.getElementById('sub-prompts-chip-container-aipage');
+    container.innerHTML = '';
+    
+    const prompts = subPromptPresets[category] || subPromptPresets['General'];
+    
+    prompts.forEach(promptText => {
+        const chip = document.createElement('button');
+        chip.className = 'chip-btn-aipage';
+        chip.innerText = promptText;
+        chip.onclick = () => sendOverlayFollowUp(promptText);
+        container.appendChild(chip);
+    });
+}
+
+function closePromptChatOverlay() {
+    document.getElementById('prompt-chat-overlay-aipage').classList.add('hidden-node-aipage');
+}
