@@ -108,6 +108,7 @@
                 <ul class="drawer-links">
                     <li id="nav-item-home" onclick="navigateToPage('home')">🏠 Home (Products)</li>
                     <li id="nav-item-messages" onclick="navigateToPage('messages')">💬 Messages</li>
+                    <li id="nav-item-my-aipage" class="hidden-admin-node" onclick="navigateToPage('prompt-workspace-aipage')">Semi-AI Assistant</li>                    
                     <li id="nav-item-my-account" onclick="navigateToPage('my-account')">⚙️ My Account Settings</li>
                     <li id="admin-nav-item" class="hidden-admin-node" onclick="navigateToPage('admin-dashboard')">🛡️ Admin Dashboard</li>
                     <br>
@@ -175,6 +176,71 @@
                     </div>
                 </section>
 
+                <section id="page-prompt-workspace-aipage" class="view-page-aipage hidden-view-aipage" style="display: none !important;">
+                    <div class="prompt-page-container-aipage">
+                        
+                        <!-- DEFAULT VIEW: Prompt Search & Grid -->
+                        <div id="prompt-search-view-aipage" class="prompt-search-wrapper-aipage rounded-rect-aipage">
+                            <div class="prompt-header-box-aipage">
+                                <h2>Explore Prompts</h2>
+                                <p>Select a starter prompt or type your query below to launch an interactive session.</p>
+                                
+                                <div class="prompt-input-group-aipage">
+                                    <input type="text" id="main-prompt-input-aipage" class="rounded-rect-aipage" placeholder="Ask anything or enter a detailed prompt..." onkeydown="if(event.key==='Enter') submitMainPrompt()">
+                                    <button class="btn-blue" onclick="submitMainPrompt()">Generate</button>
+                                </div>
+                            </div>
+
+                            <!-- Pre-built Starter Cards -->
+                            <div class="prompt-cards-grid-aipage">
+                                <div class="prompt-card-aipage rounded-rect-aipage" onclick="triggerPresetPrompt('Content Creation', 'Write a marketing strategy for a SaaS product launch.')">
+                                    <span class="badge-aipage">Marketing</span>
+                                    <h4>SaaS Product Launch</h4>
+                                    <p>Draft a multi-channel campaign strategy covering social, email, and PR.</p>
+                                </div>
+                                <div class="prompt-card-aipage rounded-rect-aipage" onclick="triggerPresetPrompt('Code Debugging', 'Help me optimize and refactor a complex JS function.')">
+                                    <span class="badge-aipage">Development</span>
+                                    <h4>JS Optimization</h4>
+                                    <p>Refactor performance bottlenecks and improve maintainability.</p>
+                                </div>
+                                <div class="prompt-card-aipage rounded-rect-aipage" onclick="triggerPresetPrompt('Data Analysis', 'How do I build a dashboard layout with HTML grid?')">
+                                    <span class="badge-aipage">UI/UX</span>
+                                    <h4>Dashboard Layout</h4>
+                                    <p>Construct a flexible HTML/CSS grid layout for complex control panels.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OVERLAY VIEW: Active Chat & Sub-Prompts (Initially Hidden) -->
+                        <div id="prompt-chat-overlay-aipage" class="chat-overlay-pane-aipage rounded-rect-aipage hidden-node-aipage">
+                            <div class="chat-overlay-header-aipage">
+                                <div>
+                                    <h3 id="active-prompt-title-aipage">Interactive Session</h3>
+                                    <span id="active-prompt-category-aipage" class="badge-aipage">General</span>
+                                </div>
+                                <button class="btn-sm-pencil-aipage" style="background-color: #edf2f7; color: #4a5568;" onclick="closePromptChatOverlay()">← Back to Search</button>
+                            </div>
+
+                            <div id="prompt-chat-stream-aipage" class="message-stream-scroller-aipage scrollable-container-aipage">
+                                <!-- Dynamic messages populate here -->
+                            </div>
+
+                            <!-- Dynamic Related Sub-Prompts -->
+                            <div class="sub-prompts-bar-aipage">
+                                <span class="sub-prompts-label-aipage">Suggested follow-ups:</span>
+                                <div id="sub-prompts-chip-container-aipage" class="sub-prompts-chips-aipage">
+                                    <!-- Sub-prompt chips injected dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="chat-input-row-bar-aipage">
+                                <input type="text" id="overlay-chat-input-aipage" class="rounded-rect-aipage" placeholder="Follow up on this prompt..." onkeydown="if(event.key==='Enter') sendOverlayFollowUp()">
+                                <button onclick="sendOverlayFollowUp()" class="btn-blue">Send</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>                
 
                 <section id="page-my-account" class="view-page hidden-view">
                     <div class="settings-control-grid">

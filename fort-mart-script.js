@@ -1468,22 +1468,20 @@ if (SYSTEM_DATABASE.adminSlot === undefined) {
 // Ads displayed inside the Product Grid Loop
 const gridAdsPool = [
     { type: 'image', header: 'Web Hosting Deals', text: 'Get high-speed cloud hosting today!', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' },
-    { type: 'image', header: 'Graphic Design Hub', text: 'Professional flyers and logos made fast.', src: 'flyer-fort-landscape.png', url: 'https://graphics.fort-site.com.ng' },
-    { type: 'video', header: 'Custom Web Apps', text: 'Build scalable platforms with Fort Developers.', src: 'fort-advert.mp4', url: 'https://createawebsite.fort-site.com.ng' },
-    { type: 'image', header: 'E-commerce Solutions', text: 'Launch your store easily.', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' },
-    { type: 'image', header: 'SEO Optimization', text: 'Rank top on search engines.', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' },
-    { type: 'video', header: 'Mobile App Creation', text: 'iOS and Android solutions for your shop.', src: 'fort-advert.mp4', url: 'https://createawebsite.fort-site.com.ng' },
-    { type: 'image', header: 'UI/UX Redesign', text: 'Modernize your brand identity.', src: 'flyer-fort-landscape.png', url: 'https://graphics.fort-site.com.ng' },
+    { type: 'image', header: 'Graphic Design Hub', text: 'Professional flyers and logos made fast.', src: 'fort-graphics-logo.png', url: 'https://graphics.fort-site.com.ng' },
+    { type: 'image', header: 'Custom Web Apps', text: 'Build scalable platforms with Fort Developers.', src: 'flyer-fort-2_ewnab_landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
+    { type: 'image', header: 'E-commerce Solutions', text: 'Launch your store easily.', src: 'flyer-fort-landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
+    { type: 'image', header: 'SEO Optimization', text: 'Rank top on search engines.', src: 'flyer-fort-landscape.png', url: 'https://blogs.fortdevelopers.com.ng' },
+    { type: 'image', header: 'UI/UX Redesign', text: 'Modernize your brand identity.', src: 'fort-graphics-logo.png', url: 'https://graphics.fort-site.com.ng' },
     { type: 'image', header: 'Brand Identity Suite', text: 'Full branding packages available.', src: 'flyer-fort-landscape.png', url: 'https://graphics.fort-site.com.ng' },
-    { type: 'image', header: 'Digital Marketing Services', text: 'Grow your reach and convert leads.', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' },
-    { type: 'video', header: 'Enterprise Software', text: 'Custom web platforms built for scale.', src: 'fort-advert.mp4', url: 'https://createawebsite.fort-site.com.ng' }
+    { type: 'image', header: 'Enterprise Software', text: 'Custom web platforms built for scale.', src: 'flyer-fort-2_ewnab_landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' }
 ];
 
 // Ads displayed inside the 10% Sticky Footer Bar
 const footerAdsPool = [
-    { type: 'image', header: 'Sponsored: Fort Web Builder', text: 'Create your dream custom site.', src: 'flyer-fort-landscape.png', url: 'https://createawebsite.fort-site.com.ng' },
-    { type: 'image', header: 'Sponsored: Fort Graphics', text: 'Get high quality e-flyers today.', src: 'flyer-fort-landscape.png', url: 'https://graphics.fort-site.com.ng' },
-    { type: 'video', header: 'Sponsored: Fort Dev Hub', text: 'Professional software engineering.', src: 'fort-advert.mp4', url: 'https://fort-site.com.ng' }
+    { type: 'image', header: 'Sponsored: Fort Web Builder', text: 'Create your dream custom site.', src: 'flyer-fort-2_ewnab_landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
+    { type: 'image', header: 'Sponsored: Fort Graphics', text: 'Get high quality e-flyers today.', src: 'fort-graphics-logo.png', url: 'https://graphics.fort-site.com.ng' },
+    { type: 'image', header: 'Sponsored: Fort Dev Hub', text: 'Professional software engineering.', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' }
 ];
 
 /**
@@ -5572,10 +5570,10 @@ function renderAdminUsersManagementList() {
 }
 
 const ad1 = {
-    type: 'video',
+    type: 'image',
     header: 'Need a Custom Website!',
     text: 'Try Fort Developers <br> (createawebsite.fort-site.com.ng)',
-    src: 'fort-advert.mp4',
+    src: 'flyer-fort-2_ewnab_landscape.png',
     url: 'https://createawebsite.fort-site.com.ng'
 };
 
