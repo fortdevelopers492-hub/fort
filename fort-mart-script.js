@@ -1704,80 +1704,76 @@ function createProductSlug(name) {
 }
 
 /**
- * Native Share handler for product modal
- */
-/**
- * Native Share handler for product modal with Desktop/Windows fallbacks
+ * Native Share handler for product modal (Mobile Optimized & Primary Description Only)
  */
 async function shareProductModalDetails(productId) {
-    const product = SYSTEM_DATABASE.products.find(p => p.pid === productId) || {
+    const detailOverlayBodyNode = document.getElementById("product-detail-modal-body");
+    if (!detailOverlayBodyNode) return;
+
+    // 1. Instantly capture product details from active DOM/Memory to prevent blocking network delays
+    const DOMProductImg = detailOverlayBodyNode.querySelector(".expanded-master-image-box img");
+    const rawImageUrl = DOMProductImg ? DOMProductImg.src : '';
+
+    let product = (SYSTEM_DATABASE.products || []).find(p => p.pid === productId) || {
         pid: productId,
-        name: "Synchronized Affiliate System Feed",
-        info: "No details specified.",
-        aiInfo: "No specifications specified."
+        name: detailOverlayBodyNode.querySelector(".product-title-text, h2")?.textContent || "Product",
+        info: detailOverlayBodyNode.querySelector(".spec-section-body")?.textContent || ""
     };
 
-    const targetModal = document.getElementById("product-detail-modal-body");
-    if (!targetModal) return;
+    const productSlug = typeof createProductSlug === "function" 
+        ? createProductSlug(product.name) 
+        : product.name.toLowerCase().replace(/\s+/g, '-');
+    
+    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
+    const currencySymbol = (APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
 
-    // Locate the product image inside the modal
-    const productImageEl = targetModal.querySelector(".expanded-master-image-box img");
-    if (!productImageEl) return;
-
-    try {
-        // Fetch product cover photo and build Blob / File object directly
-        const imageResponse = await fetch(productImageEl.src, { mode: 'cors' });
-        const imageBlob = await imageResponse.blob();
-        const imageFileName = `${createProductSlug(product.name)}.png`;
-        const imageFile = new File([imageBlob], imageFileName, { type: imageBlob.type || 'image/png' });
-
-        const productSlug = createProductSlug(product.name);
-        const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
-        
-        // Build full share text containing product details and specs
-        const shareText = 
+    // 2. Format share text with ONLY the primary description
+    const shareText = 
 `${product.name} | Fort Mart
-Price: ${(APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$'}${product.price ? product.price.toLocaleString() : 'N/A'}
+Price: ${currencySymbol}${product.price ? parseFloat(product.price).toLocaleString() : ''}
 
 Description:
 ${product.info || 'No details specified.'}
 
-Specifications:
-${product.aiInfo || 'No extra details specified.'}
-
 Link: ${shareUrl}
 Shared via Fort Mart - mart.fort-site.com.ng`;
 
-        // Check if browser/OS supports file sharing (Mobile & modern Web Share supported OS)
-        if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+    // 3. Extract cached image file object directly from memory/browser cache
+    let imageFile = null;
+    if (rawImageUrl && !rawImageUrl.startsWith("data:image/svg+xml")) {
+        try {
+            const imageResponse = await fetch(rawImageUrl, { mode: 'cors', cache: 'force-cache' });
+            const imageBlob = await imageResponse.blob();
+            const imageFileName = `${productSlug}.png`;
+            imageFile = new File([imageBlob], imageFileName, { type: imageBlob.type || 'image/png' });
+        } catch (e) {
+            console.warn("Could not construct share file blob:", e);
+        }
+    }
+
+    // 4. Fire Native Mobile Share Sheet synchronously to preserve user gesture
+    try {
+        if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 files: [imageFile]
             });
         } else if (navigator.share) {
-            // Standard link + text sharing if file payload is rejected by OS
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 url: shareUrl
             });
         } else {
-            // Desktop Windows/Browser Fallback: Copy share text and download product image
+            // Desktop Clipboard Fallback
             await navigator.clipboard.writeText(shareText);
-
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(imageBlob);
-            downloadLink.download = imageFileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(downloadLink.href);
-
-            alert("Product details copied to clipboard and product image downloaded!");
+            alert("Product details copied to clipboard!");
         }
     } catch (error) {
-        console.error("Error sharing product:", error);
+        if (error.name !== "AbortError") {
+            console.error("Error launching native share sheet:", error);
+        }
     }
 }
 
