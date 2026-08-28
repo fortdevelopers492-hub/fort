@@ -1712,82 +1712,41 @@ function createProductSlug(name) {
 async function shareProductModalDetails(productId) {
     const product = SYSTEM_DATABASE.products.find(p => p.pid === productId) || {
         pid: productId,
-        name: "Synchronized Affiliate System Feed"
+        name: "Synchronized Affiliate System Feed",
+        info: "No details specified.",
+        aiInfo: "No specifications specified."
     };
 
     const targetModal = document.getElementById("product-detail-modal-body");
     if (!targetModal) return;
 
-// 1. Create a clone to generate the exact specs image in Desktop view
-    const clone = targetModal.cloneNode(true);
-    clone.style.position = "absolute";
-    clone.style.top = "-9999px";
-    clone.style.left = "-9999px";
-    
-    // Force fixed desktop dimensions
-    const DESKTOP_WIDTH = 1000;
-    clone.style.width = `${DESKTOP_WIDTH}px`;
-    clone.style.backgroundColor = "#ffffff";
-    clone.style.padding = "20px";
-    clone.style.borderRadius = "8px";
-    
-    // Modify elements per specification
-    const headerTitle = clone.querySelector(".modal-title");
-    if (headerTitle) {
-        headerTitle.textContent = "Product Details - Fort Mart";
-    }
-
-    const closeBtn = clone.querySelector(".modal-close-icon-btn");
-    if (closeBtn) closeBtn.remove();
-
-    const actionsFooter = clone.querySelector(".modal-expanded-actions-footer-row");
-    if (actionsFooter) actionsFooter.remove();
-
-    const adminControls = clone.querySelector(".admin-controls-hub-box");
-    if (adminControls) adminControls.remove();
-
-    // Append 'Visit mart.fort-site.com.ng' to indicated left-column area
-    const leftColumn = clone.querySelector(".expanded-left-visuals-column");
-    if (leftColumn) {
-        const visitTag = document.createElement("div");
-        visitTag.style.marginTop = "15px";
-        visitTag.style.fontWeight = "bold";
-        visitTag.style.color = "#1a365d";
-        visitTag.style.fontSize = "14px";
-        visitTag.textContent = "Visit mart.fort-site.com.ng";
-        leftColumn.appendChild(visitTag);
-    }
-
-    document.body.appendChild(clone);
+    // Locate the product image inside the modal
+    const productImageEl = targetModal.querySelector(".expanded-master-image-box img");
+    if (!productImageEl) return;
 
     try {
-        // Ensure html2canvas is loaded
-        if (typeof html2canvas === "undefined") {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement("script");
-                script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        // Render canvas using desktop width and window viewport emulation
-        const canvas = await html2canvas(clone, { 
-            useCORS: true, 
-            logging: false,
-            width: DESKTOP_WIDTH,
-            windowWidth: 1200
-        });
-        document.body.removeChild(clone);
-
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        // Fetch product cover photo and build Blob / File object directly
+        const imageResponse = await fetch(productImageEl.src, { mode: 'cors' });
+        const imageBlob = await imageResponse.blob();
         const imageFileName = `${createProductSlug(product.name)}.png`;
-        const imageFile = new File([blob], imageFileName, { type: 'image/png' });
+        const imageFile = new File([imageBlob], imageFileName, { type: imageBlob.type || 'image/png' });
 
         const productSlug = createProductSlug(product.name);
         const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
-        const shareText = `${shareUrl}\n${product.name} | Fort Mart\nThis product was shared from Fort Mart - mart.fort-site.com.ng`;
+        
+        // Build full share text containing product details and specs
+        const shareText = 
+`${product.name} | Fort Mart
+Price: ${(APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$'}${product.price ? product.price.toLocaleString() : 'N/A'}
+
+Description:
+${product.info || 'No details specified.'}
+
+Specifications:
+${product.aiInfo || 'No extra details specified.'}
+
+Link: ${shareUrl}
+Shared via Fort Mart - mart.fort-site.com.ng`;
 
         // Check if browser/OS supports file sharing (Mobile & modern Web Share supported OS)
         if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
@@ -1797,30 +1756,27 @@ async function shareProductModalDetails(productId) {
                 files: [imageFile]
             });
         } else if (navigator.share) {
-            // Standard link sharing if file payload is rejected by desktop OS
+            // Standard link + text sharing if file payload is rejected by OS
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 url: shareUrl
             });
         } else {
-            // Desktop Windows/Browser Fallback: Copy share text and download the generated spec image
+            // Desktop Windows/Browser Fallback: Copy share text and download product image
             await navigator.clipboard.writeText(shareText);
 
             const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.href = URL.createObjectURL(imageBlob);
             downloadLink.download = imageFileName;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
             URL.revokeObjectURL(downloadLink.href);
 
-            alert("Share message copied to clipboard and product specifications image downloaded!");
+            alert("Product details copied to clipboard and product image downloaded!");
         }
     } catch (error) {
-        if (document.body.contains(clone)) {
-            document.body.removeChild(clone);
-        }
         console.error("Error sharing product:", error);
     }
 }
