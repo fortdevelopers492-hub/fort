@@ -1704,76 +1704,124 @@ function createProductSlug(name) {
 }
 
 /**
- * Native Share handler for product modal (Mobile Optimized & Primary Description Only)
+ * Native Share handler for product modal
+ */
+/**
+ * Native Share handler for product modal with Desktop/Windows fallbacks
  */
 async function shareProductModalDetails(productId) {
-    const detailOverlayBodyNode = document.getElementById("product-detail-modal-body");
-    if (!detailOverlayBodyNode) return;
-
-    // 1. Instantly capture product details from active DOM/Memory to prevent blocking network delays
-    const DOMProductImg = detailOverlayBodyNode.querySelector(".expanded-master-image-box img");
-    const rawImageUrl = DOMProductImg ? DOMProductImg.src : '';
-
-    let product = (SYSTEM_DATABASE.products || []).find(p => p.pid === productId) || {
+    const product = SYSTEM_DATABASE.products.find(p => p.pid === productId) || {
         pid: productId,
-        name: detailOverlayBodyNode.querySelector(".product-title-text, h2")?.textContent || "Product",
-        info: detailOverlayBodyNode.querySelector(".spec-section-body")?.textContent || ""
+        name: "Synchronized Affiliate System Feed"
     };
 
-    const productSlug = typeof createProductSlug === "function" 
-        ? createProductSlug(product.name) 
-        : product.name.toLowerCase().replace(/\s+/g, '-');
+    const targetModal = document.getElementById("product-detail-modal-body");
+    if (!targetModal) return;
+
+// 1. Create a clone to generate the exact specs image in Desktop view
+    const clone = targetModal.cloneNode(true);
+    clone.style.position = "absolute";
+    clone.style.top = "-9999px";
+    clone.style.left = "-9999px";
     
-    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
-    const currencySymbol = (APP_STATE.currentUser && APP_STATE.currentUser.country === 'Nigeria') ? '₦' : '$';
-
-    // 2. Format share text with ONLY the primary description
-    const shareText = 
-`${product.name} | Fort Mart
-Price: ${currencySymbol}${product.price ? parseFloat(product.price).toLocaleString() : ''}
-
-Description:
-${product.info || 'No details specified.'}
-
-Link: ${shareUrl}
-Shared via Fort Mart - mart.fort-site.com.ng`;
-
-    // 3. Extract cached image file object directly from memory/browser cache
-    let imageFile = null;
-    if (rawImageUrl && !rawImageUrl.startsWith("data:image/svg+xml")) {
-        try {
-            const imageResponse = await fetch(rawImageUrl, { mode: 'cors', cache: 'force-cache' });
-            const imageBlob = await imageResponse.blob();
-            const imageFileName = `${productSlug}.png`;
-            imageFile = new File([imageBlob], imageFileName, { type: imageBlob.type || 'image/png' });
-        } catch (e) {
-            console.warn("Could not construct share file blob:", e);
-        }
+    // Force fixed desktop dimensions
+    const DESKTOP_WIDTH = 1000;
+    clone.style.width = `${DESKTOP_WIDTH}px`;
+    clone.style.backgroundColor = "#ffffff";
+    clone.style.padding = "20px";
+    clone.style.borderRadius = "8px";
+    
+    // Modify elements per specification
+    const headerTitle = clone.querySelector(".modal-title");
+    if (headerTitle) {
+        headerTitle.textContent = "Product Details - Fort Mart";
     }
 
-    // 4. Fire Native Mobile Share Sheet synchronously to preserve user gesture
+    const closeBtn = clone.querySelector(".modal-close-icon-btn");
+    if (closeBtn) closeBtn.remove();
+
+    const actionsFooter = clone.querySelector(".modal-expanded-actions-footer-row");
+    if (actionsFooter) actionsFooter.remove();
+
+    const adminControls = clone.querySelector(".admin-controls-hub-box");
+    if (adminControls) adminControls.remove();
+
+    // Append 'Visit mart.fort-site.com.ng' to indicated left-column area
+    const leftColumn = clone.querySelector(".expanded-left-visuals-column");
+    if (leftColumn) {
+        const visitTag = document.createElement("div");
+        visitTag.style.marginTop = "15px";
+        visitTag.style.fontWeight = "bold";
+        visitTag.style.color = "#1a365d";
+        visitTag.style.fontSize = "14px";
+        visitTag.textContent = "Visit mart.fort-site.com.ng";
+        leftColumn.appendChild(visitTag);
+    }
+
+    document.body.appendChild(clone);
+
     try {
-        if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+        // Ensure html2canvas is loaded
+        if (typeof html2canvas === "undefined") {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Render canvas using desktop width and window viewport emulation
+        const canvas = await html2canvas(clone, { 
+            useCORS: true, 
+            logging: false,
+            width: DESKTOP_WIDTH,
+            windowWidth: 1200
+        });
+        document.body.removeChild(clone);
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const imageFileName = `${createProductSlug(product.name)}.png`;
+        const imageFile = new File([blob], imageFileName, { type: 'image/png' });
+
+        const productSlug = createProductSlug(product.name);
+        const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
+        const shareText = `${shareUrl}\n${product.name} | Fort Mart\nThis product was shared from Fort Mart - mart.fort-site.com.ng`;
+
+        // Check if browser/OS supports file sharing (Mobile & modern Web Share supported OS)
+        if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 files: [imageFile]
             });
         } else if (navigator.share) {
+            // Standard link sharing if file payload is rejected by desktop OS
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 url: shareUrl
             });
         } else {
-            // Desktop Clipboard Fallback
+            // Desktop Windows/Browser Fallback: Copy share text and download the generated spec image
             await navigator.clipboard.writeText(shareText);
-            alert("Product details copied to clipboard!");
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = imageFileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(downloadLink.href);
+
+            alert("Share message copied to clipboard and product specifications image downloaded!");
         }
     } catch (error) {
-        if (error.name !== "AbortError") {
-            console.error("Error launching native share sheet:", error);
+        if (document.body.contains(clone)) {
+            document.body.removeChild(clone);
         }
+        console.error("Error sharing product:", error);
     }
 }
 
