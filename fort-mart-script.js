@@ -1467,7 +1467,7 @@ if (SYSTEM_DATABASE.adminSlot === undefined) {
 
 // Ads displayed inside the Product Grid Loop
 const gridAdsPool = [
-    { type: 'image', header: 'Web Hosting Deals', text: 'Get high-speed cloud hosting today!', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' },
+    { type: 'image', header: 'Web Hosting Deals', text: 'Get high-speed cloud hosting today!', src: 'flyer-fort-landscape.png', url: 'https://fortdevelopers.com.ng' },
     { type: 'image', header: 'Graphic Design Hub', text: 'Professional flyers and logos made fast.', src: 'fort-graphics-logo.png', url: 'https://graphics.fort-site.com.ng' },
     { type: 'image', header: 'Custom Web Apps', text: 'Build scalable platforms with Fort Developers.', src: 'flyer-fort-2_ewnab_landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
     { type: 'image', header: 'E-commerce Solutions', text: 'Launch your store easily.', src: 'flyer-fort-landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
@@ -1481,7 +1481,7 @@ const gridAdsPool = [
 const footerAdsPool = [
     { type: 'image', header: 'Sponsored: Fort Web Builder', text: 'Create your dream custom site.', src: 'flyer-fort-2_ewnab_landscape.png', url: 'https://createawebsite.fortdevelopers.com.ng' },
     { type: 'image', header: 'Sponsored: Fort Graphics', text: 'Get high quality e-flyers today.', src: 'fort-graphics-logo.png', url: 'https://graphics.fort-site.com.ng' },
-    { type: 'image', header: 'Sponsored: Fort Dev Hub', text: 'Professional software engineering.', src: 'flyer-fort-landscape.png', url: 'https://fort-site.com.ng' }
+    { type: 'image', header: 'Sponsored: Fort Dev Hub', text: 'Professional software engineering.', src: 'flyer-fort-landscape.png', url: 'https://fortdevelopers.com.ng' }
 ];
 
 /**
@@ -1703,77 +1703,120 @@ function createProductSlug(name) {
 
 /**
  * Native Share handler for product modal
- * Shares the product's actual cover photo alongside structured product details.
  */
 async function shareProductModalDetails(productId) {
     const product = SYSTEM_DATABASE.products.find(p => p.pid === productId) || {
         pid: productId,
-        name: "Synchronized Affiliate System Feed",
-        info: "",
-        coverPhoto: ""
+        name: "Synchronized Affiliate System Feed"
     };
 
-    const productSlug = createProductSlug(product.name);
-    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
+    const targetModal = document.getElementById("product-detail-modal-body");
+    if (!targetModal) return;
+
+// 1. Create a clone to generate the exact specs image in Desktop view
+    const clone = targetModal.cloneNode(true);
+    clone.style.position = "absolute";
+    clone.style.top = "-9999px";
+    clone.style.left = "-9999px";
     
-    // Construct text using your specified format
-    const shareText = `${shareUrl}\n\n${product.name} | Fort Mart\n${product.info || ''}\n\nClick to view product and price:\n${shareUrl}\n\nThis product was shared from Fort Mart - mart.fort-site.com.ng`;
+    // Force fixed desktop dimensions
+    const DESKTOP_WIDTH = 1000;
+    clone.style.width = `${DESKTOP_WIDTH}px`;
+    clone.style.backgroundColor = "#ffffff";
+    clone.style.padding = "20px";
+    clone.style.borderRadius = "8px";
+    
+    // Modify elements per specification
+    const headerTitle = clone.querySelector(".modal-title");
+    if (headerTitle) {
+        headerTitle.textContent = "Product Details - Fort Mart";
+    }
+
+    const closeBtn = clone.querySelector(".modal-close-icon-btn");
+    if (closeBtn) closeBtn.remove();
+
+    const actionsFooter = clone.querySelector(".modal-expanded-actions-footer-row");
+    if (actionsFooter) actionsFooter.remove();
+
+    const adminControls = clone.querySelector(".admin-controls-hub-box");
+    if (adminControls) adminControls.remove();
+
+    // Append 'Visit mart.fort-site.com.ng' to indicated left-column area
+    const leftColumn = clone.querySelector(".expanded-left-visuals-column");
+    if (leftColumn) {
+        const visitTag = document.createElement("div");
+        visitTag.style.marginTop = "15px";
+        visitTag.style.fontWeight = "bold";
+        visitTag.style.color = "#1a365d";
+        visitTag.style.fontSize = "14px";
+        visitTag.textContent = "Visit mart.fort-site.com.ng";
+        leftColumn.appendChild(visitTag);
+    }
+
+    document.body.appendChild(clone);
 
     try {
-        let imageFile = null;
-        const coverPhotoSrc = product.coverPhoto || 'assets/placeholder-product.png';
-
-        // 1. Fetch the cover photo and convert it into a File object for sharing
-        try {
-            const response = await fetch(coverPhotoSrc);
-            const blob = await response.blob();
-            const mimeType = blob.type || 'image/png';
-            const extension = mimeType.split('/')[1] || 'png';
-            const fileName = `${productSlug}.${extension}`;
-            
-            imageFile = new File([blob], fileName, { type: mimeType });
-        } catch (fetchErr) {
-            console.warn("Could not fetch cover photo for sharing, proceeding without image payload:", fetchErr);
+        // Ensure html2canvas is loaded
+        if (typeof html2canvas === "undefined") {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
         }
 
-        // 2. Check if the device/browser supports sharing with files
-        const filesToShare = imageFile ? [imageFile] : [];
-        const canShareFiles = imageFile && navigator.canShare && navigator.canShare({ files: filesToShare });
+        // Render canvas using desktop width and window viewport emulation
+        const canvas = await html2canvas(clone, { 
+            useCORS: true, 
+            logging: false,
+            width: DESKTOP_WIDTH,
+            windowWidth: 1200
+        });
+        document.body.removeChild(clone);
 
-        if (canShareFiles) {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const imageFileName = `${createProductSlug(product.name)}.png`;
+        const imageFile = new File([blob], imageFileName, { type: 'image/png' });
+
+        const productSlug = createProductSlug(product.name);
+        const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productSlug}&pid=${product.pid}`;
+        const shareText = `${shareUrl}\n${product.name} | Fort Mart\nThis product was shared from Fort Mart - mart.fort-site.com.ng`;
+
+        // Check if browser/OS supports file sharing (Mobile & modern Web Share supported OS)
+        if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
-                files: filesToShare
+                files: [imageFile]
             });
         } else if (navigator.share) {
-            // Fallback: Share link and text if file sharing is unsupported (e.g., standard Desktop Chrome/Safari)
+            // Standard link sharing if file payload is rejected by desktop OS
             await navigator.share({
                 title: `${product.name} | Fort Mart`,
                 text: shareText,
                 url: shareUrl
             });
         } else {
-            // Desktop/Fallback: Copy share text to clipboard and trigger image download if available
+            // Desktop Windows/Browser Fallback: Copy share text and download the generated spec image
             await navigator.clipboard.writeText(shareText);
 
-            if (imageFile) {
-                const downloadLink = document.createElement("a");
-                downloadLink.href = URL.createObjectURL(imageFile);
-                downloadLink.download = imageFile.name;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(downloadLink.href);
-            }
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = imageFileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(downloadLink.href);
 
-            alert("Share details copied to clipboard and product photo downloaded!");
+            alert("Share message copied to clipboard and product specifications image downloaded!");
         }
     } catch (error) {
-        // Suppress errors caused by the user closing/canceling the share sheet modal
-        if (error.name !== 'AbortError') {
-            console.error("Error sharing product:", error);
+        if (document.body.contains(clone)) {
+            document.body.removeChild(clone);
         }
+        console.error("Error sharing product:", error);
     }
 }
 
@@ -5526,17 +5569,17 @@ function renderAdminUsersManagementList() {
 const ad1 = {
     type: 'image',
     header: 'Need a Custom Website!',
-    text: 'Try Fort Developers <br> (createawebsite.fort-site.com.ng)',
+    text: 'Try Fort Developers <br> (createawebsite.fortdevelopers.com.ng)',
     src: 'flyer-fort-2_ewnab_landscape.png',
-    url: 'https://createawebsite.fort-site.com.ng'
+    url: 'createawebsite.fortdevelopers.com.ng'
 };
 
 const ad2 = {
     type: 'image',
     header: 'Need a Custom Website!',
-    text: 'Try Fort Developers <br> (createawebsite.fort-site.com.ng)',
+    text: 'Try Fort Developers <br> (ccreateawebsite.fortdevelopers.com.ng)',
     src: 'flyer-fort-landscape.png',
-    url: 'https://createawebsite.fort-site.com.ng'
+    url: 'https://createawebsite.fortdevelopers.com.ng'
 };
 
 const ads = [ad1, ad2];

@@ -1,14 +1,19 @@
 :root {
-    --fort-blue-primary: #0044cc;
-    --fort-blue-dark: #002244;
-    --fort-blue-light: #0288d1;
-    --fort-blue-teal: #004d40;
-    --fort-blue-mint: #e0f2f1;
+    /* Updated Palette: Gradient Blue, Green, and White Theme */
+    --fort-blue-primary: linear-gradient(135deg, #0066ff 0%, #00b4d8 100%);
+    --fort-blue-solid: #0066ff;
+    --fort-blue-dark: #0a192f;
+    --fort-blue-light: #48cae4;
+    --fort-green-primary: linear-gradient(135deg, #2ec4b6 0%, #20bf6b 100%);
+    --fort-green-solid: #20bf6b;
+    --fort-green-light: #a7f3d0;
+    --fort-blue-teal: #0077b6;
+    --fort-blue-mint: #e0fbfc;
     --fort-white-pure: #ffffff;
-    --fort-white-snow: #fcfcfc;
-    --fort-gray-bg: #f4f7f6;
-    --fort-gray-border: #cbd5e0;
-    --fort-gray-slate: #718096;
+    --fort-white-snow: #f4fbfb;
+    --fort-gray-bg: #eef4f8;
+    --fort-gray-border: #bceeeb;
+    --fort-gray-slate: #4a5568;
     --fort-danger-red: #e53e3e;
     --fort-danger-bg: #fff5f5;
 }
@@ -30,7 +35,7 @@ body {
 .rounded-rect {
     border-radius: 8px;
     border: 1px solid var(--fort-gray-border);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 6px rgba(0, 180, 216, 0.05);
 }
 
 .circle-container {
@@ -69,8 +74,8 @@ body {
     justify-content: center;
     gap: 6px;
 }
-.btn-blue { background-color: var(--fort-blue-light); color: var(--fort-white-pure); }
-.btn-blue:hover { background-color: #0277bd; }
+.btn-blue { background: var(--fort-blue-primary); color: var(--fort-white-pure); }
+.btn-blue:hover { background: linear-gradient(135deg, #0052cc 0%, #0096c7 100%); }
 .btn-blue:disabled { background-color: #b3e5fc !important; color: #81d4fa !important; cursor: not-allowed; }
 .btn-gray { background-color: #e2e8f0; color: #4a5568; }
 .btn-gray:hover { background-color: #cbd5e0; }
@@ -78,8 +83,8 @@ body {
 .btn-danger:hover { background-color: #c53030; }
 .btn-sm-pencil { padding: 4px 8px; font-size: 0.8rem; background-color: #edf2f7; border: 1px solid #cbd5e0; }
 .btn-group { display: flex; gap: 12px; margin-top: 14px; }
-.btn-green { background-color: #13d841; color: var(--fort-white-pure); }
-.btn-green:hover { background-color: #099b2b; }
+.btn-green { background: var(--fort-green-primary); color: var(--fort-white-pure); }
+.btn-green:hover { background: linear-gradient(135deg, #25b3a4 0%, #1ab35d 100%); }
 .btn-green:disabled { background-color: #b3e5fc !important; color: #81d4fa !important; cursor: not-allowed; }
 
 
@@ -87,7 +92,7 @@ body {
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background-color: rgba(0, 34, 68, 0.5);
+    background-color: rgba(10, 25, 47, 0.6);
     display: none;
     align-items: center;
     justify-content: center;
@@ -103,7 +108,7 @@ body {
     max-height: 90vh;
     overflow-y: auto;
 }
-.modal-box h2, .modal-box h3 { color: var(--fort-blue-primary); margin-bottom: 12px; font-weight: 800; }
+.modal-box h2, .modal-box h3 { color: #0066ff; margin-bottom: 12px; font-weight: 800; }
 .modal-box p { font-size: 0.92rem; color: var(--fort-gray-slate); line-height: 1.5; }
 
 .modal-box-expanded {
@@ -131,15 +136,15 @@ body {
 .top-nav-bar {
     height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: var(--fort-white-pure); transition: height 0.2s ease; overflow: hidden; z-index: 90;
 }
-.bg-blue { background-color: var(--fort-blue-primary); border-bottom: 2px solid var(--fort-blue-dark); }
+.bg-blue { background: var(--fort-blue-primary); border-bottom: 2px solid var(--fort-blue-dark); }
 .top-nav-bar.relapsed-nav { height: 0px; padding: 0px; border-bottom: none; }
 .nav-toggle-btn { background: none; border: none; color: inherit; font-size: 1.6rem; cursor: pointer; }
 .search-container { flex: 1; max-width: 500px; margin: 0 20px; }
-.search-container input { width: 100%; padding: 8px 16px; border-radius: 20px; border: none; background-color: rgba(255,255,255,0.15); color: #fff; font-size: 0.92rem; }
-.search-container input::placeholder { color: rgba(255,255,255,0.6); }
-.search-container input:focus { background-color: rgba(255,255,255,0.25); outline: none; }
+.search-container input { width: 100%; padding: 8px 16px; border-radius: 20px; border: none; background-color: rgba(255,255,255,0.2); color: #fff; font-size: 0.92rem; }
+.search-container input::placeholder { color: rgba(255,255,255,0.7); }
+.search-container input:focus { background-color: rgba(255,255,255,0.35); outline: none; }
 .nav-right-actions { display: flex; align-items: center; gap: 16px; }
-.profile-avatar-trigger { width: 36px; height: 36px; cursor: pointer; border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; overflow: hidden; }
+.profile-avatar-trigger { width: 36px; height: 36px; cursor: pointer; border: 2px solid rgba(255,255,255,0.9); border-radius: 50%; overflow: hidden; }
 .profile-avatar-trigger img { width: 100%; height: 100%; object-fit: cover; }
 .expand-collapse-btn { background: none; border: none; color: #fff; font-size: 1.1rem; cursor: pointer; }
 
@@ -154,14 +159,14 @@ body {
 .drawer-header-pane-card {
     background-color: var(--fort-white-snow); padding: 14px; border: 1px solid var(--fort-gray-border); display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
 }
-#drawer-user-avatar-frame-node { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background-color: #edf2f7; border: 2px solid var(--fort-blue-light); }
+#drawer-user-avatar-frame-node { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background-color: #edf2f7; border: 2px solid var(--fort-green-solid); }
 .profile-mode-tag-label { display: inline-block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-top: 4px; }
 .profile-mode-tag-label.personal { background-color: #e2e8f0; color: #4a5568; }
-.profile-mode-tag-label.business { background-color: #cce4ff; color: #004085; }
+.profile-mode-tag-label.business { background-color: #e0f2fe; color: #0369a1; }
 .profile-mode-tag-label.admin-tier { background-color: #fed7d7; color: #9b2c2c; }
 .drawer-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .drawer-links li { padding: 12px 14px; border-radius: 6px; font-weight: 600; font-size: 0.92rem; color: var(--fort-blue-dark); cursor: pointer; transition: background 0.15s; }
-.drawer-links li:hover { background-color: var(--fort-gray-bg); color: var(--fort-blue-light); }
+.drawer-links li:hover { background-color: var(--fort-blue-mint); color: var(--fort-blue-solid); }
 .hidden-admin-node { display: none !important; }
 
 /* Core Layout Routing Multi Viewports Surface Surface Nodes */
@@ -170,10 +175,10 @@ body {
 
 /* Category Ribbon Sub System Wrapper Control Layout Elements */
 .categories-bar-wrapper { margin-bottom: 20px; background-color: var(--fort-white-pure); padding: 12px; border-radius: 8px; border: 1px solid var(--fort-gray-border); }
-.category-toggle { background: none; border: none; font-weight: 700; color: var(--fort-blue-primary); cursor: pointer; font-size: 0.9rem; }
+.category-toggle { background: none; border: none; font-weight: 700; color: #0066ff; cursor: pointer; font-size: 0.9rem; }
 .category-items-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7; }
 .category-chip-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--fort-gray-border); background-color: var(--fort-white-snow); color: var(--fort-gray-slate); font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.category-chip-btn.active { background-color: var(--fort-blue-light); color: #fff; border-color: var(--fort-blue-light); }
+.category-chip-btn.active { background: var(--fort-green-primary); color: #fff; border-color: transparent; }
 
 /* Grid Pipeline Layout System for Products Discovery Container Cards */
 .products-master-grid {
@@ -193,7 +198,7 @@ body {
 }
 .product-item-card-container:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 15px rgba(0,0,0,0.04);
+    box-shadow: 0 10px 15px rgba(0, 180, 216, 0.1);
 }
 .poster-profile-strip {
     display: flex;
@@ -205,7 +210,7 @@ body {
     cursor: pointer;
 }
 .poster-profile-strip:hover .mini-profile-business-name {
-    color: var(--fort-blue-light);
+    color: #0066ff;
 }
 .mini-profile-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background-color: #edf2f7; }
 .mini-profile-business-name { font-size: 0.78rem; font-weight: 700; color: var(--fort-blue-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -229,9 +234,9 @@ body {
     overflow: hidden;
     cursor: pointer;
 }
-.product-card-title { font-size: 0.92rem; font-weight: 700; color: var(--fort-blue-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-card-title { font-size: 0.92rem; font-weight: 700; color: #0066ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .product-card-description { font-size: 0.8rem; color: var(--fort-gray-slate); line-height: 1.4; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-.product-card-price-tag { font-size: 1.2rem; font-weight: 800; color: var(--fort-blue-light); margin-top: 8px; }
+.product-card-price-tag { font-size: 1.2rem; font-weight: 800; color: var(--fort-green-solid); margin-top: 8px; }
 
 /* Programmatic Embedded Google AdSense Inline Banner Display Blocks Slots Components styling */
 .adsense-tracker-placeholder-box {
@@ -262,12 +267,12 @@ body {
 .settings-tab-btn {
     text-align: left; padding: 12px 16px; border-radius: 6px; background: none; border: none; font-weight: 600; font-size: 0.9rem; color: var(--fort-gray-slate); cursor: pointer; transition: all 0.2s;
 }
-.settings-tab-btn:hover { background-color: rgba(0,0,0,0.02); color: var(--fort-blue-dark); }
-.settings-tab-btn.active { background-color: var(--fort-blue-primary); color: #fff; }
+.settings-tab-btn:hover { background-color: rgba(0, 180, 216, 0.05); color: var(--fort-blue-dark); }
+.settings-tab-btn.active { background: var(--fort-blue-primary); color: #fff; }
 .settings-content-pane { height: 100%; padding-right: 4px; }
-.settings-sub-panel h2 { font-size: 1.3rem; color: var(--fort-blue-primary); margin-bottom: 18px; font-weight: 800; }
+.settings-sub-panel h2 { font-size: 1.3rem; color: #0066ff; margin-bottom: 18px; font-weight: 800; }
 .profile-photo-center-block { margin-bottom: 24px; position: relative; }
-.pencil-overlay-icon { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,51,102,0.7); color: #fff; font-size: 0.75rem; padding: 4px 0; font-weight: bold; }
+.pencil-overlay-icon { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 102, 255, 0.8); color: #fff; font-size: 0.75rem; padding: 4px 0; font-weight: bold; }
 .detail-row-item { margin-bottom: 16px; }
 .detail-row-item label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--fort-gray-slate); text-transform: uppercase; margin-bottom: 4px; }
 .detail-row-item-second { margin-bottom: 16px; }
@@ -276,66 +281,61 @@ body {
 
 /* Messenger Realtime Workspace Visual Pipeline Interface Layout Specifications */
 .pane-header { padding: 16px; border-bottom: 1px solid var(--fort-gray-border); background-color: var(--fort-white-snow); }
-.pane-header h3 { font-size: 1rem; font-weight: 800; color: var(--fort-blue-primary); text-transform: uppercase; letter-spacing: 0.5px; }
+.pane-header h3 { font-size: 1rem; font-weight: 800; color: #0066ff; text-transform: uppercase; letter-spacing: 0.5px; }
 #chat-threads-target-list { flex: 1; overflow-y: auto; }
 .chat-thread-roster-row { display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid #edf2f7; cursor: pointer; transition: background 0.15s; }
-.chat-thread-roster-row:hover { background-color: var(--fort-gray-bg); }
-.chat-thread-roster-row.active { background-color: #e3f2fd; border-left: 4px solid var(--fort-blue-light); }
+.chat-thread-roster-row:hover { background-color: var(--fort-blue-mint); }
+.chat-thread-roster-row.active { background-color: #e0f2fe; border-left: 4px solid var(--fort-blue-solid); }
 
 .empty-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; color: var(--fort-gray-slate); font-size: 0.92rem; }
 .active-conversation-grid { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
 .chat-context-sub-bar { height: 54px; border-bottom: 1px solid var(--fort-gray-border); display: flex; align-items: center; }
-.message-stream-scroller { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; background-color: #f7fafc; }
+.message-stream-scroller { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; background-color: #f8fafc; }
 
 /* Chat Bubble Highlight States & Overlay Controls Bar */
 .chat-bubble-node {
     max-width: 70%; padding: 12px 14px; position: relative; line-height: 1.4; font-size: 0.92rem; cursor: pointer; transition: filter 0.15s; user-select: none;
 }
-.chat-bubble-node.incoming-msg { background-color: var(--fort-white-pure); align-self: flex-start; border-bottom-left-radius: 0px; color: var(--fort-blue-dark); }
-.chat-bubble-node.outgoing-msg { background-color: #ebf8ff; align-self: flex-end; border-bottom-right-radius: 0px; border-color: #bee3f8; color: #2b6cb0; }
-.chat-bubble-node.selected-highlight { filter: brightness(0.9) contrast(1.1); border: 2px solid var(--fort-blue-light) !important; }
+.chat-bubble-node.incoming-msg { background-color: var(--fort-white-pure); align-self: flex-start; border-bottom-left-radius: 0px; color: var(--fort-blue-dark); border: 1px solid var(--fort-gray-border); }
+.chat-bubble-node.outgoing-msg { background-color: #e0f2fe; align-self: flex-end; border-bottom-right-radius: 0px; border-color: #bae6fd; color: #0369a1; }
+.chat-bubble-node.selected-highlight { filter: brightness(0.9) contrast(1.1); border: 2px solid var(--fort-blue-solid) !important; }
 .msg-meta-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.7rem; color: var(--fort-gray-slate); margin-top: 4px; }
 .tick-mark-node { font-weight: 700; color: #a0aec0; }
-.tick-mark-node.seen { color: var(--fort-blue-light); }
+.tick-mark-node.seen { color: var(--fort-blue-solid); }
 
 .message-action-overlay-bar {
-    position: absolute; top: 54px; left: 0; width: 100%; background-color: #fff; border-bottom: 2px solid var(--fort-blue-light); box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; z-index: 50;
+    position: absolute; top: 54px; left: 0; width: 100%; background-color: #fff; border-bottom: 2px solid var(--fort-blue-solid); box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; z-index: 50;
 }
 
 .chat-input-row-bar { padding: 14px; border-top: 1px solid var(--fort-gray-border); background-color: var(--fort-white-snow); display: flex; gap: 10px; align-items: center; }
 .chat-input-row-bar input[type="text"] { flex: 1; padding: 10px 16px; border: 1px solid var(--fort-gray-border); background-color: #fff; font-size: 0.95rem; }
-.chat-input-row-bar input[type="text"]:focus { outline: none; border-color: var(--fort-blue-light); }
+.chat-input-row-bar input[type="text"]:focus { outline: none; border-color: var(--fort-blue-solid); }
 .attachment-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--fort-gray-slate); padding: 0 4px; }
-.attachment-btn:hover { color: var(--fort-blue-light); }
+.attachment-btn:hover { color: var(--fort-blue-solid); }
 
 /* System Admin Dash Metrics Matrix Modules Layouts Grid */
 .admin-timeframe-selector-bar { background-color: var(--fort-white-pure); padding: 14px; border-radius: 8px; border: 1px solid var(--fort-gray-border); display: flex; align-items: center; gap: 12px; }
-.admin-timeframe-selector-bar label { font-size: 0.85rem; font-weight: 700; color: var(--fort-blue-primary); }
+.admin-timeframe-selector-bar label { font-size: 0.85rem; font-weight: 700; color: #0066ff; }
 .metrics-statistical-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .metric-card-box { background-color: var(--fort-white-pure); padding: 20px; }
 .metric-card-box h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--fort-gray-slate); letter-spacing: 0.5px; }
-.metric-numeric-callout { font-size: 1.4rem; font-weight: 900; color: var(--fort-blue-primary); margin-top: 8px; line-height: 1.2; }
+.metric-numeric-callout { font-size: 1.4rem; font-weight: 900; color: #0066ff; margin-top: 8px; line-height: 1.2; }
 
 .floating-action-plus-button-node {
     position: fixed;
-    /* Lift it above the 10vh footer bar (10vh footer + ~20px offset) */
     bottom: calc(10vh + 20px); 
     right: 20px;
-    
-    /* Ensure it layer-stacks ABOVE the footer (footer is z-index: 500) */
     z-index: 600; 
-
-    /* Styling to keep the button round and easy to tap */
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background-color: var(--fort-blue-light, #3182ce);
+    background: var(--fort-green-primary);
     color: #ffffff;
     border: none;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(32, 191, 107, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -346,7 +346,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Base message bubble relative positioning */
 .message-bubble {
     position: relative;
     padding: 10px 14px;
@@ -356,7 +355,6 @@ body {
     background-color: #f1f5f9;
 }
 
-/* Actions bar is invisible by default */
 .message-bubble-actions {
     display: flex;
     gap: 6px;
@@ -367,12 +365,10 @@ body {
     transition: opacity 0.15s ease-in-out;
 }
 
-/* Actions bar surfaces on hover */
 .message-bubble:hover .message-bubble-actions {
     opacity: 1;
 }
 
-/* Action button micro-styles */
 .bubble-action-btn {
     font-size: 0.75rem;
     padding: 2px 6px;
@@ -391,7 +387,6 @@ body {
     color: #2b6cb0;
 }
 
-/* Contextual Message Hover Actions */
 .msg-hover-actions {
     position: absolute;
     top: -14px;
@@ -409,7 +404,6 @@ body {
     z-index: 10;
 }
 
-/* Reveal actions container on message hover */
 .chat-bubble-node:hover .msg-hover-actions {
     opacity: 1;
     pointer-events: auto;
@@ -432,18 +426,7 @@ body {
 
 .msg-action-btn:hover {
     background-color: #edf2f7;
-    color: #2b6cb0;
-}
-
-.msg-action-btn:hover {
-    background-color: #edf2f7;
-    color: #2b6cb0;
-}
-
-/* Image Message Preview Configuration */
-.msg-action-btn:hover {
-    background-color: #edf2f7;
-    color: #2b6cb0;
+    color: var(--fort-blue-solid);
 }
 
 .msg-image-preview {
@@ -456,17 +439,15 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* Broadcast Virtual Nodes Visual Styling */
 .broadcast-system-node {
     background-color: #f7fafc;
-    border-left: 4px solid #3182ce !important;
+    border-left: 4px solid var(--fort-blue-solid) !important;
 }
 .broadcast-system-node.active {
-    background-color: #ebf8ff !important;
-    border-left: 4px solid #2b6cb0 !important;
+    background-color: #e0f2fe !important;
+    border-left: 4px solid var(--fort-blue-solid) !important;
 }
 
-/* Status Badge Styling */
 .profile-mode-tag-label {
     padding: 3px 8px;
     border-radius: 4px;
@@ -474,25 +455,23 @@ body {
     font-weight: bold;
     text-transform: uppercase;
 }
-.profile-mode-tag-label.verified { background-color: #c6f6d5; color: #22543d; }
-.profile-mode-tag-label.unverified { background-color: #feebc8; color: #744210; }
-.profile-mode-tag-label.restricted { background-color: #fed7d7; color: #742a2a; }
+.profile-mode-tag-label.verified { background-color: #d1fae5; color: #065f46; }
+.profile-mode-tag-label.unverified { background-color: #fef3c7; color: #92400e; }
+.profile-mode-tag-label.restricted { background-color: #fee2e2; color: #991b1b; }
 
-/* User Card Layout */
 .editable-field-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--fort-gray-border);
     border-radius: 6px;
     transition: background 0.2s ease;
 }
 .editable-field-row:hover {
-    background-color: #f7fafc !important;
+    background-color: var(--fort-blue-mint) !important;
 }
 
-/* Form Layout Helper utilities */
 .admin-inspector-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -517,17 +496,12 @@ body {
     margin-top: 10px;
 }
 
-/* Individual Product Module Sections Architecture Viewports */
 .website-section-layout { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; width: 100%; }
 .website-meta-side { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
 .website-info-block { flex: 1; }
-.website-info-block h3 { font-size: 1.4rem; color: var(--fort-blue-primary); font-weight: 800; }
+.website-info-block h3 { font-size: 1.4rem; color: #0066ff; font-weight: 800; }
 .website-info-block p { font-size: 1rem; color: var(--fort-blue-dark); line-height: 1.6; }
 
-
-
-
-/* Platform Cards Products Discovery Grid Panel Module Layout */
 .products-master-grid-fortdev {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -557,60 +531,27 @@ body {
 .header-inline-edit-row-fortdev { display: flex; align-items: center; gap: 12px; }
 
 .website-info-block-fortdev { flex: 1; }
-.website-info-block-fortdev h3 { font-size: 1rem; color: var(--fort-blue-primary); font-weight: 800; }
+.website-info-block-fortdev h3 { font-size: 1rem; color: #0066ff; font-weight: 800; }
 .website-info-block-fortdev p { font-size: 1rem; color: var(--fort-blue-dark); line-height: 1.6; }
 
-
-/* ==========================================================================
-   Adaptive Responsive Layout Framework (Pure CSS Media Queries)
-   ========================================================================== */
-
-/* Laptop / Desktop Default (No classes needed) */
-.products-master-grid { 
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px;
-}
-.settings-control-grid { 
-    display: grid;
-    grid-template-columns: 250px 1fr; 
-}
-.messages-split-layout { 
-    display: grid;
-    grid-template-columns: 350px 1fr; 
-}
-
-/* Tablet / Small Laptop Layout */
 @media (max-width: 1024px) {
     .products-master-grid { 
         grid-template-columns: repeat(2, 1fr); 
     }
 }
 
-/* Mobile Phone Layout (Auto-detected) */
 @media (max-width: 768px) {
-    /* Homepage: One product per row */
     .products-master-grid { 
         grid-template-columns: repeat(1, 1fr) !important; 
         gap: 14px; 
     }
 
-    /* Settings: Categories aligned horizontally at the top */
     .settings-control-grid { 
         grid-template-columns: 1fr; 
         display: flex;
         flex-direction: column;
     }
-    .settings-sidebar-or-categories { /* Adjust selector to your settings menu container */
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        white-space: nowrap;
-        gap: 10px;
-        padding-bottom: 10px;
-    }
 
-    /* Mobile Side Drawer Navigation */
     .side-drawer-menu {
         position: fixed; 
         top: 0; 
@@ -625,7 +566,6 @@ body {
         transform: translateX(0); 
     }
 
-    /* Messages: Expanded chat view covers the chat list */
     .messages-split-layout { 
         grid-template-columns: 1fr; 
         position: relative; 
@@ -638,13 +578,12 @@ body {
         height: 100%; 
         display: none; 
         z-index: 60; 
-        background: #fff; /* Ensures the chat list underneath is fully covered */
+        background: #fff; 
     }
     .chat-conversation-workspace.phone-active-thread { 
         display: flex !important; 
     }
 
-    /* Message Input Container: Stretch input while keeping button right-aligned */
     .message-input-container {
         display: flex;
         align-items: center;
@@ -653,14 +592,13 @@ body {
         box-sizing: border-box;
     }
     .message-input-container input {
-        flex-grow: 1; /* Automatically resizes input to fill remaining space */
+        flex-grow: 1; 
         width: 100%;
     }
     .message-input-container .send-btn {
-        margin-left: auto; /* Pushes the send button to the absolute right end */
+        margin-left: auto; 
     }
 
-    /* Responsive Modals */
     .modal-box {
         width: 90% !important;
         max-width: 400px;
@@ -669,7 +607,6 @@ body {
     }
 }
 
-/* Image Preview Block Formatting Fix */
 .form-input-container-image {
     font-family: sans-serif; 
     padding: 20px; 
@@ -678,7 +615,7 @@ body {
 .form-input-container-image .preview-box { 
     width: 300px; 
     height: 300px; 
-    border: 2px dashed #ccc; 
+    border: 2px dashed var(--fort-gray-border); 
     margin: 20px auto; 
     display: flex;
     align-items: center; 
@@ -692,29 +629,23 @@ body {
 }
 .form-input-container-image .upload-btn { 
     padding: 10px 20px; 
-    background: #007BFF; 
+    background: var(--fort-blue-solid); 
     color: white; 
     border: none; 
     cursor: pointer; 
     border-radius: 5px; 
 }
 
-
-/* Default Laptop/Desktop Navbar Height */
 .navbar {
     height: 70px; 
 }
 
-/* Auto-adjust Navbar Height for Mobile Screens */
 @media (max-width: 768px) {
     .navbar {
-        height: 55px; /* Or whatever height you want for mobile */
+        height: 55px; 
     }
 }
 
-/* ==========================================================================
-   Desktop & Large Screens (Side-by-Side Grid Layout)
-   ========================================================================== */
 .messages-split-layout { 
     display: grid;
     grid-template-columns: 320px 1fr; 
@@ -731,7 +662,6 @@ body {
     height: 100%;
 }
 
-/* Explicit layout assignment matching your active DOM workspace container ID */
 #chat-conversation-pane { 
     background-color: var(--fort-white-pure); 
     display: flex; 
@@ -741,179 +671,81 @@ body {
     position: relative; 
 }
 
-
-/* ==========================================================================
-   Mobile Phone Layout (Overlapping Target Pane Architecture)
-   ========================================================================== */
 @media (max-width: 768px) {
-    
-    /* Collapses the side-by-side grid structure to a single responsive container stack */
     .messages-split-layout { 
         grid-template-columns: 1fr; 
         position: relative; 
         height: 100%;
     }
 
-    /* Sets the active window pane to float over and mask the behind roster list */
     #chat-conversation-pane {
         position: absolute; 
         top: 0; 
         left: 0; 
         width: 100%; 
         height: 100%; 
-        display: none; /* Kept completely hidden until an active chat row is triggered */
+        display: none; 
         z-index: 60; 
         background-color: var(--fort-white-pure); 
     }
 
-    /* Target state class toggled by your JavaScript state engine to display the pane */
     #chat-conversation-pane.phone-active-thread { 
         display: flex !important; 
     }
     
-    /* Normalizes inner toolbar structural paddings across smaller viewports */
     .chat-context-sub-bar {
         padding: 0 10px;
     }
 }
 
-/* ==========================================================================
-   Product Expanded View Mobile Media Queries (Strict Top Stacking)
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. Turn the main parent container into a flat vertical stack */
     .modal-expanded-content-split-grid {
         display: flex !important;
         flex-direction: column !important;
         gap: 12px !important;
     }
 
-    /* 2. Force the right details column to behave like a normal contents wrapper */
-    .expanded-right-details-column {
-        display: flex !important;
-        flex-direction: column !important;
-        display: contents !important; /* Breaks the inner elements out so they can sort globally */
-    }
-
-    /* 3. Re-assign order values globally across all child blocks */
-    
-    /* User / Vendor Profile Box goes to position 1 (Top) */
-    .expanded-right-details-column > div:first-child {
-        order: 1 !important;
-    }
-
-    /* Left Visuals Column containing the Product Image goes directly underneath User Info */
-    .expanded-left-visuals-column {
-        order: 2 !important;
-        width: 100% !important;
-        margin: 4px 0 !important;
-    }
-
-    /* Force the image wrapper to scale perfectly into a responsive square width */
-    .expanded-master-image-box {
-        width: 100% !important;
-        height: auto !important; 
-        aspect-ratio: 1 / 1 !important; 
-        max-width: 320px !important; 
-        margin: 0 auto !important; 
-    }
-
-    /* Product Title Heading */
-    .expanded-right-details-column > h2 {
-        order: 3 !important;
-        margin-top: 6px !important;
-    }
-
-    /* Product Pricing Label */
-    .expanded-right-details-column > div:nth-child(3) {
-        order: 4 !important;
-    }
-
-    /* Primary Description & AI Specification Blocks */
-    .expanded-right-details-column > .spec-note-paragraph-block {
-        order: 5 !important;
-    }
-
-    /* Action Footer Buttons (Message Seller or Manage Post) */
-    .modal-expanded-actions-footer-row {
-        order: 6 !important;
-        padding-top: 14px !important;
-        margin-top: 10px !important;
-    }
-
-    /* Admin Pin/Leaderboard Control panel forced to the absolute bottom of the viewport */
-    .expanded-right-details-column > div[style*="border: 1px dashed"] {
-        order: 7 !important;
-        margin-top: 14px !important;
-        margin-bottom: 0 !important;
-    }
-}
-
-/* ==========================================================================
-   Product Expanded View Mobile Media Queries (Vertical Square Stacking)
-   ========================================================================== */
-@media (max-width: 768px) {
-    /* 1. Turn the parent grid into a single-column vertical flex container */
-    .modal-expanded-content-split-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-    }
-
-    /* 2. Break down the details column structural wrapper so its items can sort globally */
     .expanded-right-details-column {
         display: contents !important; 
     }
 
-    /* ==========================================================================
-       GLOBAL ORDERING ARRAY FOR ELEMENT STACKING
-       ========================================================================== */
-
-    /* [POSITION 1] User / Vendor Profile Info Box at the very top */
     .expanded-right-details-column > div:first-child {
         order: 1 !important;
     }
 
-    /* [POSITION 2] Product Image Column sits vertically right under User Info */
     .expanded-left-visuals-column {
         order: 2 !important;
         width: 100% !important;
         margin: 4px 0 !important;
     }
 
-    /* Force the image container to scale responsively based on screen width while keeping a square ratio */
     .expanded-master-image-box {
         width: 100% !important;
         height: auto !important; 
-        aspect-ratio: 1 / 1 !important; /* Guarantees a perfect square ratio */
-        max-width: 340px !important; /* Prevents it from getting too large on tablet widths */
-        margin: 0 auto !important; /* Centers the square image nicely if needed */
+        aspect-ratio: 1 / 1 !important; 
+        max-width: 340px !important; 
+        margin: 0 auto !important; 
     }
 
-    /* [POSITION 3] Product Title Heading */
     .expanded-right-details-column > h2 {
         order: 3 !important;
         margin-top: 8px !important;
     }
 
-    /* [POSITION 4] Product Pricing Display */
     .expanded-right-details-column > div:nth-child(3) {
         order: 4 !important;
     }
 
-    /* [POSITION 5] Descriptions & Metadata Specifications Box Blocks */
     .expanded-right-details-column > .spec-note-paragraph-block {
         order: 5 !important;
     }
 
-    /* [POSITION 6] Action Footer Buttons (Message Seller or Manage Inventory Details) */
     .modal-expanded-actions-footer-row {
         order: 6 !important;
         padding-top: 14px !important;
         margin-top: 8px !important;
     }
 
-    /* [POSITION 7] Admin Pin & Leaderboard Controls Panel forced to the absolute bottom */
     .expanded-right-details-column > div[style*="border: 1px dashed"] {
         order: 7 !important;
         margin-top: 14px !important;
@@ -921,39 +753,27 @@ body {
     }
 }
 
-/* ==========================================================================
-   "15. Settings Css Queries.txt" - Horizontal Tabs Scroll Query
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* Force the main settings grid layout into a vertical stacking sequence */
     .settings-control-grid {
         display: flex !important;
         flex-direction: column !important;
         gap: 16px !important;
     }
 
-    /* Force all tab buttons onto a single, non-wrapping horizontal line */
     .settings-tabs-topbar {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        
-        /* Enable smooth hardware-accelerated horizontal touch scrolling */
         overflow-x: auto !important;
         overflow-y: hidden !important;
         -webkit-overflow-scrolling: touch !important;
-        
-        /* Layout spacing adjustments */
         width: 100% !important;
         padding: 8px 4px !important;
         gap: 8px !important;
-        
-        /* Snaps buttons to grid tracking points while scrolling */
         scroll-snap-type: x mandatory !important;
     }
 
-    /* Ensure buttons maintain structural sizing integrity instead of shrinking */
     .settings-tab-btn {
         flex: 0 0 auto !important;
         white-space: nowrap !important;
@@ -962,7 +782,6 @@ body {
         font-size: 0.85rem !important;
     }
 
-    /* Optional: Style a clean, visible horizontal scroll bar track to help direct user focus */
     .settings-tabs-topbar::-webkit-scrollbar {
         height: 5px !important;
     }
@@ -973,114 +792,88 @@ body {
     }
     
     .settings-tabs-topbar::-webkit-scrollbar-thumb {
-        background: var(--fort-blue-light, #3182ce) !important;
+        background: var(--fort-blue-solid);
         border-radius: 10px !important;
     }
 }
 
-/* ==========================================================================
-   Responsive Chat Input & Send Button Fix
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. Target your exact input bar container class from your HTML code */
     .chat-input-row-bar {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
         width: 100% !important;
-        padding: 8px 12px !important; /* Proper defensive screen padding spacing */
+        padding: 8px 12px !important; 
         box-sizing: border-box !important;
-        gap: 8px !important; /* Strict tracking gap between field and send button */
+        gap: 8px !important; 
     }
 
-    /* 2. Target the text input field via its structural ID */
     #chat-text-input-field {
-        flex: 1 1 auto !important; /* Dynamically grows and shrinks to take up available space */
-        min-width: 0 !important;   /* Breaks the native browser text-input minimum sizing boundary width */
+        flex: 1 1 auto !important; 
+        min-width: 0 !important;   
         box-sizing: border-box !important;
     }
 
-    /* 3. Target the send button inside the message row container precisely */
     .chat-input-row-bar .btn-blue {
-        flex: 0 0 auto !important;  /* Strict rule: never allow the send button to squish or contract */
-        white-space: nowrap !important; /* Prevents text from wrapping into multiple broken lines */
-        margin-left: auto !important;   /* Pins layout cleanly to the extreme right margin edge */
+        flex: 0 0 auto !important;  
+        white-space: nowrap !important; 
+        margin-left: auto !important;   
     }
 }
 
-
-/* ==========================================================================
-   Unified Profile Avatar Frames (Settings, Website & FortDev Views)
-   ========================================================================== */
-
-/* 1. Base / Settings View: Default 100px Circular Frame */
 .large-avatar-frame,
 .large-avatar-frame-fortdev { 
     width: 100px; 
     height: 100px; 
     margin: 0 auto; 
-    border: 3px solid var(--fort-blue-light); 
+    border: 3px solid var(--fort-blue-solid); 
     position: relative; 
     cursor: pointer; 
     overflow: hidden; 
     background-color: #edf2f7; 
-    border-radius: 50%; /* Forces perfect circle */
+    border-radius: 50%; 
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* 2. Website View Variant: Overrides base styles for the 120px layout version */
 .large-avatar-frame.website-variant {
     width: 120px; 
     height: 120px; 
     background-color: #fff; 
     padding: 10px; 
     flex-shrink: 0; 
-    border: none; /* Removes the blue border for the product page layout if needed */
+    border: none; 
 }
 
-/* 3. Core Image Fitting: Applied universally across all variations */
 .large-avatar-frame img,
 .large-avatar-frame-fortdev img { 
     width: 100%; 
     height: 100%; 
-    object-fit: cover; /* Crops image cleanly to circle boundaries without distortion */
+    object-fit: cover; 
 }
 
-/* ==========================================================================
-   Category Chips Ribbon Horizontal Scroll Query
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* Force all category chip items onto a single, non-wrapping horizontal line */
     .category-items-grid {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        
-        /* Enable smooth hardware-accelerated horizontal touch scrolling */
         overflow-x: auto !important;
         overflow-y: hidden !important;
         -webkit-overflow-scrolling: touch !important;
-        
-        /* Layout spacing adjustments matching structural balance */
         width: 100% !important;
         padding: 8px 4px !important;
         gap: 8px !important;
-        
-        /* Snaps chips cleanly to tracking positions while browsing */
         scroll-snap-type: x mandatory !important;
     }
 
-    /* Ensure individual chip elements maintain their width instead of collapsing */
     .category-chip-btn {
         flex: 0 0 auto !important;
         white-space: nowrap !important;
         scroll-snap-align: start !important;
     }
 
-    /* Clean horizontal scrollbar tracking line styles */
     .category-items-grid::-webkit-scrollbar {
         height: 5px !important;
     }
@@ -1091,20 +884,17 @@ body {
     }
     
     .category-items-grid::-webkit-scrollbar-thumb {
-        background: var(--fort-blue-light, #0288d1) !important;
+        background: var(--fort-green-solid);
         border-radius: 10px !important;
     }
 }
 
-
-/* Styling layout for message items with failed transmission flag state properties */
 .chat-bubble-node.transmission-failed-node {
     background-color: #ffeeee !important;
     border: 1px solid #e53e3e !important;
     color: #c53030 !important;
 }
 
-/* Ensure incoming/outgoing default overrides scale gracefully inside failed layouts */
 .chat-bubble-node.transmission-failed-node p {
     color: #c53030 !important;
 }
@@ -1116,12 +906,8 @@ body {
 
 .drawer-links-three { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .drawer-links-three li { padding: 12px 14px; border-radius: 6px; font-weight: 600; font-size: 0.92rem; color: var(--fort-blue-dark); cursor: pointer; transition: background 0.15s; }
-.drawer-links-three li:hover { background-color: var(--fort-gray-bg); color: var(--fort-blue-light); }
+.drawer-links-three li:hover { background-color: var(--fort-blue-mint); color: var(--fort-blue-solid); }
 
-
-/* ==========================================
-   FORT MART PRELOADER & LOADING ANIMATION
-   ========================================== */
 #preloader-container {
     position: fixed;
     top: 0;
@@ -1129,7 +915,7 @@ body {
     width: 100%;
     height: 100%;
     background-color: #ffffff;
-    z-index: 99999; /* Ensure it stays on top of everything */
+    z-index: 99999; 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1137,14 +923,12 @@ body {
     transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-/* Hide helper class */
 #preloader-container.fade-out {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
 
-/* Logo pulse (heartbeat) animation */
 .preloader-logo {
     width: 120px;
     height: 120px;
@@ -1154,91 +938,68 @@ body {
 }
 
 @keyframes logoHeartbeat {
-    0% {
-        transform: scale(1);
-    }
-    14% {
-        transform: scale(1.15);
-    }
-    28% {
-        transform: scale(1);
-    }
-    42% {
-        transform: scale(1.15);
-    }
-    70% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.15); }
+    70% { transform: scale(1); }
 }
 
-/* Rounded rect progress meter wrapper */
 .progress-meter-container {
     width: 260px;
     height: 18px;
-    background-color: #e2e8f0; /* Light gray track background */
-    border-radius: 50px;       /* Pill shape rounded rect */
-    padding: 3px;              /* Creates an inner inset look */
+    background-color: #e2e8f0; 
+    border-radius: 50px;       
+    padding: 3px;              
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
 }
 
-/* Dynamic filling meter bar */
 .progress-meter-bar {
     height: 100%;
-    width: 0%; /* Dynamic fill */
-    background-color: #3182ce; /* Primary brand blue */
+    width: 0%; 
+    background: var(--fort-green-primary); 
     border-radius: 50px;
     transition: width 0.1s linear, background-color 0.4s ease;
 }
 
-/* Full state turns completely blue */
 .progress-meter-bar.fully-complete {
-    background-color: #1a365d !important; /* Deep/complete brand blue */
+    background: var(--fort-green-primary) !important; 
 }
 
-/* Optional subtext */
 .preloader-text {
     margin-top: 10px;
     font-family: system-ui, -apple-system, sans-serif;
     font-size: 0.85rem;
-    color: #718096;
+    color: var(--fort-gray-slate);
     font-weight: 500;
 }
 
-/* ==========================================================================
-   Product Settings (Account Inventory Ledger) Mobile Layout Fix
-   Pushes product descriptive info text above the action buttons on mobile screens
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* Target the product inventory row container generated by renderAccountInventoryLedgerManagementDashboardGrid */
     #my-products-list-container > .rounded-rect {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: 12px !important;
     }
 
-    /* Product thumbnail and descriptive details wrapper */
     #my-products-list-container > .rounded-rect > div:first-child {
         width: 100% !important;
     }
 
-    /* Action buttons container (Edit Details & Delete) */
     #my-products-list-container > .rounded-rect > div:last-child {
         width: 100% !important;
-        justify-content: flex-start !important; /* Aligns buttons nicely under the text */
+        justify-content: flex-start !important; 
         border-top: 1px solid var(--fort-gray-border, #cbd5e0);
         padding-top: 10px !important;
     }
 
-    /* Optional: Stretch action buttons evenly across mobile screen width */
     #my-products-list-container > .rounded-rect > div:last-child > button {
         flex: 1 !important;
         text-align: center !important;
     }
 }
 
-/* Leaderboard Slots Styling */
 .leaderboard-settings-section {
     margin-top: 24px;
     padding-top: 16px;
@@ -1255,17 +1016,17 @@ body {
     transition: all 0.2s ease;
 }
 .slot-owned {
-    background-color: #d4edda !important; /* Green */
-    border-color: #c3e6cb !important;
-    color: #155724;
+    background-color: #d1fae5 !important; 
+    border-color: #a7f3d0 !important;
+    color: #065f46;
 }
 .slot-available {
-    background-color: #ffffff !important; /* White */
+    background-color: #ffffff !important; 
     border-color: var(--fort-gray-border) !important;
     color: var(--fort-blue-dark);
 }
 .slot-unavailable {
-    background-color: #e2e8f0 !important; /* Ash */
+    background-color: #e2e8f0 !important; 
     border-color: #cbd5e0 !important;
     color: #4a5568;
 }
@@ -1280,7 +1041,6 @@ body {
     text-align: center;
 }
 
-/* Paystack Checkout Screen Modal Specifics */
 .paystack-modal-box {
     background: var(--fort-white-pure);
     border-radius: 8px;
@@ -1288,10 +1048,10 @@ body {
     max-width: 420px;
     width: 100%;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 34, 68, 0.15);
+    box-shadow: 0 10px 25px rgba(0, 102, 255, 0.15);
 }
 .paystack-header-brand {
-    background-color: #09a5db; /* Authentic Paystack Identity Accent Tint */
+    background: var(--fort-blue-primary); 
     color: var(--fort-white-pure);
     padding: 20px;
     text-align: center;
@@ -1314,14 +1074,13 @@ body {
     gap: 12px;
 }
 .btn-paystack-complete {
-    background-color: #3bb75e; /* Paystack Green Action */
+    background: var(--fort-green-primary); 
     color: var(--fort-white-pure);
 }
 .btn-paystack-complete:hover {
-    background-color: #2ea350;
+    background: linear-gradient(135deg, #25b3a4 0%, #1ab35d 100%);
 }
 
-/* Container for toast notifications in the top-right corner */
 #toast-container {
   position: fixed;
   top: 20px;
@@ -1330,10 +1089,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  pointer-events: none; /* Let clicks pass through empty container space */
+  pointer-events: none; 
 }
 
-/* Individual Toast Cards */
 .toast-notification {
   pointer-events: auto;
   min-width: 280px;
@@ -1350,33 +1108,28 @@ body {
   justify-content: space-between;
   gap: 12px;
   font-weight: bold;
-  
-  /* Initial off-screen right positioning + transition */
   transform: translateX(120%);
   opacity: 0;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out;
 }
 
-/* Slide in state */
 .toast-notification.toast-show {
   transform: translateX(0);
   opacity: 1;
 }
 
-/* Toast Color Variants */
 .toast-notification.toast-success {
-  background-color: #10b981; /* Emerald green */
+  background: var(--fort-green-primary); 
 }
 
 .toast-notification.toast-error {
-  background-color: #ef4444; /* Bright red */
+  background-color: #ef4444; 
 }
 
 .toast-notification.toast-info {
-  background-color: #134294; /* Blue */
+  background: var(--fort-blue-primary); 
 }
 
-/* Close Button Inside Toast */
 .toast-close-btn {
   background: transparent;
   border: none;
@@ -1394,7 +1147,6 @@ body {
   opacity: 1;
 }
 
-/* Modal Structural Base Styles (Desktop First) */
 .modal-expanded-header-row {
     display: flex;
     justify-content: space-between;
@@ -1451,7 +1203,7 @@ body {
 }
 
 .vendor-business-name {
-    color: var(--fort-blue-primary);
+    color: #0066ff;
 }
 
 .vendor-country-tag {
@@ -1468,7 +1220,7 @@ body {
 .product-price-tag {
     font-size: 1.6rem;
     font-weight: 900;
-    color: var(--fort-blue-light);
+    color: var(--fort-green-solid);
 }
 
 .spec-section-label {
@@ -1488,12 +1240,12 @@ body {
 .spec-ai-info {
     font-size: 0.9rem;
     font-style: italic;
-    color: var(--fort-blue-primary);
+    color: #0066ff;
 }
 
 .admin-controls-hub-box {
-    background: #edf2f7;
-    border: 1px dashed var(--fort-blue-primary);
+    background: #eef4f8;
+    border: 1px dashed var(--fort-blue-solid);
     padding: 12px;
     border-radius: 6px;
     margin-bottom: 12px;
@@ -1541,7 +1293,6 @@ body {
     border-top: 1px solid #f0f0f0;
 }
 
-/* Mobile Media Queries Override */
 @media (max-width: 768px) {
     .modal-expanded-content-split-grid {
         grid-template-columns: 1fr;
@@ -1570,14 +1321,12 @@ body {
     background-color: var(--fort-white-snow, #fdfdfd); 
 }
 
-/* Icon & Text Container */
 .card-info {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-/* FontAwesome Icon Sizing */
 .card-icon {
     font-size: 1.8rem;
     display: flex;
@@ -1586,7 +1335,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Image Logo Sizing (if using Option 2) */
 .card-logo-img {
     width: 32px;
     height: 32px;
@@ -1594,13 +1342,11 @@ body {
     flex-shrink: 0;
 }
 
-/* Buttons */
 .card-btn-link {
     text-decoration: none;
     flex-shrink: 0;
 }
 
-/* Responsive Styles for Mobile */
 @media (max-width: 768px) {
     .suite-extension-row-card {
         flex-direction: column;
@@ -1616,51 +1362,45 @@ body {
     }
 }
 
-/* Stack picture/logo above text on mobile screens only */
 @media (max-width: 768px) {
     .website-meta-side {
         flex-direction: column;
-        align-items: center; /* Center-aligns image and text block */
+        align-items: center; 
         gap: 16px;
     }
 
     .website-info-block {
-        text-align: center; /* Center-aligns title and paragraph */
+        text-align: center; 
         width: 100%;
     }
-
-    
 }
 
-/* Overlay styling */
 .modal-overlay-ad {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(10, 25, 47, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-/* Modal box container */
 .modal-box-ad {
     background-color: #ffffff;
     padding: 24px;
     max-width: 450px;
     width: 90%;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 180, 216, 0.15);
 }
 
 .text-center {
     text-align: center;
 }
 
-/* Media wrapper & elements */
 .media-container-ad {
     margin: 15px 0;
     width: 100%;
@@ -1677,9 +1417,8 @@ body {
     object-fit: cover;
 }
 
-/* Button & disabled state styling */
 .btn-blue-ad {
-    background-color: #007bff;
+    background: var(--fort-blue-primary);
     color: #ffffff;
     border: none;
     padding: 10px 20px;
@@ -1690,7 +1429,7 @@ body {
 }
 
 .btn-blue-ad:hover:not(:disabled) {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, #0052cc 0%, #0096c7 100%);
 }
 
 .btn-blue-ad:disabled {
@@ -1699,11 +1438,7 @@ body {
     opacity: 0.65;
 }
 
-/* ==========================================================================
-   Mobile Centering for Dynamic Website Cards
-   ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. Stack the card contents vertically and center all alignment */
     .section-content-wrapper-fortdev.website-section-layout {
         display: flex !important;
         flex-direction: column !important;
@@ -1711,7 +1446,6 @@ body {
         text-align: center !important;
     }
 
-    /* 2. Stack the logo icon and text block vertically */
     .website-meta-side {
         flex-direction: column !important;
         align-items: center !important;
@@ -1719,7 +1453,6 @@ body {
         gap: 12px !important;
     }
 
-    /* 3. Center header title and text descriptions */
     .website-info-block-fortdev {
         display: flex !important;
         flex-direction: column !important;
@@ -1737,7 +1470,6 @@ body {
         text-align: center !important;
     }
 
-    /* 4. Center the button container and set button to responsive width */
     .section-content-wrapper-fortdev .margin-top-md {
         width: 100% !important;
         display: flex !important;
@@ -1747,23 +1479,20 @@ body {
 
     .section-content-wrapper-fortdev .btn-blue {
         margin: 0 auto !important;
-        min-width: 160px; /* Optional: gives a comfortable tap target on phones */
+        min-width: 160px; 
     }
 }
 
-/* Layout container updates for strict 90% / 10% viewport layout */
-/* Container wrapping view-port and footer */
 .app-wrapper {
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
-/* Updated #view-port to prevent footer overlap */
 #view-port {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 20px; /* Gives extra clearance at the bottom */
+    padding-bottom: 20px; 
 }
 
 .footer-ad-content {
@@ -1815,10 +1544,9 @@ body {
     text-transform: uppercase;
 }
 
-/* Marketplace In-Grid Ad Card styling */
 .ad-card-item {
-    border: 2px dashed #3182ce;
-    background-color: #f7fafc;
+    border: 2px dashed var(--fort-blue-solid);
+    background-color: #f8fafc;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1831,7 +1559,7 @@ body {
     position: absolute;
     top: 8px;
     right: 8px;
-    background-color: #3182ce;
+    background: var(--fort-blue-solid);
     color: white;
     font-size: 0.65rem;
     padding: 2px 6px;
@@ -1857,19 +1585,18 @@ body {
     border-radius: 6px;
 }
 
-/* Footer Bar - Increase height slightly if you want extra room */
 .footer-ad-bar {
-    height: 12vh; /* Slightly increased from 10vh to give images breathing room */
-    min-height: 70px; /* Ensures images don't shrink too small on mobile */
+    height: 12vh; 
+    min-height: 70px; 
     width: 100%;
-    background-color: #1a202c;
+    background-color: #0a192f;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
     box-sizing: border-box;
-    border-top: 2px solid var(--fort-blue-light, #3182ce);
+    border-top: 2px solid var(--fort-blue-light);
     cursor: pointer;
     overflow: hidden;
     position: fixed;
@@ -1878,37 +1605,28 @@ body {
     z-index: 500;
 }
 
-/* Bigger Media Elements */
 .footer-ad-media {
-    width: 90px; /* Increased width (was 60px) */
-    height: 100%; /* Spans full height of the bar minus padding */
-    max-height: 60px; /* Increased max-height (was 50px) */
+    width: 90px; 
+    height: 100%; 
+    max-height: 60px; 
     object-fit: cover;
     border-radius: 6px;
-    flex-shrink: 0; /* Prevents the image from shrinking when text is long */
+    flex-shrink: 0; 
 }
 
-/* Text Container Adjustment */
 .footer-ad-text-block {
     flex: 1;
-    min-width: 0; /* Keeps text truncating properly alongside the bigger image */
+    min-width: 0; 
     overflow: hidden;
     margin-left: 12px;
 }
 
-/* ==========================================================================
-   Label Not Showing For Modals In Phone View
-   ========================================================================== */
 @media (max-width: 768px) {
     .form-input-container label {
         display: none !important;
     }
 }
 
-
-/* ==========================================================================
-   Borders touching edge
-   ========================================================================== */
 @media (max-width: 768px) {
     .content-view-port { 
         padding: 0px !important;
@@ -1925,91 +1643,22 @@ body {
     }
 }
 
-/* ==========================================================================
-    Logout Modal Text Hidden
-   ========================================================================== */
 @media (max-width: 768px) {
     #logout-modal-content p {
         display: none !important;
     }
 }
 
-/* Fullscreen Mobile Modals Query with Safe Overflow Alignment */
 @media (max-width: 768px) {
     .modal-overlay,
     .modal-overlay-ad {
         padding: 0 !important;
-    }
-
-    /* Outer Container: Scroll handling & base alignment */
-    .modal-box,
-    .modal-box-expanded,
-    .paystack-modal-box,
-    .modal-box-ad {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        border: none !important;
-        box-sizing: border-box !important;
-        display: flex !important;
-        flex-direction: column !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
-        /* Do NOT set justify-content: center here */
-    }
-
-    /* Safe Vertical Centering: Auto margins center short content 
-       without hiding top content when scrolling is triggered */
-    .modal-box > *:first-child,
-    .modal-box-expanded > *:first-child,
-    .paystack-modal-box > *:first-child,
-    .modal-box-ad > *:first-child {
-        margin-top: auto !important;
-    }
-
-    .modal-box > *:last-child,
-    .modal-box-expanded > *:last-child,
-    .paystack-modal-box > *:last-child,
-    .modal-box-ad > *:last-child {
-        margin-bottom: auto !important;
-    }
-
-    /* Ensure children fill the width */
-    .modal-box > *,
-    .modal-box-expanded > *,
-    .paystack-body-content,
-    .modal-box-ad > * {
-        width: 100% !important;
-    }
-
-    /* Restore form labels & paragraph visibility */
-    .form-input-container label {
-        display: block !important;
-    }
-
-    #logout-modal-content p {
-        display: block !important;
-    }
-}
-
-/* ==========================================================================
-   Responsive Mobile Modal System (Auto-adapting Bottom Sheet & Tall Modals)
-   ========================================================================== */
-@media (max-width: 768px) {
-    /* 1. Backdrop Overlay & Smooth Glass Effect */
-    .modal-overlay,
-    .modal-overlay-ad {
-        padding: 0 !important;
-        align-items: flex-end !important; /* Anchors short/compact modals to the bottom */
+        align-items: flex-end !important; 
         backdrop-filter: blur(4px) !important;
         -webkit-backdrop-filter: blur(4px) !important;
-        background-color: rgba(0, 34, 68, 0.45) !important;
+        background-color: rgba(10, 25, 47, 0.5) !important;
     }
 
-    /* 2. Unified Base Styles for ALL Modals */
     .modal-box,
     .modal-box-expanded,
     .paystack-modal-box,
@@ -2021,25 +1670,18 @@ body {
         box-sizing: border-box !important;
         display: flex !important;
         flex-direction: column !important;
-        
-        /* Rounded sheet presentation for short/medium content */
         border-top-left-radius: 20px !important;
         border-top-right-radius: 20px !important;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
         border: none !important;
         box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2) !important;
-
-        /* Touch-friendly scrolling */
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
-
-        /* Slide-up entrance animation */
         animation: sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         position: relative;
     }
 
-    /* 3. Visual Drag Indicator Line at the Top */
     .modal-box::before,
     .modal-box-expanded::before,
     .paystack-modal-box::before,
@@ -2054,8 +1696,6 @@ body {
         flex-shrink: 0;
     }
 
-    /* 4. Safe Vertical Alignment Mechanics */
-    /* Prevents tall overflowing content from hiding past top y-axis boundary */
     .modal-box > *:first-child,
     .modal-box-expanded > *:first-child,
     .paystack-modal-box > *:first-child,
@@ -2063,7 +1703,6 @@ body {
         margin-top: 0 !important;
     }
 
-    /* 5. Child Node Width Stretch */
     .modal-box > *,
     .modal-box-expanded > *,
     .paystack-body-content,
@@ -2071,7 +1710,6 @@ body {
         width: 100% !important;
     }
 
-    /* 6. Form Label & Paragraph Visibility Restorations */
     .form-input-container label {
         display: block !important;
     }
@@ -2081,7 +1719,6 @@ body {
     }
 }
 
-/* Bottom Sheet Entrance Keyframe */
 @keyframes sheetSlideUp {
     from {
         transform: translateY(100%);
@@ -2103,9 +1740,6 @@ body {
     }
 }
 
-/* CSS */
-
-/* Container Layout */
 .prompt-page-container-aipage {
     position: relative;
     width: 100%;
@@ -2157,13 +1791,12 @@ body {
     font-size: 0.75rem;
     font-weight: 700;
     padding: 2px 8px;
-    background-color: #ebf8ff;
-    color: #2b6cb0;
+    background-color: #e0f2fe;
+    color: #0369a1;
     border-radius: 12px;
     margin-bottom: 8px;
 }
 
-/* Chat Overlay (Absolute Position Over Search View) */
 .chat-overlay-pane-aipage {
     position: absolute;
     top: 0;
@@ -2191,7 +1824,6 @@ body {
     padding-bottom: 12px;
 }
 
-/* Sub-Prompts Bar */
 .sub-prompts-bar-aipage {
     padding: 10px 0;
     border-top: 1px solid #edf2f7;
@@ -2227,7 +1859,6 @@ body {
     color: #2d3748;
 }
 
-/* Chat Bubbles */
 .chat-msg-aipage {
     margin: 8px 0;
     padding: 10px 14px;
@@ -2238,7 +1869,7 @@ body {
 
 .chat-msg-aipage.user-aipage {
     align-self: flex-end;
-    background-color: #2b6cb0;
+    background: var(--fort-blue-primary);
     color: #ffffff;
     margin-left: auto;
 }
